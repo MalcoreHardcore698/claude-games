@@ -9,7 +9,7 @@
     prize:['Сектор «Приз»','Prize sector'],prize_d:['Лента игр, плавное замедление и один случайный победитель под указателем.','A reel of games slows to reveal a random winner under the pointer.'],
     pick:['Выбрать режим','Choose mode'],resume:['Продолжить выбор','Resume session'],menu:['Все режимы','All modes'],host:['Хост','Host'],only_host:['Режим и состав игр выбирает хост лобби.','The lobby host chooses the mode and included games.'],
     roster:['Игроки лобби','Lobby players'],waiting:['Ждём голоса','Waiting for votes'],ready:['Готово','Ready'],include:['Игры в выборе','Included games'],include_d:['Изменение состава игр начинает голосование заново.','Changing the games resets the vote.'],
-    budget:['Распределите 10 голосов','Distribute your 10 votes'],remaining:['Осталось: {n}','Remaining: {n}'],confirm:['Подтвердить голоса','Confirm votes'],edit:['Изменить голоса','Edit votes'],
+    budget:['Голосуйте по секторам','Vote by clicking sectors'],remaining:['Осталось: {n}','Remaining: {n}'],sector_help:['Нажмите на сектор, чтобы добавить голос. Shift + клик или правый клик — убрать голос.','Click a sector to add a vote. Shift-click or right-click removes one.'],settings:['Настройки выбора','Selection settings'],confirm:['Подтвердить голоса','Confirm votes'],edit:['Изменить голоса','Edit votes'],
     wheel_note:['У каждой игры есть базовый сектор. Голоса увеличивают его площадь и шанс выпадения.','Every game has a base sector. Votes increase its area and winning chance.'],
     spin:['КРУТИТЬ КОЛЕСО','SPIN THE WHEEL'],spin_prize:['КРУТИТЬ ЛЕНТУ','SPIN THE REEL'],next:['Следующий раунд','Next round'],reveal:['Раскрыть победителя','Reveal winner'],
     rarity:['Редкость','Rarity'],tag:['Тег','Tag'],game:['Игра','Game'],round:['Раунд {n} из 3','Round {n} of 3'],voted:['Ваш голос','Your vote'],votes:['голосов: {n}','votes: {n}'],
@@ -22,7 +22,7 @@
   };
   window.createOrionTamada = function (ctx) {
     const root = ctx.root, games = ctx.games;
-    let state = null, menu = true, finishTimer = null, sig = '', noticeId = '';
+    let state = null, menu = true, finishTimer = null, sig = '', noticeId = '', previousSectors = null;
     const t = (key, values = {}) => {
       let value = (words[key] || [key, key])[ctx.lang() === 'en' ? 1 : 0];
       for (const [name, replacement] of Object.entries(values)) value = value.split('{'+name+'}').join(replacement);
@@ -106,17 +106,29 @@
     function wheelMarkup() {
       const weights = state.spinWeights || C.wheelWeights(state, players());
       const segments = C.sectors(weights), selected = segments.find(s => s.id === state.result);
+      const prev = previousSectors && previousSectors.length === segments.length ? previousSectors : [];
       const angle = selected ? 2160 + (360 - selected.mid) : 0;
       const spinning = state.phase === 'spin', finished = state.phase === 'done';
-      const point = (angle, radius) => { const a=(angle-90)*Math.PI/180;return [210+Math.cos(a)*radius,210+Math.sin(a)*radius]; };
+      const mine = state.ballots[ctx.me()] || {};
+      const canVote = state.phase === 'vote' && !state.ready[ctx.me()];
+      const point = (a, radius) => { const radians=(a-90)*Math.PI/180;return [210+Math.cos(radians)*radius,210+Math.sin(radians)*radius]; };
       const path = sector => { const p=point(sector.start,199),q=point(sector.end,199);return `M210 210L${p.join(' ')}A199 199 0 ${sector.end-sector.start>180?1:0} 1 ${q.join(' ')}Z`; };
-      return `<div class="tmWheelArea"><div class="tmWheelFrame"><span class="tmWheelPointer"></span><div class="tmWheelRotor${spinning?' spinning':''}" style="--tm-rotation:${angle}deg;--tm-duration:${state.spinDuration}ms;animation-delay:${state.spinAt-Date.now()}ms;${finished?`transform:rotate(${angle}deg)`:''}"><svg viewBox="0 0 420 420" role="img" aria-label="${escape(t('wheel'))}">${segments.map(s=>{const p=point(s.mid,135),g=game(s.id);return `${segments.length===1?`<circle cx="210" cy="210" r="199"`:`<path d="${path(s)}"`} fill="${ctx.color(g.r)}" stroke="#17191c" stroke-width="3"/><text x="${p[0]}" y="${p[1]}" text-anchor="middle" dominant-baseline="middle">${escape(name(s.id).length>16?name(s.id).slice(0,15)+'…':name(s.id))}</text>`;}).join('')}<circle cx="210" cy="210" r="54" fill="#17191c" stroke="#ece6d8" stroke-width="3"/><text x="210" y="215" text-anchor="middle" class="tmWheelCenter">ORION</text><circle cx="210" cy="210" r="204" fill="none" stroke="#f2a33a" stroke-width="4"/></svg></div></div><p class="tmFootnote">${escape(t('wheel_note'))}</p></div>`;
+      const part = sector => {
+        const older=prev.find(x=>x.id===sector.id),before=older&&path(older),after=path(sector),p=point(sector.mid,137),oldp=older&&point(older.mid,137),g=game(sector.id);
+        const isCircle = segments.length===1;
+        const select=`data-tm-action="sector" data-game="${sector.id}" data-tm-focus="sector-${sector.id}" role="button" tabindex="${canVote?0:-1}" aria-label="${escape(name(sector.id)+': '+(mine[sector.id]||0))}"`;
+        const anim=!isCircle&&older&&before!==after&&state.phase==='vote'&&(!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        const shape=isCircle?`<circle cx="210" cy="210" r="199"`:`<path d="${after}"`;
+        return `<g class="tmSector${canVote?' votable':''}${mine[sector.id]?' hasVotes':''}" style="--sector:${ctx.color(g.r)}">${shape} ${select} fill="${ctx.color(g.r)}" stroke="#17191c" stroke-width="3">${anim?`<animate attributeName="d" from="${before}" to="${after}" dur=".42s" fill="freeze"/>`:''}${isCircle?'</circle>':'</path>'}
+          <text x="${p[0]}" y="${p[1]-8}" text-anchor="middle" dominant-baseline="middle" pointer-events="none">${escape(name(sector.id).length>14?name(sector.id).slice(0,13)+'…':name(sector.id))}${anim?`<animate attributeName="x" from="${oldp[0]}" to="${p[0]}" dur=".42s" fill="freeze"/><animate attributeName="y" from="${oldp[1]-8}" to="${p[1]-8}" dur=".42s" fill="freeze"/>`:''}</text>
+          <text class="tmSectorVotes" x="${p[0]}" y="${p[1]+12}" text-anchor="middle" dominant-baseline="middle" pointer-events="none">${mine[sector.id]?`×${mine[sector.id]}`:''}${anim?`<animate attributeName="x" from="${oldp[0]}" to="${p[0]}" dur=".42s" fill="freeze"/><animate attributeName="y" from="${oldp[1]+12}" to="${p[1]+12}" dur=".42s" fill="freeze"/>`:''}</text></g>`;
+      };
+      previousSectors=segments;
+      return `<div class="tmWheelArea"><div class="tmWheelFrame"><span class="tmWheelPointer"></span><div class="tmWheelRotor${spinning?' spinning':''}" style="--tm-rotation:${angle}deg;--tm-duration:${state.spinDuration}ms;animation-delay:${state.spinAt-Date.now()}ms;${finished?`transform:rotate(${angle}deg)`:''}"><svg viewBox="0 0 420 420" role="group" aria-label="${escape(t('wheel'))}">${segments.map(part).join('')}<circle cx="210" cy="210" r="54" fill="#17191c" stroke="#ece6d8" stroke-width="3" pointer-events="none"/><text x="210" y="215" text-anchor="middle" class="tmWheelCenter" pointer-events="none">ORION</text><circle cx="210" cy="210" r="204" fill="none" stroke="#f2a33a" stroke-width="4" pointer-events="none"/></svg></div></div><p class="tmFootnote">${escape(t('wheel_note'))}</p></div>`;
     }
     function votesMarkup() {
-      const mine = state.ballots[ctx.me()] || {}, total = C.sum(mine), locked = !!state.ready[ctx.me()] || state.phase!=='vote', totals=C.totals(state,players());
-      return `<div class="tmBallot"><div class="tmBallotHead"><h3>${escape(t('budget'))}</h3><span>${escape(t('remaining',{n:10-total}))}</span></div><div class="tmBudget"><i style="width:${total*10}%"></i></div>
-        <div class="tmVoteRows">${state.enabled.map(id=>{const g=game(id);return `<div class="tmVoteRow" style="--rc:${ctx.color(g.r)}"><span class="tmGameIcon"><i class="fa-solid ${g.icon}"></i></span><span class="tmVoteName">${escape(name(id))}<small>${escape(t('votes',{n:totals[id]}))}</small></span><div class="tmStepper"><button type="button" data-tm-action="minus" data-game="${id}" data-tm-focus="minus-${id}" aria-label="${escape(name(id)+' −1')}" ${locked||!mine[id]?'disabled':''}>−</button><b>${mine[id]||0}</b><button type="button" data-tm-action="plus" data-game="${id}" data-tm-focus="plus-${id}" aria-label="${escape(name(id)+' +1')}" ${locked||total>=10?'disabled':''}>+</button></div></div>`;}).join('')}</div>
-        ${state.phase==='vote'?actionButton('ready', t(state.ready[ctx.me()]?'edit':'confirm'), '', total!==10):''}</div>`;
+      const mine=state.ballots[ctx.me()]||{},total=C.sum(mine);
+      return `<div class="tmBallot"><div class="tmBallotHead"><h3>${escape(t('budget'))}</h3><span>${escape(t('remaining',{n:10-total}))}</span></div><div class="tmBudget"><i style="width:${total*10}%"></i></div><p class="tmFootnote">${escape(t('sector_help'))}</p>${state.phase==='vote'?actionButton('ready',t(state.ready[ctx.me()]?'edit':'confirm'),'',total!==10):''}</div>`;
     }
     function tilesMarkup() {
       const opts = C.options(state,games), mine = state.ballots[ctx.me()], tally=Object.fromEntries(opts.map(id=>[id,0]));
@@ -136,9 +148,9 @@
       const phase=state.phase, allReady=C.canAdvance(state,players());
       const label=state.mode==='wheel'?'spin':state.mode==='prize'?'spin_prize':state.round==='game'?'reveal':'next';
       return `<section class="tmSession"><div class="tmSessionHead"><div><p class="eyebrow">ORION · ${escape(t('title'))}</p><h2>${escape(t(state.mode))}</h2></div>${actionButton('menu',t('menu'),'',false,true)}</div>
-        <div class="tmSessionBody">${state.mode==='wheel'?`<div class="tmWorkspace">${wheelMarkup()}${votesMarkup()}</div>`:state.mode==='tiles'?tilesMarkup():prizeMarkup()}</div>
-        <div class="tmSessionBottom"><div class="tmReadyLine"><span role="status" aria-live="polite">${escape(phase==='spin'?t('spinning'):phase==='done'?t('winner',{g:name(state.result)}):state.mode==='prize'?t('prize_ready'):t('vote_count',{n:readyCount(),total:players().length}))}</span>${phase==='vote'&&isHost()?actionButton('advance',t(label),'',!allReady):''}</div>${phase==='vote'?`<p class="tmFootnote">${escape(t(state.mode==='prize'?(isHost()?'random':'host_launch'):allReady?'all_ready':isHost()?'waiting':'await_host'))}</p>`:''}${membersMarkup()}</div>
-        ${resultMarkup()}${includedMarkup()}</section>`;
+        <div class="tmSessionBody">${state.mode==='wheel'?wheelMarkup():state.mode==='tiles'?tilesMarkup():prizeMarkup()}</div>
+        <aside class="tmSettings"><p class="eyebrow tmSettingsTitle">${escape(t('settings'))}</p>${state.mode==='wheel'?votesMarkup():''}${includedMarkup()}</aside>
+        <div class="tmSessionBottom"><div class="tmReadyLine"><span role="status" aria-live="polite">${escape(phase==='spin'?t('spinning'):phase==='done'?t('winner',{g:name(state.result)}):state.mode==='prize'?t('prize_ready'):t('vote_count',{n:readyCount(),total:players().length}))}</span>${phase==='vote'&&isHost()?actionButton('advance',t(label),'',!allReady):''}</div>${phase==='vote'?`<p class="tmFootnote">${escape(t(state.mode==='prize'?(isHost()?'random':'host_launch'):allReady?'all_ready':isHost()?'waiting':'await_host'))}</p>`:''}${membersMarkup()}${resultMarkup()}</div></section>`;
     }
     function render(force = false) {
       if (!ctx.visible()) return;
@@ -149,14 +161,21 @@
       if(focus)root.querySelector(`[data-tm-focus="${CSS.escape(focus)}"]`)?.focus({preventScroll:true});
     }
     root.addEventListener('click', event => {
-      const button=event.target.closest('button[data-tm-action]');if(!button||button.disabled||!root.contains(button))return;
+      const button=event.target.closest('[data-tm-action]');if(!button||button.disabled||!root.contains(button))return;
       const a=button.dataset.tmAction;
       if(a==='mode'){start(button.dataset.mode);return;}
       if(a==='menu'){menu=true;render(true);return;}if(a==='resume'){menu=false;render(true);return;}
       if(!state)return;
       const send=payload=>ctx.emit({id:state.id,revision:state.revision,...payload});
       if(a==='include'){if(isHost())send({a:'include',game:button.dataset.game});}
-      else if(a==='plus'||a==='minus'){
+      else if(a==='sector'){
+        const mine={...(state.ballots[ctx.me()]||{})},id=button.dataset.game;
+        if(state.phase!=='vote'||state.ready[ctx.me()]||!state.enabled.includes(id))return;
+        const minus=event.shiftKey||C.sum(mine)>=10;
+        if(minus&&!(mine[id]>0))return;
+        mine[id]=(mine[id]||0)+(minus?-1:1);
+        if(C.allocation(mine,state.enabled))send({a:'vote',allocation:mine,ready:false});
+      }else if(a==='plus'||a==='minus'){
         const mine={...(state.ballots[ctx.me()]||{})},id=button.dataset.game;
         mine[id]=(mine[id]||0)+(a==='plus'?1:-1);
         if(C.allocation(mine,state.enabled))send({a:'vote',allocation:mine,ready:false});
@@ -165,6 +184,20 @@
       else if(a==='advance'){if(isHost())send({a:'advance'});}
       else if(a==='launch'){if(isHost())send({a:'launch',game:state.result});}
       else if(a==='again')start(state.mode);
+    });
+    root.addEventListener('contextmenu', event => {
+      const segment=event.target.closest('.tmSector [data-tm-action="sector"]');
+      if(!segment||!root.contains(segment)||state?.phase!=='vote'||state.ready[ctx.me()])return;
+      event.preventDefault();
+      const mine={...(state.ballots[ctx.me()]||{})},id=segment.dataset.game;
+      if(!(mine[id]>0))return;
+      mine[id]--;
+      ctx.emit({id:state.id,revision:state.revision,a:'vote',allocation:mine,ready:false});
+    });
+    root.addEventListener('keydown', event => {
+      if((event.key==='Enter'||event.key===' ')&&event.target.matches('.tmSector [data-tm-action="sector"]')){
+        event.preventDefault();event.target.click();
+      }
     });
     return { receive, getSnapshot:()=>state, open(){sync();menu=true;render(true);}, join(){menu=false;render(true);},
       render:()=>render(true), tick(){sync();render();}, destroy(){clearTimeout(finishTimer);} };

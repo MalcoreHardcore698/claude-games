@@ -13,3 +13,59 @@
 .tmPrizeStage{padding-block:30px}.tmPrizeStage>.eyebrow{justify-content:center;margin-bottom:18px}.tmReelViewport{position:relative;height:285px;overflow:hidden;border:1px solid #f2a33a55;border-radius:16px;background:#090b0f;box-shadow:inset 0 0 35px #0009}.tmReelViewport::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#090b0fd9,transparent 15% 85%,#090b0fd9);pointer-events:none;z-index:2}.tmReelPointer{position:absolute;z-index:4;left:50%;top:0;bottom:0;width:2px;background:#f2a33a;box-shadow:0 0 15px #f2a33a66}.tmReelPointer::before,.tmReelPointer::after{content:"";position:absolute;left:50%;translate:-50% 0;border-left:9px solid transparent;border-right:9px solid transparent}.tmReelPointer::before{top:0;border-top:16px solid var(--amber)}.tmReelPointer::after{bottom:0;border-bottom:16px solid var(--amber)}.tmPrizeTrack{position:relative;left:50%;margin-left:-90px;display:flex;gap:10px;width:max-content;padding-block:18px;will-change:transform}.tmPrizeItem{width:180px;height:247px;border-radius:11px;overflow:hidden;background:linear-gradient(180deg,#24232d,#14151b);border:1px solid color-mix(in srgb,var(--rc) 45%,#17191c);border-bottom:5px solid var(--rc);display:flex;flex-direction:column;align-items:center;gap:10px;flex:none;position:relative}.tmPrizeItem>.cover{height:125px;flex:none}.tmPrizeItem>i{font-size:20px;color:var(--rc)}.tmPrizeItem>b{font:600 14px/1.2 var(--body);text-align:center;padding:0 9px}.tmPrizeItem>span{font:500 9px var(--mono);color:var(--rc);margin-top:auto;margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em}.tmPrizeItem.winner{box-shadow:inset 0 0 0 2px var(--rc),0 0 28px color-mix(in srgb,var(--rc) 40%,transparent)}.tmPrizeTrack.spinning{animation:tmPrizeSpin var(--tm-duration) cubic-bezier(.12,.75,.13,1) both}@keyframes tmPrizeSpin{from{transform:translateX(0)}to{transform:translateX(var(--tm-offset))}}.tmPrizeStage>.tmFootnote{text-align:center}
 .tmResult{display:flex;align-items:center;gap:16px;padding:20px;border:1px solid color-mix(in srgb,var(--rc) 55%,transparent);border-radius:14px;background:color-mix(in srgb,var(--rc) 9%,#17191c);margin-top:20px;animation:tmChoiceIn .3s ease-out}.tmResult>i{font-size:30px;color:var(--rc)}.tmResult>div{flex:1}.tmResult small{font:500 9px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.14em}.tmResult h3{font:700 20px/1.3 var(--body);margin:4px 0 0}.tmResult>span{font-size:13px;color:var(--muted)}
 @media(prefers-reduced-motion:reduce){.tmMode,.tmChoice,.tmArtWheelDisc,.tmArtCards i,.tmArtPrize>div{transition:none}.tmChoices,.tmResult{animation:none}.tmWheelRotor.spinning,.tmPrizeTrack.spinning{animation-duration:1ms;animation-delay:0ms}}
+
+/* Recovery: 1024x600 / 1280x720 Tamada layouts without vertical scrolling. */
+body:has(#vTamada:not([hidden])){height:100dvh;min-height:0;overflow:hidden}
+.app:has(#vTamada:not([hidden])){height:100dvh;min-height:0;padding-block:8px 8px;gap:7px}
+.app:has(#vTamada:not([hidden]))>.bar{flex:none;min-height:38px}
+#vTamada:not([hidden]){display:flex;flex-direction:column;flex:1;min-height:0;gap:8px}
+#vTamada>.row{margin-bottom:0!important;flex:none;min-height:30px}
+#tamadaRoot{display:flex;flex:1;min-height:0;height:100%;overflow:hidden}
+#tamadaRoot>*{min-height:0;flex:1}
+.tmHub{height:100%;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:clamp(9px,2vh,20px);padding:clamp(14px,2.5vh,26px) clamp(14px,2.8vw,28px);background:radial-gradient(ellipse at 60% 50%,#25151a55,transparent 70%),linear-gradient(#171013e0,#161318cc),url('assets/quiz-menu.webp') center/cover}
+.tmHeroCopy{margin:0 auto;flex:0 0 auto}.tmHeroCopy h2{margin:6px 0 3px;font-size:clamp(30px,5vh,46px)}.tmHeroCopy>p:last-child{font-size:clamp(12px,2vh,14px)}
+.tmModes{flex:1;min-height:0;gap:clamp(8px,1.5vw,18px)}
+.tmMode{min-height:0;height:100%;padding:clamp(10px,2vh,18px);background:#19191fdc;justify-content:space-between}
+.tmMode:nth-child(2){background:#211923e8}.tmMode:nth-child(3){background:#15202be8}
+.tmModeArt{flex:1;min-height:60px;height:auto;max-height:190px;transform:scale(.83)}
+.tmMode h3{font-size:clamp(17px,2.5vh,22px);margin:5px 0}
+.tmMode p{font-size:clamp(11px,1.9vh,14px);min-height:0;margin:0 0 6px;line-height:1.4}
+.tmModeGo{font-size:11px}
+.tmResume{margin:0}.tmResume button{padding:7px 12px}
+.tmSession{height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(205px,265px);grid-template-rows:auto minmax(0,1fr) auto;gap:8px 14px;padding:clamp(10px,2vh,20px)}
+.tmSessionHead{grid-column:1;grid-row:1;min-width:0;margin:0;min-height:0}.tmSessionHead h2{font-size:clamp(22px,3vh,28px);margin-top:2px}
+.tmSessionHead .btn{font-size:11px;padding:8px 10px}
+.tmSessionBody{grid-column:1;grid-row:2;min-height:0;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.tmSettings{grid-column:2;grid-row:1/4;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px;background:#0e0f1199;border:1px solid var(--line);border-radius:12px;padding:12px}
+.tmSettingsTitle{font-size:10px;flex:0 0 auto}
+.tmSessionBottom{grid-column:1;grid-row:3;margin:0;padding:7px 0 0;min-height:0}
+.tmReadyLine{gap:8px}.tmReadyLine>span{font-size:clamp(10px,1.65vh,12px)}
+.tmReadyLine>.btn{font-size:11px;padding:7px 12px}.tmSessionBottom>.tmFootnote{margin:4px 0 0;font-size:10px}
+.tmPlayers{gap:5px;margin-top:5px}.tmPlayer{font-size:9px;padding:3px 7px}
+.tmIncluded{margin:0;padding:0;border:0;gap:6px;min-height:0;overflow:hidden}
+.tmIncluded>div{display:grid;grid-template-columns:1fr;gap:5px}
+.tmInclude{font-size:11px;line-height:1.2;padding:5px 8px;gap:7px}
+.tmIncluded>p{font-size:10px;line-height:1.2}
+.tmBallot{gap:9px;padding:10px;flex:0 0 auto}
+.tmBallotHead{align-items:flex-start;gap:7px;flex-wrap:wrap}.tmBallotHead h3{font-size:12px}.tmBallotHead>span{font-size:10px}
+.tmBallot .tmFootnote{font-size:10px;line-height:1.35;margin:0}
+.tmBallot>.btn{font-size:11px;padding:7px 10px}
+.tmWheelArea{height:100%;justify-content:center}.tmWheelFrame{height:min(100%,390px);width:auto;max-width:min(100%,390px);padding:5px;margin:auto}
+.tmWheelArea>.tmFootnote{margin:3px 0 0;font-size:10px;max-width:none}
+.tmWheelRotor svg .tmSector text{font-size:11px;fill:#17191c;font-weight:700;stroke:rgba(255,255,255,.25);stroke-width:.3px;paint-order:stroke}
+.tmWheelRotor svg .tmSector .tmSectorVotes{font-size:19px;fill:#111;stroke:#fffc;stroke-width:.9px}
+.tmSector.votable [data-tm-action="sector"]{cursor:pointer;transition:filter .15s}
+.tmSector.votable:hover [data-tm-action="sector"],.tmSector.votable [data-tm-action="sector"]:focus-visible{filter:brightness(1.16);outline:none;stroke:#fff;stroke-width:5}
+.tmSector.hasVotes [data-tm-action="sector"]{filter:saturate(1.18)}
+.tmRounds{gap:4px}.tmRounds>span{padding:5px 9px;font-size:10px}.tmRounds b{width:18px;height:18px}
+.tmRoundNote{margin:7px 0;font-size:11px}
+.tmChoices{gap:8px;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));min-height:0}
+.tmChoice{min-height:0;padding:10px;gap:4px}.tmChoice.game{min-height:0;padding-bottom:8px}
+.tmChoice h3{font-size:15px}.tmChoiceSymbol{font-size:36px;padding-block:7px}
+.tmChoice.game>.cover{height:clamp(54px,15vh,105px)}.tmChoice.game h3{font-size:14px}
+.tmPrizeStage{padding-block:5px}.tmPrizeStage>.eyebrow{margin-bottom:5px}.tmReelViewport{height:clamp(140px,34vh,240px)}
+.tmPrizeTrack{padding-block:8px}.tmPrizeItem{height:clamp(125px,30vh,214px)}.tmPrizeItem>.cover{height:44%}
+.tmResult{margin-top:6px;padding:7px;gap:8px}.tmResult>i{font-size:16px}.tmResult h3{font-size:13px}.tmResult>.btn{font-size:10px;padding:7px 8px}
+@media(max-height:650px){.tmHub{gap:8px}.tmModeArt{transform:scale(.7);max-height:132px}.tmHeroCopy h2{font-size:29px}.tmHeroCopy>p:last-child{font-size:11px}.tmSession{gap:5px 11px}.tmSettings{padding:8px;gap:5px}.tmBallot{padding:7px;gap:5px}.tmWheelFrame{max-width:min(100%,330px)}.tmWheelPointer{top:-3px;border-left-width:9px;border-right-width:9px;border-top-width:23px}.tmIncluded>p{display:none}.tmPlayer{padding:2px 5px}}
+@media(max-width:1050px){.tmSession{grid-template-columns:minmax(0,1fr) minmax(185px,225px)}.tmSettings{padding:9px}.tmModeArt{transform:scale(.73)}}
+@media(prefers-reduced-motion:reduce){.tmSector *{animation:none!important}}

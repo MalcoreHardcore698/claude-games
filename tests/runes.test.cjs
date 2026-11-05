@@ -175,8 +175,8 @@ test('runes always show three position circles, including empty and inactive pos
   const marks = api.positionMarks('isa', 3);
   assert.equal((marks.match(/class="positionBadge/g) || []).length, 3);
   assert.equal((marks.match(/exists active/g) || []).length, 1);
-  assert.ok(marks.includes('>III</span>'));
-  assert.ok(marks.includes('>VI</span>'));
+  assert.ok(marks.includes('>3</span>'));
+  assert.ok(marks.includes('>6</span>'));
   assert.ok(marks.includes('class="positionBadge"></span>'));
 });
 

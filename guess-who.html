@@ -25,6 +25,15 @@ html.orion-pending:not(.orion-mounted)::after{content:"";position:fixed;left:50%
 .guessArtCorners{position:absolute;inset:0;pointer-events:none;background:linear-gradient(var(--acc),var(--acc)) left top/24px 2px no-repeat,linear-gradient(var(--acc),var(--acc)) left top/2px 24px no-repeat,linear-gradient(var(--acc),var(--acc)) right bottom/24px 2px no-repeat,linear-gradient(var(--acc),var(--acc)) right bottom/2px 24px no-repeat}
 @media(max-height:700px){.guessMenuCopy{gap:20px}.guessMenuCopy h1{font-size:64px}.guessMenuCopy .lede{font-size:17px}.guessClue{margin-top:0}.guessMenuCopy .btn{padding:12px 17px}.guessMenuArt{height:100%}}
 @media(max-width:1050px){.guessMenu{gap:28px;grid-template-columns:.95fr 1.05fr}.guessMenuCopy{padding-left:0;gap:20px}.guessMenuCopy h1{font-size:62px}.guessMenuCopy .lede{font-size:17px}.guessMenuCopy .row{gap:10px}.guessMenuCopy .btn{padding:12px 15px;font-size:13px}}
+/* Restored full-bleed intro art, without a picture-frame crop. */
+.wrap:has(#sMenu:not([hidden])){height:100dvh;overflow:hidden;padding-block:10px 16px;gap:10px}
+.guessMenu{position:relative;isolation:isolate;overflow:hidden;border-radius:20px;border:1px solid #c8a24a33;display:flex;align-items:center;padding:clamp(20px,4vw,56px)}
+.guessMenuArt{position:absolute;inset:0;z-index:-2;width:100%;height:100%;min-height:0;border:0;padding:0;box-shadow:none;transform:none;border-radius:0;background:#15110e}
+.guessMenuArt img{width:100%;height:100%;object-fit:cover;object-position:center;border-radius:0}
+.guessMenuArt::after{content:"";position:absolute;inset:0;box-shadow:none;background:linear-gradient(90deg,rgba(14,10,10,.94) 0%,rgba(14,10,10,.76) 36%,rgba(14,10,10,.12) 78%)}
+.guessMenuCopy{position:relative;z-index:1;max-width:560px;width:55%;padding:0;gap:clamp(14px,3vh,26px)}
+@media(max-width:1050px){.guessMenuCopy{width:59%;max-width:490px}}
+@media(max-height:620px){.guessMenuCopy h1{font-size:clamp(42px,7vh,58px)}.guessMenuCopy{gap:12px}.guessClue{display:none}}
 </style>
 <script data-orion-boot>
 document.documentElement.classList.add('orion-pending');
@@ -188,7 +197,7 @@ input[type=text]{font:500 17px var(--body);color:var(--paper);background:var(--w
       </div>
       <div class="guessClue" aria-hidden="true"><span></span><i class="fa-solid fa-magnifying-glass"></i><span></span></div>
     </div>
-    <div class="guessMenuArt"><img src="assets/guess-hero-menu.png" alt="" decoding="async" fetchpriority="high" draggable="false"><div class="guessArtCorners" aria-hidden="true"></div></div>
+    <div class="guessMenuArt" aria-hidden="true"><img src="assets/guess-hero-menu.png" alt="" decoding="async" fetchpriority="high" draggable="false"></div>
   </section>
 
   <!-- ONLINE: players come from the site lobby -->

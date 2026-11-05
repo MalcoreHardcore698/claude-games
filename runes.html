@@ -9,6 +9,14 @@ html.orion-pending:not(.orion-mounted)::before{content:"";position:fixed;inset:0
 html.orion-pending:not(.orion-mounted)::after{content:"";position:fixed;left:50%;top:50%;width:12px;height:12px;margin:-6px;background:#e9c16f;box-shadow:-20px 0 #e9c16f,20px 0 #e9c16f,0 -20px #e9c16f,0 20px #e9c16f;z-index:2147482999;animation:orion-boot .8s steps(4,end) infinite}
 @keyframes orion-boot{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){html.orion-pending::after{animation:none!important}}
+
+/* Smaller numbered position badges, inset from the rune edge. */
+.runePositions{bottom:8px;left:5px;right:5px;gap:2px;justify-content:center;align-items:center}
+.positionBadge{box-sizing:border-box;flex:0 0 12px;width:12px;height:12px;font-size:7px;line-height:1;border-width:1px}
+.ring .runePositions{bottom:7px;left:4px;right:4px;gap:1px}
+.ring .positionBadge{flex-basis:12px;width:12px;height:12px;font-size:7px}
+.ring .positionBadge:first-child,.ring .positionBadge:last-child{transform:none}
+.rn{padding-bottom:10px}.ring .sk .rn{padding-bottom:12px}
 </style>
 <script data-orion-boot>
 document.documentElement.classList.add('orion-pending');
@@ -576,7 +584,7 @@ for(const [k,positions] of Object.entries(RUNE_POSITIONS))RUNES[k].positions=pos
 const runePosition=(k,i)=>k&&RUNES[k].positions.find(p=>p.slot===i+1);
 const canPlace=(k,a,i)=>!k||a==='inv'||!!runePosition(k,i);
 const ROMAN=['I','II','III','IV','V','VI'];
-function positionMarks(k,slot){const positions=RUNES[k].positions;return `<span class="runePositions" aria-hidden="true">${Array.from({length:3},(_,i)=>{const p=positions[i];return `<span class="positionBadge${p?' exists':''}${p&&(!slot||p.slot===slot)?' active':''}">${p?ROMAN[p.slot-1]:''}</span>`;}).join('')}</span>`;}
+function positionMarks(k,slot){const positions=RUNES[k].positions;return `<span class="runePositions" aria-hidden="true">${Array.from({length:3},(_,i)=>{const p=positions[i];return `<span class="positionBadge${p?' exists':''}${p&&(!slot||p.slot===slot)?' active':''}">${p?String(p.slot):''}</span>`;}).join('')}</span>`;}
 function positionDescription(k,slot){return `<div class="tipPositions">${RUNES[k].positions.map(p=>`<div class="${p.slot===slot?'current':''}"><strong>${POS[p.slot-1]}</strong> ${esc(tr(p.d))}</div>`).join('')}</div>`;}
 const BASIC=['raido','jera','teiwaz','algiz','berkana','thurs','gebo','fehu','hagal','uruz'];
 const SYN=[
@@ -1115,7 +1123,7 @@ function renderDeck(){
     if(pts.length===2)svg+=`<line class="syn" style="--sc:${col};stroke:${col};animation-delay:${-si*.2}s" x1="${pts[0][0]}" y1="${pts[0][1]}" x2="${pts[1][0]}" y2="${pts[1][1]}"/>`;
     else svg+=`<polygon class="syn" style="--sc:${col};stroke:${col};animation-delay:${-si*.2}s" points="${pts.map(p=>p.join(',')).join(' ')}"/>`;});
   svg+='</svg>';
-  $('#ring').innerHTML=svg+RING.map((p,i)=>`<div class="sk slotc${G.sock[i]?' filled':''}${lit.has(i)?' lit':''}" data-a="sock" data-i="${i}" style="left:${p[0]}px;top:${p[1]}px"><span class="socketPos" aria-hidden="true">${ROMAN[i]}</span>${G.sock[i]?runeEl(G.sock[i],i+1):''}</div>`).join('')+`<div class="core" style="--cp:${syn.length}">${syn.length}<small>${esc(T('syn_core'))}</small></div>`;
+  $('#ring').innerHTML=svg+RING.map((p,i)=>`<div class="sk slotc${G.sock[i]?' filled':''}${lit.has(i)?' lit':''}" data-a="sock" data-i="${i}" style="left:${p[0]}px;top:${p[1]}px"><span class="socketPos" aria-hidden="true">${i+1}</span>${G.sock[i]?runeEl(G.sock[i],i+1):''}</div>`).join('')+`<div class="core" style="--cp:${syn.length}">${syn.length}<small>${esc(T('syn_core'))}</small></div>`;
   const C=cfgNow();const reso=Object.entries(C.c).filter(([k,n])=>n>=3).map(([k])=>k);
   const items=syn.map(s=>`<span class="cb" data-tip="syn:${s.id}"><i class="fa-solid ${s.i}"></i>${esc(tr(s.n))}</span>`).concat(reso.map(k=>`<span class="cb" data-tip="reso:${k}"><i class="fa-solid fa-wave-square"></i>${esc(T('reso'))}: ${esc(tr(RUNES[k].n))}</span>`));
   while(items.length<3)items.push(`<span class="cb ph"><i class="fa-regular fa-circle"></i>${esc(T('syn_ph'))}</span>`);
@@ -1173,12 +1181,12 @@ function renderMenu(){
   buildSeg($('#heroSeg'),HK.map(k=>[k,tr(HEROES[k].n),HEROES[k].i]),heroSel,v=>{heroSel=v;renderMenu();});
   const W=weekly();const claimed=store.wclaim&&store.wclaim[W.wk];
   const md=[{id:'time',cls:'',i:'fa-stopwatch',best:(store.time||{}).best,u:T('kills')},{id:'endless',cls:'e',i:'fa-infinity',best:(store.endless||{}).best,u:T('kills')},{id:'weekly',cls:'w',i:'fa-calendar-week',best:(store.weekly||{}).best,u:T('kills')}];
-  $('#modes').innerHTML=md.map(m=>`<div class="mcard"><div class="pic modepic ${m.cls}"><i class="h fa-solid ${m.i}"></i></div><div class="body"><h2>${esc(T('m_'+m.id))}</h2><p>${esc(T('m_'+m.id+'_d'))}</p>
+  $('#modes').innerHTML=md.map(m=>`<div class="mcard"><div class="pic modepic ${m.cls}"><img src="assets/mode-${m.id}.webp" alt="" draggable="false" loading="lazy"></div><div class="body"><h2>${esc(T('m_'+m.id))}</h2><p>${esc(T('m_'+m.id+'_d'))}</p>
     ${m.id==='weekly'?`<div class="meta"><span><i class="fa-solid fa-calendar"></i>${esc(T('week',{n:W.wk%100}))}</span><span><i class="fa-solid ${HEROES[W.hk].i}"></i>${esc(tr(HEROES[W.hk].n))}</span><span style="color:${claimed?'var(--muted)':'var(--brass2)'}"><i class="fa-solid fa-coins"></i>${esc(claimed?T('claimed'):T('reward',{n:540}))}</span></div><div class="mods">${W.mods.map(x=>`<span>${esc(tr(x.n))}</span>`).join('')}</div>`:''}
     <div class="meta"><span><i class="fa-solid fa-trophy" style="color:var(--brass)"></i>${esc(T('best',{b:(m.best||0)+' '+m.u}))}</span></div>
     <button class="btn sm go" type="button" data-mode="${m.id}"><i class="fa-solid fa-play"></i>${esc(T('play'))}</button></div></div>`).join('');
   $('#modes').querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>start(b.dataset.mode,b.dataset.mode==='weekly'?W.hk:heroSel,W));
-  $('#advs').innerHTML=HK.map(k=>{const H=HEROES[k];const rec=store[k]||{};return `<div class="mcard"><div class="pic th th-${H.th}"><i class="h fa-solid ${H.i}"></i><i class="c fa-solid ${H.castle}"></i></div><div class="body"><h2>${esc(tr(H.camp))}</h2><p>${esc(tr(H.cd))}</p>
+  $('#advs').innerHTML=HK.map(k=>{const H=HEROES[k];const rec=store[k]||{};return `<div class="mcard"><div class="pic th th-${H.th}"><img src="assets/campaign-${k}.webp" alt="" draggable="false" loading="lazy"></div><div class="body"><h2>${esc(tr(H.camp))}</h2><p>${esc(tr(H.cd))}</p>
     <div class="meta"><span class="stars">${esc(T('diff'))} ${'<i class="fa-solid fa-star"></i>'.repeat(H.stars)}${'<i class="fa-solid fa-star o"></i>'.repeat(3-H.stars)}</span><span><i class="fa-solid fa-heart" style="color:var(--hp)"></i>${H.hp}</span><span><i class="fa-solid fa-rotate"></i>${H.spins}</span></div>
     <div class="meta"><span>${rec.cleared?`<i class="fa-solid fa-flag-checkered" style="color:var(--buff)"></i>${esc(T('cleared',{n:rec.cleared}))}`:esc(rec.best?T('best',{b:rec.best+'/8'}):T('best_none'))}</span><span style="font-family:var(--rune);color:var(--arc)">${H.start.map(r=>RUNES[r].g).join(' ')} · ${RUNES[H.uRune].g}</span></div>
     <button class="btn sm go" type="button" data-camp="${k}"><i class="fa-solid fa-play"></i>${esc(T('play'))}</button></div></div>`;}).join('');

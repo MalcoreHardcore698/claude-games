@@ -45,3 +45,9 @@
 @media(max-height:620px){.homeCopy h1{font-size:52px}.homeCopy .homeFoot{display:none}.homeCopy{gap:12px}.homeDoor{padding-block:12px}.carouselTrack .mcard .body{padding:18px;gap:8px}.carouselTrack .mcard h2{font-size:28px}.carouselTrack .mcard p{font-size:15px}.carouselTrack .mcard .mods span{font-size:12px;padding:3px 7px}.shelfOptions .seg button{padding:6px 10px}.carouselArrow{height:36px}.shelf{gap:10px}}
 @media(max-width:1050px){.carouselTrack .mcard{flex-basis:92%;grid-template-columns:31% minmax(0,1fr)}.homeCopy{width:56%;padding:32px}.homeCopy .homeLede{font-size:16px}.shelfOptions .seg button{padding-inline:10px}.carouselHint{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.runeMenuScreen *{transition:none!important;scroll-behavior:auto!important}}
+
+/* Recovered campaign and mode illustrations: each slide shows its own art. */
+.carouselTrack .mcard .pic img{display:block;width:100%;height:100%;position:absolute;inset:0;object-fit:cover;object-position:center 38%;pointer-events:none}
+.carouselTrack .mcard .pic{isolation:isolate;background:#261b30}
+.carouselTrack .mcard .pic::before{display:none}
+.carouselTrack .mcard .pic::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#0d0b1240,transparent 55%);pointer-events:none}
