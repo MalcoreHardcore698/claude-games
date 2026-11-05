@@ -7,7 +7,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&family=Ruslan+Display&family=Alegreya+SC:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&family=Ruslan+Display&family=Alegreya+SC:wght@700&family=Noto+Sans+Runic&display=swap">
 <!-- Font Awesome Free. With a Pro licence, swap this line for your kit: <script src="https://kit.fontawesome.com/XXXX.js" crossorigin="anonymous"></script> -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 <style>
@@ -41,6 +41,10 @@
 ::-webkit-scrollbar-thumb:hover{background-color:rgba(242,163,58,.55)}
 ::-webkit-scrollbar-corner{background:transparent}
 @supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:rgba(236,230,216,.2) transparent}}
+.sf{--fd:34px}
+.sf.ft{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--fd));mask-image:linear-gradient(to bottom,transparent 0,#000 var(--fd))}
+.sf.fb{-webkit-mask-image:linear-gradient(to top,transparent 0,#000 var(--fd));mask-image:linear-gradient(to top,transparent 0,#000 var(--fd))}
+.sf.ft.fb{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--fd),#000 calc(100% - var(--fd)),transparent 100%);mask-image:linear-gradient(to bottom,transparent 0,#000 var(--fd),#000 calc(100% - var(--fd)),transparent 100%)}
 .modal:not([hidden]){animation:mFade .2s ease-out}
 .modal:not([hidden]) .mbox{animation:mPop .32s cubic-bezier(.2,1.25,.4,1)}
 .modal.closing{animation:mFadeOut .18s ease-in forwards}
@@ -168,6 +172,10 @@ a{color:inherit}
 .quizc .qt{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:52%}
 .quizc .qt i{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;color:#fff;font-size:clamp(16px,2.4vw,24px);box-shadow:0 4px 0 rgba(0,0,0,.3)}
 .quizc .qq{position:absolute;font:900 clamp(60px,10vw,110px)/1 "Arial Black",var(--display);color:#ffd23f;text-shadow:0 6px 0 rgba(0,0,0,.4)}
+.runesc{background:radial-gradient(ellipse 70% 60% at 50% 20%,rgba(217,164,65,.28),transparent 70%),linear-gradient(160deg,#241f2d,#110f16);display:grid;place-items:center}
+.runesc .rl{display:flex;gap:8px;padding:10px;border-radius:12px;border:2px solid #d9a441;background:#0d0b12;box-shadow:0 0 0 4px #3a2a10}
+.runesc .rl i{width:clamp(34px,5vw,46px);aspect-ratio:3/4;border-radius:7px;background:linear-gradient(180deg,#f3ead6,#d6c7a6);display:grid;place-items:center;font-size:clamp(14px,2vw,20px)}
+.runesc .gl{position:absolute;font:400 clamp(28px,4vw,40px) "Noto Sans Runic","Segoe UI Historic",serif;color:#5ee6c8;text-shadow:0 0 16px #5ee6c8}
 /* tamada */
 .tamhead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
 .tamhead h2{margin:0;font:800 clamp(34px,6vw,64px)/1 var(--display);letter-spacing:-.02em}
@@ -295,7 +303,7 @@ select option:disabled{color:#555}
         <div class="achHead"><h2><i class="fa-solid fa-trophy"></i><span data-t="ach"></span> <small id="achCount"></small> <span class="achPts" id="achPts"></span></h2>
           <div class="seg" role="group" id="achFilter"></div></div>
         <div class="prog"><i id="achProg" style="width:0"></i></div>
-        <div class="achGrid" id="achGrid"></div>
+        <div class="achGrid sf" id="achGrid"></div>
       </section>
     </div>
     <div class="doors">
@@ -351,7 +359,7 @@ select option:disabled{color:#555}
   <div class="row" style="justify-content:space-between"><h2><i class="fa-solid fa-coins" style="color:var(--amber)"></i> <span data-t="bet_title"></span></h2><span class="payout" id="betBal"></span></div>
   <div class="tabs" id="betGames"></div>
   <label for="betWho"><span data-t="bet_on"></span><select id="betWho"></select></label>
-  <div class="evs" id="betEvs"></div>
+  <div class="evs sf" id="betEvs"></div>
   <div class="stake"><label for="betAmt"><span data-t="stake"></span><input type="number" id="betAmt" min="10" step="10" value="100"></label>
     <div class="row"><button class="btn ghost sm" type="button" data-amt="50">50</button><button class="btn ghost sm" type="button" data-amt="100">100</button><button class="btn ghost sm" type="button" data-amt="250">250</button><button class="btn ghost sm" type="button" data-amt="all"><i class="fa-solid fa-fire"></i><span data-t="all_in"></span></button></div></div>
   <p class="payout" id="betPay"></p>
@@ -370,7 +378,7 @@ select option:disabled{color:#555}
 
 <div class="modal" id="mBets" hidden><div class="mbox">
   <h2 data-t="my_bets"></h2>
-  <ul class="bets" id="betList"></ul>
+  <ul class="bets sf" id="betList"></ul>
   <div class="row"><button class="btn ghost" id="mBetsClose" type="button" data-t="close"></button></div>
 </div></div>
 
@@ -422,7 +430,7 @@ bet_title:['Ставка','Place a bet'],bet_on:['На кого','On whom'],grou
 pay:['Коэффициент ×{k} · выигрыш {p}','Odds ×{k} · payout {p}'],pick_ev:['Выберите событие.','Pick an event.'],need_lobby_bet:['Ставки на других игроков работают в лобби.','Betting on other players works inside a lobby.'],
 low:['Не хватает фишек.','Not enough chips.'],min_bet:['Минимальная ставка — 10.','The minimum stake is 10.'],placed:['Ставка принята','Bet placed'],
 busy_bet:['{n} уже в партии — ставки откроются после неё.','{n} is already in a game — betting reopens after it.'],busy_group:['Партия уже идёт — ставки на неё закрыты.','A game is already running — betting on it is closed.'],
-won_t:['Ставка сыграла','Your bet won'],lost_t:['Ставка не сыграла','Your bet lost'],refund_t:['Ставка возвращена','Stake returned'],refund:['Партию бросили: {e}','The game was abandoned: {e}'],
+won_t:['Ставка сыграла','Your bet won'],stake_t:['Ставка сделана','Stake placed'],payout_t:['Выплата','Payout'],lost_t:['Ставка не сыграла','Your bet lost'],refund_t:['Ставка возвращена','Stake returned'],refund:['Партию бросили: {e}','The game was abandoned: {e}'],
 st_open:['ждёт','pending'],st_won:['+{p}','+{p}'],st_lost:['проиграна','lost'],st_back:['возврат','refunded'],cancel_bet:['Отменить','Cancel'],no_bets:['Ставок пока нет.','No bets yet.'],
 next_game:['на следующую партию','for the next game'],running:['идёт партия','game in progress'],
 tam_vote:['Выберите карту','Pick a card'],tam_note:['Карты перемешаны. Проголосовали: {v} из {n}.','The cards are shuffled. Voted: {v} of {n}.'],tam_end:['Подвести итог','Call it'],
@@ -437,7 +445,8 @@ s_bets:['ставок','bets'],s_won:['выиграно','won'],s_best:['луч�
 g_svo_d:['Ночь, спальный район, повестка уже в пути. Найдите паспорт и уезжайте, пока вас не нашли.','Night in a commuter district and a draft summons on its way. Find your passport and get out.'],
 g_gw_d:['Загадайте героя из «Ведьмака», LoL, Dota 2, «Звёздных войн» или «Игры престолов» и угадайте героя соперника.','Pick a hero from The Witcher, LoL, Dota 2, Star Wars or Game of Thrones and guess your opponent’s.'],
 g_quiz_d:['164 вопроса, колесо фортуны и испытания между раундами. Вместе против Профессора, каждый сам за себя или командами.','164 questions, a wheel of fortune and trials between rounds. Together against the Professor, free for all or in teams.'],
-t_quiz:['викторина','trivia'],t_8:['1–8 игроков','1–8 players'],t_teams:['команды','teams'],
+t_quiz:['викторина','trivia'],t_slots:['автоматы','slots'],t_solo:['одиночная','solo'],t_rpg:['приключение','adventure'],
+g_runes_d:['Игровой автомат-приключение: руны меняют барабаны, барабаны решают исход боя. Ведите героя к замку и ставьте фишки.','A slot-machine adventure: runes reshape the reels and the reels decide each fight. Lead your hero to the castle and put chips on it.'],t_8:['1–8 игроков','1–8 players'],t_teams:['команды','teams'],
 t_3d:['3D','3D'],t_horror:['хоррор','horror'],t_coop8:['кооп до 8','co-op up to 8'],t_board:['настолка','tabletop'],t_two:['1–2 игрока','1–2 players'],t_online:['онлайн','online']
 };
 const RAR={
@@ -471,13 +480,18 @@ const EVENTS=[
  {id:'quiz.streak5',g:'quiz',kind:'yes',base:3.0,t:['{n} ответит верно пять раз подряд','{n} answers five in a row']},
  {id:'quiz.jackpot',g:'quiz',kind:'yes',base:5.0,t:['{n} сорвёт джекпот на колесе','{n} hits the wheel jackpot']},
  {id:'quiz.beat_bot',g:'quiz',kind:'group',base:2.0,t:['Игроки обыграют Профессора','The players beat the Professor']},
- {id:'quiz.close',g:'quiz',kind:'group',base:3.0,t:['Разрыв на финише меньше 100 очков','The final gap is under 100 points']}
+ {id:'quiz.close',g:'quiz',kind:'group',base:3.0,t:['Разрыв на финише меньше 100 очков','The final gap is under 100 points']},
+ {id:'runes.castle',g:'runes',kind:'yes',base:2.4,t:['{n} дойдёт до замка','{n} reaches the castle']},
+ {id:'runes.fall',g:'runes',kind:'yes',base:1.7,t:['Герой {n} падёт в бою','{n}’s hero falls in battle']},
+ {id:'runes.jackpot',g:'runes',kind:'yes',base:3.2,t:['{n} соберёт пять в ряд','{n} lands five in a row']},
+ {id:'runes.rich',g:'runes',kind:'group',base:2.6,t:['Добыча больше 300 золота','The haul tops 300 gold']}
 ];
 const EV=Object.fromEntries(EVENTS.map(e=>[e.id,e]));
 const GAMES=[
  {id:'svo',file:'escape-from-commissariat.html',name:['Escape from SVO','Escape from SVO'],d:'g_svo_d',tags:['t_3d','t_horror','t_coop8'],cover:'svo',r:'legendary',icon:'fa-person-running'},
  {id:'gw',file:'guess-who.html',name:['Угадай героя','Guess the Hero'],d:'g_gw_d',tags:['t_board','t_two','t_online'],cover:'gw',r:'rare',icon:'fa-user-secret'},
- {id:'quiz',file:'quiz.html',name:['Викторина','Quiz Night'],d:'g_quiz_d',tags:['t_quiz','t_8','t_teams'],cover:'quizc',r:'epic',icon:'fa-circle-question'}
+ {id:'quiz',file:'quiz.html',name:['Викторина','Quiz Night'],d:'g_quiz_d',tags:['t_quiz','t_8','t_teams'],cover:'quizc',r:'epic',icon:'fa-circle-question'},
+ {id:'runes',file:'runes.html',name:['Руны удачи','Reels & Runes'],d:'g_runes_d',tags:['t_slots','t_solo','t_rpg'],cover:'runesc',r:'legendary',icon:'fa-dice-d20'}
 ];
 const GM=Object.fromEntries(GAMES.map(g=>[g.id,g]));
 const ACH=[
@@ -540,13 +554,31 @@ const ACH=[
  {id:'q_jackpot',g:'quiz',r:'rare',i:'fa-crown',t:['Джекпот!','Jackpot!'],d:['Выпадите джекпот на колесе фортуны.','Hit the jackpot on the wheel.']},
  {id:'q_shield',g:'quiz',r:'rare',i:'fa-shield-halved',t:['Щит не подвёл','Saved by the shield'],d:['Щит спасает вас от вылета.','Let the shield save you from a knockout.']},
  {id:'q_ko',g:'quiz',r:'common',i:'fa-ban',t:['Посидите в сторонке','Benched'],d:['Вылетите на испытании.','Get knocked out by a trial.']},
- {id:'q_10',g:'quiz',r:'rare',i:'fa-tv',t:['Постоянный участник','Regular contestant'],d:['Сыграйте десять викторин.','Play ten quizzes.']}
+ {id:'q_10',g:'quiz',r:'rare',i:'fa-tv',t:['Постоянный участник','Regular contestant'],d:['Сыграйте десять викторин.','Play ten quizzes.']},
+ {id:'q_hard',g:'quiz',r:'rare',i:'fa-dumbbell',t:['Без поблажек','No mercy'],d:['Пройдите испытание на сложном уровне.','Pass a trial on hard.']},
+ {id:'q_rhythm',g:'quiz',r:'common',i:'fa-drum',t:['Чувство ритма','Got rhythm'],d:['Пройдите ритм-испытание.','Pass the rhythm trial.']},
+ {id:'q_odd',g:'quiz',r:'common',i:'fa-eye',t:['Зоркий глаз','Eagle eye'],d:['Найдите лишнее три раза подряд.','Spot the odd one three times.']},
+ {id:'q_sprint',g:'quiz',r:'rare',i:'fa-stopwatch',t:['Блиц','Blitz'],d:['Решите блиц-счёт.','Clear the speed-maths trial.']},
+ {id:'r_first',g:'runes',r:'common',i:'fa-dice',t:['Первая кровь','First blood'],d:['Победите первого врага.','Defeat your first foe.']},
+ {id:'r_knight',g:'runes',r:'rare',i:'fa-chess-rook',t:['Чёрный замок пал','The Black Castle falls'],d:['Пройдите путь сэра Эдгара.','Finish Sir Edgar’s road.']},
+ {id:'r_rogue',g:'runes',r:'epic',i:'fa-landmark-dome',t:['Ключи от дворца','Keys to the palace'],d:['Пройдите путь Лиса Рашида.','Finish Rashid’s road.']},
+ {id:'r_mage',g:'runes',r:'epic',i:'fa-hat-wizard',t:['Лёд тронулся','The ice breaks'],d:['Пройдите путь ведуньи Ирмы.','Finish Irma’s road.']},
+ {id:'r_all',g:'runes',r:'legendary',i:'fa-crown',t:['Повелитель рун','Rune lord'],d:['Пройдите все три приключения.','Finish all three adventures.']},
+ {id:'r_five',g:'runes',r:'rare',i:'fa-grip-lines',t:['Пять в ряд','Five in a row'],d:['Соберите линию из пяти символов.','Land a five-symbol line.']},
+ {id:'r_full',g:'runes',r:'epic',i:'fa-table-cells',t:['Полный барабан','Full reels'],d:['Раскройте барабан 5×5.','Open the reels to 5×5.']},
+ {id:'r_combo3',g:'runes',r:'rare',i:'fa-circle-nodes',t:['Рунный мастер','Rune master'],d:['Активируйте три комбинации рун сразу.','Have three rune combos active at once.']},
+ {id:'r_cursed',g:'runes',r:'common',i:'fa-skull-crossbones',t:['Проклятый','Cursed'],d:['Носите три проклятия одновременно.','Carry three curses at once.']},
+ {id:'r_fall',g:'runes',r:'common',i:'fa-cross',t:['Покойся с миром','Rest in peace'],d:['Герой пал в бою.','Your hero falls in battle.']},
+ {id:'r_flawless',g:'runes',r:'epic',i:'fa-shield-heart',t:['Без единой царапины','Not a scratch'],d:['Победите босса, не потеряв ни единицы здоровья.','Beat a boss without losing any health.']},
+ {id:'r_gold',g:'runes',r:'rare',i:'fa-sack-dollar',t:['Казнокрад','Treasure hoarder'],d:['Добудьте 500 золота за одно приключение.','Collect 500 gold in one adventure.']},
+ {id:'r_rich',g:'runes',r:'legendary',i:'fa-money-bill-trend-up',t:['Сорвал банк','Broke the bank'],d:['Получите выплату от 1000 фишек.','Receive a payout of 1,000 chips or more.']}
 ];
 const AM=Object.fromEntries(ACH.map(a=>[a.id,a]));
 const RW={common:10,rare:25,epic:50,legendary:100};
 const achPts=ids=>ids.reduce((t,id)=>t+(AM[id]?RW[AM[id].r]:0),0);
 const EV_ACH={'svo.escape':'svo_escape','svo.escape_car':'svo_car','svo.escape_bus':'svo_bus','svo.night2':'svo_night2','svo.rescuer':'svo_rescue','svo.bribe':'svo_bribe','svo.keys':'svo_keys','svo.robbed':'svo_robbed','svo.drafted':'svo_drafted','gw.wrongguess':'gw_wrong','svo.detained':'svo_detained','svo.donos':'svo_donos','svo.passport':'svo_pp',
- 'quiz.streak5':'q_streak5','quiz.fast':'q_fast','quiz.math_hard':'q_math','quiz.memory_ok':'q_memory','quiz.reflex_ok':'q_reflex','quiz.jackpot':'q_jackpot','quiz.shield_save':'q_shield','quiz.ko':'q_ko'};
+ 'quiz.streak5':'q_streak5','quiz.fast':'q_fast','quiz.math_hard':'q_math','quiz.memory_ok':'q_memory','quiz.reflex_ok':'q_reflex','quiz.jackpot':'q_jackpot','quiz.shield_save':'q_shield','quiz.ko':'q_ko','quiz.hard_ok':'q_hard','quiz.rhythm_ok':'q_rhythm','quiz.odd_ok':'q_odd','quiz.sprint_ok':'q_sprint',
+ 'runes.first_win':'r_first','runes.jackpot':'r_five','runes.full':'r_full','runes.combo3':'r_combo3','runes.cursed':'r_cursed','runes.fall':'r_fall','runes.flawless':'r_flawless'};
 let cfg={lang:(navigator.language||'').toLowerCase().startsWith('ru')?'ru':'en'};
 try{Object.assign(cfg,JSON.parse(localStorage.getItem('svo-cfg')||'{}'));}catch(e){}
 const L=()=>cfg.lang==='en'?1:0;
@@ -575,6 +607,10 @@ function hideM(el){if(!el||el.hidden||el.classList.contains('closing'))return;el
 function segThumb(seg){if(!seg)return;let t=seg.querySelector(':scope>.thumb');if(!t){t=document.createElement('i');t.className='thumb';seg.prepend(t);}
   const b=seg.querySelector(':scope>button[aria-pressed="true"]');if(!b||!b.offsetWidth){t.style.opacity=0;return;}t.style.opacity=1;t.style.left=b.offsetLeft+'px';t.style.width=b.offsetWidth+'px';}
 const segAll=()=>document.querySelectorAll('.seg').forEach(segThumb);
+/* fade a scroll box's edge only where content continues past it */
+function scrollFade(el){const upd=()=>{const t=el.scrollTop>2,b=el.scrollTop+el.clientHeight<el.scrollHeight-2;el.classList.toggle('ft',t);el.classList.toggle('fb',b);};
+  el.addEventListener('scroll',upd,{passive:true});try{new ResizeObserver(upd).observe(el);}catch(e){}new MutationObserver(()=>requestAnimationFrame(upd)).observe(el,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});upd();}
+document.querySelectorAll('.sf').forEach(scrollFade);
 addEventListener('resize',segAll);
 
 /* ================= notifications ================= */
@@ -919,6 +955,7 @@ $('#bTamada').onclick=()=>startTamada();
 function coverHTML(g){
   if(g==='svo'){let b1='',b2='';for(let i=0;i<60;i++)b1+=`<b${Math.random()<.14?' class="l"':''}></b>`;for(let i=0;i<28;i++)b2+=`<b${Math.random()<.14?' class="l"':''}></b>`;
     return `<div class="bld" style="left:46%;width:30%;height:78%;grid-template-columns:repeat(6,1fr)">${b1}</div><div class="bld" style="left:79%;width:24%;height:58%;grid-template-columns:repeat(4,1fr)">${b2}</div><div class="esc">Escape from</div><div class="stamp">SVO</div>`;}
+  if(g==='runes')return `<div class="gl" style="left:10%;top:14%">ᚱ</div><div class="gl" style="right:10%;bottom:14%">ᚠ</div><div class="rl"><i class="fa-solid fa-khanda" style="color:#6b7280"></i><i class="fa-solid fa-star" style="color:#d9a441"></i><i class="fa-solid fa-khanda" style="color:#6b7280"></i><i class="fa-solid fa-heart" style="color:#e5484d"></i></div>`;
   if(g==='quiz')return `<div class="qt"><i class="fa-solid fa-bolt" style="background:#ff5a5f"></i><i class="fa-solid fa-star" style="background:#3d8bff"></i><i class="fa-solid fa-moon" style="background:#ffb627"></i><i class="fa-solid fa-heart" style="background:#2fd17a"></i></div><div class="qq">?</div>`;
   const cs=['#1c1814','#b3262a','#2f6fb3','#5f9a46','#e5c33a','#8fb4c8'],rs=['#c8a24a','#b8b2a3','#c0682e'];let t='';
   for(let i=0;i<18;i++)t+=`<div class="t${[2,5,7,11,13,16].includes(i)?' d':''}" style="--c:${cs[i%6]};--r:${rs[i%3]}"></div>`;
@@ -1001,6 +1038,8 @@ function peersForGame(){return members().map(m=>({label:m.label,name:clean(m.p.n
 function hello(){const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'hello',me:LB.label,name:prof.name,lang:cfg.lang,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');}
 setInterval(()=>{if(!curGame)return;const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'peers',me:LB.label,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');},100);
 function ownEvent(ev,x){const a=EV_ACH[ev];if(a)unlock(a);
+  if(ev==='runes.castle'&&x){const k=str(x.adv,12);const id={knight:'r_knight',rogue:'r_rogue',mage:'r_mage'}[k];if(id){unlock(id);if(!Array.isArray(prof.runesDone))prof.runesDone=[];if(!prof.runesDone.includes(k))prof.runesDone.push(k);saveProf();if(prof.runesDone.length>=3)unlock('r_all');}}
+  if(ev==='runes.fin'&&x&&num(x.gold)>=500)unlock('r_gold');
   if(ev==='quiz.fin'&&x){unlock('q_first');if(x.win){if(x.mode==='ffa')unlock('q_win');if(x.mode==='teams')unlock('q_team');if(x.mode==='coop')unlock(x.solo?'q_solo':'q_bot');}if(x.perfect)unlock('q_perfect');}
   if(ev==='gw.fin'&&x){const st=x.win?bump('gwst'):(prof.cnt.gwst=0);if(st>=3)unlock('gw_streak3');saveProf();}
   if(ev==='gw.fin'&&x){unlock('gw_first');if(x.win){unlock('gw_win');unlock(x.bot?'gw_bot':'gw_online');if(num(x.myQ,99)<=5)unlock('gw_fast');
@@ -1017,6 +1056,10 @@ addEventListener('message',e=>{
     case 'end':emit('gend',{game:curGame,gid:str(m.gid),sum:obj(m.sum)||{}});break;
     case 'bet':openBet(curGame,str(m.target)||null);break;
     case 'invite':sendInvite(str(m.to),curGame);break;
+    case 'stake':{const amt=Math.floor(num(m.amt));const ok=amt>0&&amt<=prof.chips&&amt<=100000;if(ok){const from=prof.chips;prof.chips-=amt;saveProf();notify({icon:'fa-coins',title:T('stake_t'),text:gname(curGame),chips:{from,to:prof.chips},ttl:3500});renderHome();}
+      const w=frameWin();if(w)w.postMessage({svo:1,type:'stake',id:str(m.id),ok},'*');break;}
+    case 'payout':{const amt=Math.max(0,Math.min(1e6,Math.floor(num(m.amt))));const st=Math.max(0,Math.floor(num(m.stake)));if(!amt)break;const from=prof.chips;prof.chips+=amt;saveProf();
+      notify({icon:amt>st?'fa-sack-dollar':'fa-coins',color:amt>st?'var(--win)':'var(--amber)',title:T('payout_t'),text:gname(curGame),chips:{from,to:prof.chips},ttl:6000});if(amt>st)boom(amt>=1000);if(amt>=1000)unlock('r_rich');checkWealth();renderHome();break;}
     case 'lobby':openPop();break;
     case 'exit':closeGame();break;
     case 'lang':if(m.lang==='ru'||m.lang==='en'){cfg.lang=m.lang;applyLang();}break;
