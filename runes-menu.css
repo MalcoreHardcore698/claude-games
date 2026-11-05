@@ -1,0 +1,47 @@
+/* Fixed-height home and two independent horizontal shelves. */
+.wrap:has(.runeMenuScreen:not([hidden])){height:100dvh;max-width:1440px;padding-block:12px 20px;overflow:hidden}
+.wrap:has(.runeMenuScreen:not([hidden]))>.top{height:36px;flex:none}
+.runeMenuScreen{flex:1;min-height:0}
+.runeHome{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;border:1px solid var(--line);border-radius:22px;background:#211b2a}
+.runeHome>.homeArt{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:-2;pointer-events:none}
+.runeHome::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,#16121de8 0%,#1c1623bb 32%,#16121d1a 62%),linear-gradient(0deg,#110f1699,transparent 30%)}
+.homeCopy{width:50%;max-width:610px;padding:clamp(28px,4vw,60px);display:flex;flex-direction:column;align-items:flex-start;gap:20px}
+.homeCopy .eyebrow{color:#d7bc8b;font-size:10px;letter-spacing:.2em}
+.homeCopy h1{font:700 clamp(48px,6.3vw,88px)/.94 var(--display);color:var(--brass2);margin:0;text-wrap:balance;text-shadow:0 3px 0 #3d2a0c}
+.homeCopy .homeLede{font-size:18px;line-height:1.4;color:#c3b5c8;max-width:34ch;margin:0}
+.homeActions{display:flex;flex-direction:column;gap:14px;width:100%;max-width:370px;margin-top:12px}
+.homeDoor{display:grid;grid-template-columns:42px 1fr 18px;align-items:center;gap:15px;text-align:left;padding:17px 20px;font:700 19px var(--body);letter-spacing:.08em;border-radius:11px}
+.homeDoor>i:first-child{font-size:22px}.homeDoor>i:last-child{font-size:13px;opacity:.6;transition:translate .2s}
+.homeDoor:hover>i:last-child{translate:4px 0}.homeDoor.ghost{background:#1b1726bc;backdrop-filter:blur(6px);box-shadow:inset 0 0 0 1px #d9a44177}
+.homeCopy .homeFoot{font:500 10px var(--mono);color:#bbaaac;letter-spacing:.13em;margin:8px 0 0}
+.shelf{display:flex;flex-direction:column;gap:18px;padding:10px 0 0}
+.shelfHead{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:12px 24px;flex:none}
+.shelfHeading{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.shelfBack{font:500 13px var(--body);color:var(--muted);padding:0}
+.shelfHeading h1{font:700 clamp(32px,3.7vw,52px)/1 var(--display);color:var(--brass2);margin:0;display:flex;align-items:center;gap:16px}
+.shelfHeading h1 i{font-size:.55em;color:var(--muted)}
+.shelfOptions{display:flex;flex-direction:column;align-items:flex-end;gap:9px}
+.shelfOptions .seg button{padding:8px 15px;font-size:12px}.shelfOptions .eyebrow{font-size:10px}
+.shelfNote{font-size:13px;line-height:1.3;min-height:18px;flex:none;margin:-7px 0 -5px;max-width:90ch}
+.carousel{display:flex;flex-direction:column;gap:14px;flex:1;min-height:0}
+.carouselTrack{position:relative;display:flex;gap:20px;flex:1;min-height:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;touch-action:pan-y;cursor:grab;padding:1px 0 5px;overscroll-behavior-x:contain}
+.carouselTrack::-webkit-scrollbar{display:none}
+.carouselTrack.dragging{cursor:grabbing;scroll-snap-type:none;scroll-behavior:auto}
+.carouselTrack .mcard{flex:0 0 80%;display:grid;grid-template-columns:38% minmax(0,1fr);scroll-snap-align:start;scroll-snap-stop:always;opacity:.48;transition:opacity .28s,border-color .28s;min-width:0}
+.carouselTrack .mcard.is-current{opacity:1;border-color:#d9a44199;box-shadow:0 4px 16px #0003}
+.carouselTrack .mcard .pic{height:auto;min-height:0}.carouselTrack .mcard .pic i.h{font-size:clamp(62px,9vw,138px);filter:drop-shadow(0 10px 0 #0004)}
+.carouselTrack .mcard .pic i.c{font-size:clamp(42px,6vw,86px);right:20px;bottom:12%}
+.carouselTrack .mcard .pic::before{content:'';position:absolute;width:230px;height:230px;border:1px solid #fff2;border-radius:50%;box-shadow:0 0 0 30px #ffffff06,0 0 0 60px #ffffff04;left:50%;top:50%;transform:translate(-50%,-50%)}
+.carouselTrack .mcard .body{padding:clamp(20px,3vw,40px);gap:14px;min-width:0;justify-content:center}
+.carouselTrack .mcard h2{font-size:clamp(28px,3vw,42px)}.carouselTrack .mcard p{font-size:17px;line-height:1.4}
+.carouselTrack .mcard .meta{font-size:12px;gap:12px}.carouselTrack .mcard .mods span{font-size:13px;padding:5px 9px}
+.carouselTrack .mcard .go{margin-top:10px;font-size:15px;padding:12px 23px;min-width:150px}
+.carouselFooter{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:none;padding:0 2px}
+.carouselHint{font-size:13px;color:var(--muted);margin:0;display:flex;align-items:center;gap:8px}
+.carouselControls{display:flex;align-items:center;gap:18px}.carouselCount{font:500 12px var(--mono);color:var(--brass2);min-width:64px;text-align:center}
+.carouselArrow{width:44px;height:42px;border:1px solid var(--line);background:var(--deck2);border-radius:10px;cursor:pointer;display:grid;place-items:center;transition:background .15s,transform .15s,color .15s;color:var(--brass2)}
+.carouselArrow:hover{background:#3c3040;transform:translateY(-2px)}.carouselArrow:active{transform:translateY(1px)}.carouselArrow:disabled{opacity:.25;cursor:default;transform:none}
+@media(max-height:720px){.homeCopy{gap:14px;padding-block:24px}.homeCopy h1{font-size:64px}.homeCopy .homeLede{font-size:16px}.homeActions{margin-top:5px;gap:12px}.homeDoor{padding-block:14px}.shelf{gap:12px}.shelfHeading{gap:6px}.carouselTrack .mcard .body{gap:10px;padding:22px}.carouselTrack .mcard .go{margin-top:2px}.shelfHeading h1{font-size:38px}}
+@media(max-height:620px){.homeCopy h1{font-size:52px}.homeCopy .homeFoot{display:none}.homeCopy{gap:12px}.homeDoor{padding-block:12px}.carouselTrack .mcard .body{padding:18px;gap:8px}.carouselTrack .mcard h2{font-size:28px}.carouselTrack .mcard p{font-size:15px}.carouselTrack .mcard .mods span{font-size:12px;padding:3px 7px}.shelfOptions .seg button{padding:6px 10px}.carouselArrow{height:36px}.shelf{gap:10px}}
+@media(max-width:1050px){.carouselTrack .mcard{flex-basis:92%;grid-template-columns:31% minmax(0,1fr)}.homeCopy{width:56%;padding:32px}.homeCopy .homeLede{font-size:16px}.shelfOptions .seg button{padding-inline:10px}.carouselHint{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.runeMenuScreen *{transition:none!important;scroll-behavior:auto!important}}

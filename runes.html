@@ -3,6 +3,18 @@
 <head>
 <script src="screen-guard.js" defer></script>
 <meta charset="utf-8">
+<style data-orion-critical>
+html.orion-pending body{visibility:hidden!important}
+html.orion-pending:not(.orion-mounted)::before{content:"";position:fixed;inset:0;background:#101012;z-index:2147482998}
+html.orion-pending:not(.orion-mounted)::after{content:"";position:fixed;left:50%;top:50%;width:12px;height:12px;margin:-6px;background:#e9c16f;box-shadow:-20px 0 #e9c16f,20px 0 #e9c16f,0 -20px #e9c16f,0 20px #e9c16f;z-index:2147482999;animation:orion-boot .8s steps(4,end) infinite}
+@keyframes orion-boot{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){html.orion-pending::after{animation:none!important}}
+</style>
+<script data-orion-boot>
+document.documentElement.classList.add('orion-pending');
+setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.remove('orion-pending');},12000);
+</script>
+<script src="orion-loader.js" defer></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Руны удачи</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -315,6 +327,8 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
 .sceneLoot h2{margin:0;font:700 23px/1 var(--display);color:var(--brass2)}.sceneLoot .lootRewards{min-height:0;overflow:auto;gap:7px;font-size:13px}.sceneLoot .lootRewards p{margin:2px 0}.sceneLoot .lootReward b{font-size:17px}.sceneLoot .tipPositions{font-size:11px;gap:3px;margin-top:3px;padding-top:3px}.sceneLoot .btn{flex:none;align-self:stretch;min-height:32px}
 
 </style>
+<link rel="stylesheet" href="runes-menu.css">
+<script src="orion-carousel.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -326,16 +340,48 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
     <div class="seg" id="langSeg" role="group" aria-label="Language"></div>
   </div>
 
-  <section id="sMenu">
-    <div class="menuHead"><h1><span class="r">ᚱ</span><span id="title"></span><span class="r">ᚠ</span></h1><p data-t="lede"></p></div>
-    <div class="msec">
-      <div class="hd"><h3><i class="fa-solid fa-hourglass-half"></i><span data-t="modes"></span></h3><span class="sp"></span><span class="eyebrow" data-t="mode_hero"></span><div class="seg" id="heroSeg" role="group"></div></div>
-      <div class="cards3" id="modes"></div>
+  <section id="sMenu" class="runeMenuScreen runeHome">
+    <img class="homeArt" src="assets/runes-menu.png" alt="" decoding="async" fetchpriority="high" draggable="false">
+    <div class="homeCopy">
+      <p class="eyebrow"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><span data-t="home_eyebrow"></span></p>
+      <h1 id="title"></h1>
+      <p class="homeLede" data-t="home_lede"></p>
+      <div class="homeActions">
+        <button class="btn homeDoor" type="button" id="bCampaigns"><i class="fa-solid fa-map" aria-hidden="true"></i><span data-t="campaign_menu"></span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+        <button class="btn ghost homeDoor" type="button" id="bModes"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i><span data-t="modes"></span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+      </div>
+      <p class="homeFoot" data-t="home_foot"></p>
     </div>
-    <div class="msec">
-      <div class="hd"><h3><i class="fa-solid fa-map"></i><span data-t="camps"></span></h3><span class="sp"></span><span class="eyebrow" id="stakeL"><i class="fa-solid fa-coins"></i><span data-t="stake"></span></span><div class="seg" id="stakeSeg" role="group"></div></div>
-      <p class="note" id="stakeNote"></p>
-      <div class="cards3" id="advs"></div>
+  </section>
+
+  <section id="sCampaigns" class="runeMenuScreen shelf" hidden>
+    <div class="shelfHead">
+      <div class="shelfHeading"><button class="back shelfBack" type="button" data-menu-back><i class="fa-solid fa-arrow-left" aria-hidden="true"></i><span data-t="to_menu"></span></button><h1><i class="fa-solid fa-map" aria-hidden="true"></i><span data-t="camps"></span></h1></div>
+      <div class="shelfOptions"><span class="eyebrow" id="stakeL"><i class="fa-solid fa-coins" aria-hidden="true"></i><span data-t="stake"></span></span><div class="seg" id="stakeSeg" role="group"></div></div>
+    </div>
+    <p class="note shelfNote" id="stakeNote"></p>
+    <div class="carousel" id="campCarousel" role="region" aria-roledescription="carousel">
+      <div class="carouselTrack" id="advs" data-carousel-track tabindex="0"></div>
+      <div class="carouselFooter"><p class="carouselHint"><i class="fa-solid fa-arrows-left-right" aria-hidden="true"></i><span data-t="carousel_hint"></span></p><div class="carouselControls">
+        <button class="carouselArrow" type="button" data-carousel-prev aria-label="Previous"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+        <span class="carouselCount" data-carousel-count aria-live="polite">01 / 03</span>
+        <button class="carouselArrow" type="button" data-carousel-next aria-label="Next"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+      </div></div>
+    </div>
+  </section>
+
+  <section id="sModes" class="runeMenuScreen shelf" hidden>
+    <div class="shelfHead">
+      <div class="shelfHeading"><button class="back shelfBack" type="button" data-menu-back><i class="fa-solid fa-arrow-left" aria-hidden="true"></i><span data-t="to_menu"></span></button><h1><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i><span data-t="modes"></span></h1></div>
+      <div class="shelfOptions"><span class="eyebrow" data-t="mode_hero"></span><div class="seg" id="heroSeg" role="group"></div></div>
+    </div>
+    <div class="carousel" id="modeCarousel" role="region" aria-roledescription="carousel">
+      <div class="carouselTrack" id="modes" data-carousel-track tabindex="0"></div>
+      <div class="carouselFooter"><p class="carouselHint"><i class="fa-solid fa-arrows-left-right" aria-hidden="true"></i><span data-t="carousel_hint"></span></p><div class="carouselControls">
+        <button class="carouselArrow" type="button" data-carousel-prev aria-label="Previous"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+        <span class="carouselCount" data-carousel-count aria-live="polite">01 / 03</span>
+        <button class="carouselArrow" type="button" data-carousel-next aria-label="Next"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+      </div></div>
     </div>
   </section>
 
@@ -421,6 +467,10 @@ const INV_CAP=35;
 const D={
 all_games:['Все игры','All games'],title:['Руны удачи','Reels & Runes'],
 lede:['Игровой автомат-приключение: каждая прокрутка — удар, блок или лечение, руны в гнёздах перестраивают барабан, а у каждого врага свой барабан.','A slot-machine adventure: every spin is a strike, a block or a heal, the runes in your sockets rebuild the reels — and every foe spins reels of its own.'],
+home_eyebrow:['Арканный автомат · приключение','An arcane slot adventure'],
+home_lede:['Собирайте руны, меняйте судьбу барабана и пробивайтесь к замку. Каждый поворот — новая история.','Collect runes, reshape the reels and fight your way to the castle. Every spin starts a new story.'],
+home_foot:['ВРАЩАЙТЕ БАРАБАН · МЕНЯЙТЕ СУДЬБУ','SPIN THE REELS · CHANGE YOUR FATE'],
+campaign_menu:['Кампания','Campaign'],carousel_hint:['Листайте стрелками или перетаскивайте карточки','Use the arrows or drag the cards'],
 modes:['Режимы','Modes'],camps:['Кампании','Campaigns'],mode_hero:['Герой','Hero'],stake:['Ставка','Stake'],free:['Без ставки','No stake'],play:['Играть','Play'],
 stake_note:['Ставка действует в кампаниях: дойдёте до замка — получите ставку ×2 и золото. Падёте — золото вернёт часть ставки.','Stakes apply to campaigns: reach the castle for stake ×2 plus your gold. Fall and the gold buys back part of it.'],
 stake_low:['Не хватает фишек.','Not enough chips.'],
@@ -667,7 +717,7 @@ const Shell={me:null,chips:null};
 function shellPost(type,o){if(SHELL){try{parent.postMessage(Object.assign({svo:1,type},o||{}),'*');}catch(e){}}}
 const stakeWait={};
 addEventListener('message',e=>{if(!SHELL||e.source!==parent)return;const m=e.data;if(!m||m.svo!==1)return;
-  if(m.type==='hello'||m.type==='peers'){if(typeof m.me==='string')Shell.me=m.me;const me=(m.peers||[]).find(p=>p&&p.label===Shell.me);if(me)Shell.chips=me.chips;if(!$('#sMenu').hidden)renderStakeNote();}
+  if(m.type==='hello'||m.type==='peers'){if(typeof m.me==='string')Shell.me=m.me;const me=(m.peers||[]).find(p=>p&&p.label===Shell.me);if(me)Shell.chips=me.chips;if(!$('#sCampaigns').hidden)renderStakeNote();}
   else if(m.type==='stake'&&stakeWait[m.id]){stakeWait[m.id](!!m.ok);delete stakeWait[m.id];}});
 function askStake(amt){return new Promise(res=>{if(!SHELL||!amt){res(true);return;}const id=rid();stakeWait[id]=res;shellPost('stake',{id,amt});setTimeout(()=>{if(stakeWait[id]){delete stakeWait[id];res(false);}},3000);});}
 function ev(name,x){if(SHELL&&G&&G.gid)shellPost('event',{gid:G.gid,ev:name,x});}
@@ -1108,6 +1158,17 @@ function hideTip(){$('#tip').hidden=true;}
 
 /* ================= menu ================= */
 function weekly(){const wk=weekNo();const seed=wk*7919;const wr=mulberry(seed);const hk=HK[Math.floor(wr()*3)];const pool=WMODS.slice();const mods=[];for(let i=0;i<2;i++)mods.push(pool.splice(Math.floor(wr()*pool.length),1)[0]);return {wk,seed,hk,mods};}
+const menuCarousels={};
+function refreshCarousels(){
+  if(!window.OrionCarousel)return;
+  for(const id of ['campCarousel','modeCarousel']){
+    if(!menuCarousels[id])menuCarousels[id]=new OrionCarousel($('#'+id));
+    else menuCarousels[id].refresh();
+    $('#'+id).setAttribute('aria-label',T(id==='campCarousel'?'camps':'modes'));
+    $('#'+id+' [data-carousel-prev]').setAttribute('aria-label',cfg.lang==='ru'?'Предыдущая карточка':'Previous card');
+    $('#'+id+' [data-carousel-next]').setAttribute('aria-label',cfg.lang==='ru'?'Следующая карточка':'Next card');
+  }
+}
 function renderMenu(){
   buildSeg($('#heroSeg'),HK.map(k=>[k,tr(HEROES[k].n),HEROES[k].i]),heroSel,v=>{heroSel=v;renderMenu();});
   const W=weekly();const claimed=store.wclaim&&store.wclaim[W.wk];
@@ -1124,7 +1185,7 @@ function renderMenu(){
   $('#advs').querySelectorAll('[data-camp]').forEach(b=>b.onclick=()=>start('camp',b.dataset.camp));
   $('#stakeL').hidden=!SHELL;$('#stakeSeg').hidden=!SHELL;
   buildSeg($('#stakeSeg'),[[0,T('free')],[50,'50'],[100,'100'],[250,'250'],[500,'500']],stake,v=>{stake=+v;renderMenu();});
-  renderStakeNote();
+  renderStakeNote();refreshCarousels();
 }
 function renderStakeNote(){const n=$('#stakeNote');if(!SHELL){n.textContent='';return;}const low=stake>0&&Shell.chips!=null&&Shell.chips<stake;n.textContent=low?T('stake_low'):T('stake_note');n.style.color=low?'var(--debuff)':'';
   document.querySelectorAll('#advs [data-camp]').forEach(b=>b.disabled=low);}
@@ -1140,11 +1201,15 @@ async function start(mode,hk,W){
   const f=$('#foe');f.classList.remove('dead','spawn');void f.offsetWidth;f.classList.add('spawn');
   if(!FX.cv)fxInit();
 }
+$('#bCampaigns').onclick=()=>{show('sCampaigns');renderStakeNote();};
+$('#bModes').onclick=()=>show('sModes');
+document.querySelectorAll('[data-menu-back]').forEach(b=>b.onclick=()=>show('sMenu'));
 $('#bRoll').onclick=()=>roll();
 $('#auto').onclick=()=>{if(G&&!G.over)setAuto(!G.auto);};
 addEventListener('keydown',e=>{const modal=!$('#mLogs').hidden?$('#mLogs'):!$('#mInfo').hidden?$('#mInfo'):null;
   if(modal){if(e.key==='Escape'){e.preventDefault();if(modal.id==='mLogs')closeLogs();else if(modal.id==='mInfo')closeInfo();return;}
     if(e.key==='Tab'){const focus=[...modal.querySelectorAll('button:not(:disabled),input,[tabindex="0"]')];if(focus.length){const first=focus[0],last=focus[focus.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}return;}
+  if(e.key==='Escape'&&(!$('#sCampaigns').hidden||!$('#sModes').hidden)){show('sMenu');return;}
   if(e.key==='Escape'&&G&&G.selectedRune){G.selectedRune=null;renderDeck();return;}
   if(e.code==='Space'&&!$('#sPlay').hidden&&!e.repeat&&!['INPUT','BUTTON','SELECT','TEXTAREA'].includes(e.target.tagName)&&!e.target.isContentEditable){e.preventDefault();roll();}});
 $('#bAgain').onclick=()=>{show('sMenu');renderMenu();};
@@ -1170,7 +1235,7 @@ $('#bInfo').onclick=()=>{openInfo();};$('#mInfo').onclick=e=>{if(e.target.id==='
 function segThumb(seg){let t=seg.querySelector('.thumb');if(!t){t=document.createElement('i');t.className='thumb';seg.prepend(t);}const b=seg.querySelector('button[aria-pressed="true"]');if(!b||!b.offsetWidth){t.style.opacity=0;return;}t.style.opacity=1;t.style.left=b.offsetLeft+'px';t.style.width=b.offsetWidth+'px';}
 function buildSeg(seg,opts,cur,fn){const sig=opts.map(o=>o.join()).join('|');if(seg._sig!==sig){seg._sig=sig;seg.querySelectorAll('button').forEach(b=>b.remove());for(const [v,lab,ic] of opts){const b=document.createElement('button');b.type='button';b.dataset.v=v;b.innerHTML=(ic?`<i class="fa-solid ${ic}"></i>`:'')+esc(lab);seg.appendChild(b);}}
   seg.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.v)===String(cur));b.onclick=()=>fn(b.dataset.v);});requestAnimationFrame(()=>segThumb(seg));}
-function show(id){for(const s of ['sMenu','sPlay','sEnd'])$('#'+s).hidden=s!==id;if(id!=='sPlay')$('#topTitle').textContent='';requestAnimationFrame(()=>document.querySelectorAll('.seg').forEach(segThumb));}
+function show(id){for(const s of ['sMenu','sCampaigns','sModes','sPlay','sEnd'])$('#'+s).hidden=s!==id;if(id!=='sPlay')$('#topTitle').textContent='';requestAnimationFrame(()=>{document.querySelectorAll('.seg').forEach(segThumb);if(id==='sCampaigns'||id==='sModes')refreshCarousels();});}
 function applyLang(){document.documentElement.lang=cfg.lang;document.title=T('title');document.querySelectorAll('[data-t]').forEach(el=>el.textContent=T(el.dataset.t));$('#title').textContent=T('title');
   buildSeg($('#langSeg'),[['ru','RU'],['en','EN']],cfg.lang,v=>{cfg.lang=v;saveCfg();applyLang();shellPost('lang',{lang:v});});
   $('#stakeSeg')._sig='';$('#heroSeg')._sig='';renderMenu();if(G&&!$('#sPlay').hidden){renderAll();renderDeck();$('#topTitle').textContent=G.mode==='camp'?tr(G.H.camp):T('m_'+G.mode);}if(!$('#mInfo').hidden)openInfo();}

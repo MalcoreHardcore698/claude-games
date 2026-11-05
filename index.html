@@ -3,6 +3,18 @@
 <head>
 <script src="screen-guard.js" defer></script>
 <meta charset="utf-8">
+<style data-orion-critical>
+html.orion-pending body{visibility:hidden!important}
+html.orion-pending:not(.orion-mounted)::before{content:"";position:fixed;inset:0;background:#101012;z-index:2147482998}
+html.orion-pending:not(.orion-mounted)::after{content:"";position:fixed;left:50%;top:50%;width:12px;height:12px;margin:-6px;background:#e9c16f;box-shadow:-20px 0 #e9c16f,20px 0 #e9c16f,0 -20px #e9c16f,0 20px #e9c16f;z-index:2147482999;animation:orion-boot .8s steps(4,end) infinite}
+@keyframes orion-boot{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){html.orion-pending::after{animation:none!important}}
+</style>
+<script data-orion-boot>
+document.documentElement.classList.add('orion-pending');
+setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.remove('orion-pending');},12000);
+</script>
+<script src="orion-loader.js" defer></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ORION</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1125,8 +1137,8 @@ $('#bEdit').onclick=()=>openProfile(false);
 
 /* ================= games in a frame ================= */
 const frame=$('#frame');const frameWin=()=>frame.contentWindow;
-function openGame(id){if(!GM[id])return;closePop();curGame=id;GP=null;where=id;$('#frameWrap').hidden=false;$('#fab').hidden=false;frame.src=GM[id].file;document.body.style.overflow='hidden';renderChip();setTimeout(()=>{try{frame.focus();}catch(e){}},300);}
-function closeGame(keepView){curGame=null;GP=null;frame.src='about:blank';$('#frameWrap').hidden=true;$('#fab').hidden=true;closePop();document.body.style.overflow='';if(!keepView)show('vHome');}
+function openGame(id){if(!GM[id])return;closePop();curGame=id;GP=null;where=id;$('#frameWrap').hidden=false;$('#fab').hidden=false;if(window.OrionLoader)OrionLoader.loadFrame(frame,{url:GM[id].file,title:gname(id)});else frame.src=GM[id].file;document.body.style.overflow='hidden';renderChip();setTimeout(()=>{try{frame.focus();}catch(e){}},300);}
+function closeGame(keepView){curGame=null;GP=null;if(window.OrionLoader)OrionLoader.cancelFrame();frame.src='about:blank';$('#frameWrap').hidden=true;$('#fab').hidden=true;closePop();document.body.style.overflow='';if(!keepView)show('vHome');}
 function peersForGame(){return members().map(m=>({label:m.label,name:clean(m.p.n),chips:num(m.p.c),w:str(m.p.w),ig:inGame(m.label)?1:0,gp:m.me?null:(m.p.gk===str(m.p.w)?obj(m.p.gp):null)}));}
 function hello(){const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'hello',me:LB.label,name:prof.name,lang:cfg.lang,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');}
 setInterval(()=>{if(!curGame)return;const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'peers',me:LB.label,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');},100);
