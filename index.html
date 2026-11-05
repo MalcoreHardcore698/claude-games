@@ -1,12 +1,15 @@
 <!doctype html>
 <html lang="ru">
 <head>
+<script src="screen-guard.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ORION</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiny5+Duo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&family=Ruslan+Display&family=Alegreya+SC:wght@700&family=Noto+Sans+Runic&display=swap">
 <!-- Font Awesome Free. With a Pro licence, swap this line for your kit: <script src="https://kit.fontawesome.com/XXXX.js" crossorigin="anonymous"></script> -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
@@ -69,15 +72,13 @@ button{font:inherit;color:inherit}
 a{color:inherit}
 .app{max-width:1180px;margin:0 auto;padding-block:20px 48px;display:flex;flex-direction:column;gap:24px}
 .bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.logo{font:800 24px var(--display);letter-spacing:.06em;background:none;border:0;padding:0;cursor:pointer;display:flex;align-items:center;gap:10px}
-.logo .belt{width:30px;height:22px;fill:var(--amber);filter:drop-shadow(0 0 6px rgba(242,163,58,.7))}
+.logo{font:700 38px/1 "Tiny5 Duo",monospace;letter-spacing:.02em;background:none;border:0;padding:0;cursor:pointer;color:var(--paper)}
 .nav{display:flex;gap:6px;margin-left:8px}
 .ib{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center;font-size:15px;position:relative;transition:color .15s,border-color .15s,background .15s}
 .ib:hover{color:var(--paper);border-color:rgba(236,230,216,.35)}
 .ib[aria-current="page"]{color:var(--bg);background:var(--paper);border-color:var(--paper)}
 .ib[data-tt]:hover::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);left:50%;translate:-50% 0;white-space:nowrap;font:600 11px var(--mono);letter-spacing:.06em;background:var(--paper);color:var(--bg);padding:5px 8px;border-radius:6px;z-index:5;pointer-events:none}
 .grow{flex:1}
-.logo span+span{color:var(--amber)}
 .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font:600 12px var(--mono);letter-spacing:.06em;background:transparent;cursor:pointer;color:var(--paper)}
 .chip:hover{border-color:rgba(236,230,216,.35)}
 .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
@@ -110,15 +111,19 @@ a{color:inherit}
 .ava svg{width:100%;height:100%;display:block}
 .who h1{margin:0;font:800 clamp(28px,4.4vw,44px)/1 var(--display);letter-spacing:-.02em;overflow-wrap:anywhere}
 .who p{margin:6px 0 0;color:var(--muted);font-size:17px;font-style:italic;overflow-wrap:anywhere}
-.purse{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
-.pv{display:flex;align-items:center;gap:12px}
+.purse{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.pv{display:flex;align-items:center;gap:9px}
 .pv div{display:flex;flex-direction:column}
 .gemc{width:42px;height:42px;border-radius:12px;flex:none;display:grid;place-items:center;background:linear-gradient(160deg,#b26cf5,#6a3bc0);color:#fff;font-size:17px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.25)}
 .nameRow{display:flex;align-items:center;gap:10px;min-width:0}
 .nameRow h1{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bEdit{width:27px;height:27px;border-radius:7px;font-size:11px;flex:none}
+.purse .coin,.purse .gemc{width:32px;height:32px;font-size:13px}
+.purse .gemc{border-radius:9px}
 .ptabs{align-self:flex-start}
 .ptabs button{font:600 12px var(--body)!important;letter-spacing:0!important;padding:8px 13px!important}
-.ppanel{flex:1;min-height:0;overflow-y:auto;margin-right:-6px;padding-right:6px}
+.ppanel{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin-right:-6px;padding-right:6px}
+.ppanel .bets{max-height:none;overflow:visible}
 .glist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .glist li{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;background:var(--shelf2);font-size:14px}
 .glist li .gi{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;flex:none;color:var(--rc);background:color-mix(in srgb,var(--rc) 16%,transparent)}
@@ -135,8 +140,8 @@ a{color:inherit}
 .gpl span{display:inline-flex;gap:6px;align-items:center;font:600 12px var(--mono);padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.06)}
 .empty{color:var(--muted);font-size:14px;padding:14px 4px}
 .coin{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle,#f7b955 0 50%,#c27d1c 51% 58%,#f2a33a 59%);box-shadow:inset 0 0 0 3px #c27d1c;color:#7a4a0c;font-size:16px}
-.purse b{font:800 40px/1 var(--display);font-variant-numeric:tabular-nums}
-.purse span{font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.purse b{font:800 28px/1.15 var(--display);font-variant-numeric:tabular-nums}
+.purse span{font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .stats{display:none}
 .stats div{font:600 12px var(--mono);color:var(--muted);display:flex;gap:7px;align-items:center}
 .stats b{color:var(--paper);font-variant-numeric:tabular-nums}
@@ -178,15 +183,15 @@ a{color:inherit}
 /* rarity */
 .rar{display:inline-flex;align-items:center;gap:6px;font:700 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--rc);padding:4px 9px;border-radius:999px;background:color-mix(in srgb,var(--rc) 14%,rgba(0,0,0,.55));border:1px solid color-mix(in srgb,var(--rc) 50%,transparent);backdrop-filter:blur(4px)}
 /* shelf */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .box{position:relative;display:flex;flex-direction:column;background:var(--shelf);border:1px solid var(--line);border-radius:12px;overflow:hidden;text-align:left;padding:0;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s}
 .box:hover{transform:translateY(-3px);border-color:var(--rc);box-shadow:0 10px 40px color-mix(in srgb,var(--rc) 20%,transparent)}
 .box .rar{position:absolute;right:12px;top:12px;z-index:2}
 .box.legendary{border-color:color-mix(in srgb,var(--rc) 45%,transparent)}
-.cover{position:relative;aspect-ratio:16/10;overflow:hidden;width:100%}
-.label{padding:18px 18px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
-.label h2{margin:0;font:800 22px/1.15 var(--display);letter-spacing:-.01em}
-.label p{margin:0;color:var(--muted);font-size:15px}
+.cover{position:relative;aspect-ratio:16/9;overflow:hidden;width:100%}
+.label{padding:14px 15px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.label h2{margin:0;font:800 19px/1.2 var(--display);letter-spacing:-.01em;overflow-wrap:anywhere}
+.label p{margin:0;color:var(--muted);font-size:14px}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
 .tags i{font:500 11px var(--mono);font-style:normal;letter-spacing:.04em;padding:4px 8px;border:1px solid var(--line);border-radius:999px}
 .play{margin-top:auto;font:600 14px var(--body);color:var(--amber);display:flex;align-items:center;gap:8px}
@@ -279,6 +284,30 @@ a{color:inherit}
 label{display:flex;flex-direction:column;gap:6px;font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 input[type=text],input[type=number],select{font:500 17px var(--body);color:var(--paper);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:11px 12px;width:100%}
 select option:disabled{color:#555}
+/* Native selects remain the source of values; the same animated control serves both views. */
+.selectNative{display:none!important}
+.selw{padding:0 0 0 12px;gap:6px;flex-direction:row;letter-spacing:0;text-transform:none}
+.selw>.fa-chevron-down{display:none}
+.cselect{min-width:0;width:100%}
+.selw .cselect{width:156px}
+.selectTrigger{width:100%;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) 12px;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--paper);padding:11px 12px;font:500 16px/1.3 var(--body);cursor:pointer;transition:border-color .18s,background .18s,box-shadow .18s}
+.selectTrigger>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.selectTrigger>i{font-size:10px;color:var(--muted);transition:transform .2s,color .2s}
+.selectTrigger:hover,.selectTrigger[aria-expanded="true"]{border-color:var(--amber);background:var(--shelf2)}
+.selectTrigger[aria-expanded="true"]>i{transform:rotate(180deg);color:var(--amber)}
+.selectTrigger:disabled{opacity:.4;cursor:not-allowed}
+.selw .selectTrigger{border:0;background:transparent;padding:7px 12px 7px 0;font:600 12px/1.4 var(--mono);border-radius:999px}
+.selectMenu{position:fixed;z-index:100;overflow:auto;overscroll-behavior:contain;padding:5px;margin:0;background:var(--shelf);border:1px solid rgba(242,163,58,.55);border-radius:12px;box-shadow:0 14px 38px rgba(0,0,0,.55);animation:selectIn .18s ease-out;transform-origin:top}
+.selectMenu.closing{animation:selectOut .12s ease-in forwards;pointer-events:none}
+.selectOption{padding:9px 11px;border-radius:7px;font:500 13px/1.4 var(--body);letter-spacing:0;text-transform:none;color:var(--paper);cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .12s,color .12s}
+.selectOption>span{flex:1;min-width:0;overflow-wrap:anywhere}
+.selectOption>i{width:12px;font-size:10px;visibility:hidden;color:var(--amber)}
+.selectOption[aria-selected="true"]>i{visibility:visible}
+.selectOption.active{background:rgba(242,163,58,.13);color:var(--amber)}
+.selectOption[aria-disabled="true"]{opacity:.35;cursor:not-allowed}
+@keyframes selectIn{from{opacity:0;transform:translateY(-5px) scale(.97)}}
+@keyframes selectOut{to{opacity:0;transform:translateY(-3px) scale(.98)}}
+@media(prefers-reduced-motion:reduce){.selectMenu,.selectMenu.closing{animation:none}.selectTrigger,.selectTrigger>i,.selectOption{transition:none}}
 .note{font-size:14px;color:var(--muted);margin:0}
 .note.err{color:var(--lose)}
 .evs{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow:auto}
@@ -324,14 +353,14 @@ select option:disabled{color:#555}
 .nt .delta .coin{width:22px;height:22px;font-size:9px;align-self:center}
 .nt .tm{position:absolute;left:0;bottom:0;height:3px;background:var(--nc,var(--amber));opacity:.7;transform-origin:left;animation:tm linear forwards}
 @keyframes tm{to{transform:scaleX(0)}}
-@media (max-width:860px){.desk,.doors{grid-template-columns:1fr}}
+@media (max-width:860px){.desk,.doors{grid-template-columns:1fr}.desk{grid-template-rows:470px 470px}}
 @media (prefers-reduced-motion:reduce){.tc .in,.door,.box,.nt{transition:none;animation:none}}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="bar">
-    <button class="logo" id="logo" type="button" aria-label="ORION"><svg class="belt" viewBox="0 0 34 24" aria-hidden="true"><circle cx="5" cy="17" r="3.2"/><circle cx="17" cy="12" r="3.2"/><circle cx="29" cy="7" r="3.2"/></svg><span>ORI<span>ON</span></span></button>
+    <button class="logo" id="logo" type="button" aria-label="ORION">ORION</button>
     <nav class="nav" aria-label="Sections"><button class="ib" id="navHome" type="button" data-tt="home"><i class="fa-solid fa-house"></i></button><button class="ib" id="navEvents" type="button" data-tt="events"><i class="fa-solid fa-sitemap"></i></button></nav>
     <span class="grow"></span>
     <button class="chip" id="lobbyChip" type="button" aria-haspopup="dialog"><i class="dot"></i><i class="fa-solid fa-users"></i><span id="lobbyChipT"></span></button>
@@ -348,7 +377,7 @@ select option:disabled{color:#555}
           <button class="btn sm" id="bRefill" type="button" hidden><i class="fa-solid fa-hand-holding-dollar"></i><span data-t="refill"></span></button>
         </div>
         <div class="seg ptabs" role="tablist" id="pTabs"><button type="button" data-v="games" role="tab"><i class="fa-solid fa-clock-rotate-left"></i><span data-t="t_games"></span></button><button type="button" data-v="bets" role="tab"><i class="fa-solid fa-receipt"></i><span id="tBetsT"></span></button><button type="button" data-v="stats" role="tab"><i class="fa-solid fa-chart-simple"></i><span data-t="t_stats"></span></button></div>
-        <div class="ppanel sf" id="pPanel"></div>
+        <div class="ppanel sf" id="pPanel" role="tabpanel" tabindex="0"></div>
       </section>
       <section class="card" aria-label="Achievements">
         <div class="achHead"><h2><i class="fa-solid fa-trophy"></i><span data-t="ach"></span> <small id="achCount"></small></h2>
@@ -672,8 +701,8 @@ function ava(name){const h=hash(name),hue=h%360,h2=(hue+140)%360,sides=3+(h>>>9)
   return `<svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="hsl(${hue} 32% 22%)"/><polygon points="${pts}" fill="hsl(${h2} 45% 40%)" stroke="hsl(${h2} 60% 62%)" stroke-width="3"/><circle cx="50" cy="50" r="23" fill="hsl(${hue} 30% 14%)"/><text x="50" y="61" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="28" fill="#ece6d8">${esc(ini)}</text></svg>`;}
 
 /* ================= modal open/close with motion ================= */
-function showM(el){if(!el)return;clearTimeout(el._ct);el.classList.remove('closing');el.hidden=false;}
-function hideM(el){if(!el||el.hidden||el.classList.contains('closing'))return;el.classList.add('closing');el._ct=setTimeout(()=>{el.hidden=true;el.classList.remove('closing');},170);}
+function showM(el){if(!el)return;closeSelect();clearTimeout(el._ct);el.classList.remove('closing');el.hidden=false;document.querySelectorAll('select').forEach(syncSelect);}
+function hideM(el){if(!el||el.hidden||el.classList.contains('closing'))return;closeSelect();el.classList.add('closing');el._ct=setTimeout(()=>{el.hidden=true;el.classList.remove('closing');},170);}
 function segThumb(seg){if(!seg)return;let t=seg.querySelector(':scope>.thumb');if(!t){t=document.createElement('i');t.className='thumb';seg.prepend(t);}
   const b=seg.querySelector(':scope>button[aria-pressed="true"]');if(!b||!b.offsetWidth){t.style.opacity=0;return;}t.style.opacity=1;t.style.left=b.offsetLeft+'px';t.style.width=b.offsetWidth+'px';}
 const segAll=()=>document.querySelectorAll('.seg').forEach(segThumb);
@@ -1055,8 +1084,8 @@ function renderHome(){
   renderAch();renderChip();
 }
 let pTab='games',panSig='';
-function setTab(t){pTab=t;document.querySelectorAll('#pTabs button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.v===t);b.setAttribute('aria-selected',b.dataset.v===t);});segThumb($('#pTabs'));panSig='';renderPanel();$('#pPanel').scrollTop=0;}
-document.querySelectorAll('#pTabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.v));
+function setTab(t){pTab=t;$('#pPanel').setAttribute('aria-labelledby','pTab-'+t);document.querySelectorAll('#pTabs button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.v===t);b.setAttribute('aria-selected',b.dataset.v===t);b.tabIndex=b.dataset.v===t?0:-1;});segThumb($('#pTabs'));panSig='';renderPanel();$('#pPanel').scrollTop=0;}
+document.querySelectorAll('#pTabs button').forEach(b=>{b.id='pTab-'+b.dataset.v;b.setAttribute('aria-controls','pPanel');b.onclick=()=>setTab(b.dataset.v);b.onkeydown=e=>{if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;e.preventDefault();const tabs=[...document.querySelectorAll('#pTabs button')];const next=tabs[(tabs.indexOf(b)+(e.key==='ArrowRight'?1:2))%3];setTab(next.dataset.v);next.focus();};});
 function ago(t){const m=Math.floor((Date.now()-t)/60000);if(m<1)return T('ago_now');if(m<60)return T('ago_m',{n:m});const h=Math.floor(m/60);if(h<24)return T('ago_h',{n:h});return new Date(t).toLocaleDateString(cfg.lang==='en'?'en-US':'ru-RU',{day:'numeric',month:'short'});}
 function renderPanel(){
   const sig=pTab+cfg.lang+JSON.stringify(prof.games||[]).length+prof.bets.map(b=>b.st).join()+prof.chips+Object.keys(prof.ach).length+Math.floor(Date.now()/60000);if(sig===panSig)return;panSig=sig;
@@ -1126,7 +1155,7 @@ function openProfile(first){
   $('#pName').value=prof?prof.name:'';$('#pStatus').value=prof?prof.status:'';$('#pErr').hidden=true;showM($('#mProfile'));setTimeout(()=>$('#pName').focus(),50);
 }
 $('#pSave').onclick=()=>{const n=clean($('#pName').value);if(!n){$('#pErr').hidden=false;return;}const s=clean($('#pStatus').value,60);
-  if(!prof){prof={name:n,status:s,chips:1000,bets:[]};fixProf();}else{prof.name=n;prof.status=s;}saveProf();hideM($('#mProfile'));if(prof.status)unlock('p_status');achSig='';renderHome();};
+  if(!prof){prof={name:n,status:s,chips:1000,bets:[]};fixProf();}else{prof.name=n;prof.status=s;}saveProf();hideM($('#mProfile'));if(prof.status)unlock('p_status');achSig='';renderHome();setTab(pTab);};
 $('#pCancel').onclick=()=>{hideM($('#mProfile'));};
 $('#pName').addEventListener('keydown',e=>{if(e.key==='Enter')$('#pSave').click();});
 $('#bEdit').onclick=()=>openProfile(false);
@@ -1169,6 +1198,28 @@ addEventListener('message',e=>{
 addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#pop').hidden){closePop();return;}for(const id of ['mBet','mView','mBets','mAch'])if(!$('#'+id).hidden){hideM($('#'+id));return;}if(!$('#mProfile').hidden&&prof)hideM($('#mProfile'));}});
 
 /* ================= lang + boot ================= */
+const customSelects=new Map();let openSelect=null;
+function syncSelect(sel){const c=customSelects.get(sel);if(!c)return;const o=sel.selectedOptions[0];c.button.firstElementChild.textContent=o?o.textContent:'';c.button.disabled=sel.disabled;
+  c.button.setAttribute('aria-label',(sel.id==='achGame'?T('ach'):T('bet_on'))+': '+(o?o.textContent:''));}
+function closeSelect(focus=false){if(!openSelect)return;const c=openSelect;openSelect=null;c.button.setAttribute('aria-expanded','false');c.button.removeAttribute('aria-activedescendant');const menu=c.menu;menu.classList.add('closing');menu.removeAttribute('id');menu.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));setTimeout(()=>menu.remove(),130);if(focus)c.button.focus();}
+function showSelect(c){closeSelect();syncSelect(c.sel);if(c.sel.disabled)return;
+  const menu=document.createElement('div');menu.className='selectMenu';menu.id=c.sel.id+'-options';menu.setAttribute('role','listbox');menu.setAttribute('aria-label',c.button.getAttribute('aria-label'));c.menu=menu;
+  const opts=[...c.sel.options];c.active=Math.max(0,c.sel.selectedIndex);c.items=opts.map((o,i)=>{const el=document.createElement('div');el.id=menu.id+'-'+i;el.className='selectOption';el.setAttribute('role','option');el.setAttribute('aria-selected',o.selected);el.setAttribute('aria-disabled',o.disabled);el.innerHTML='<span></span><i class="fa-solid fa-check" aria-hidden="true"></i>';el.firstElementChild.textContent=o.textContent;
+    el.onpointermove=()=>{if(!o.disabled)activateSelect(c,i);};el.onpointerdown=e=>e.preventDefault();el.onclick=()=>chooseSelect(c,i);menu.appendChild(el);return el;});
+  document.body.appendChild(menu);const r=c.button.getBoundingClientRect();const w=Math.min(innerWidth-16,Math.max(180,r.width));menu.style.width=w+'px';menu.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+'px';
+  const below=innerHeight-r.bottom-14,above=r.top-14;const up=below<160&&above>below;menu.style.maxHeight=Math.min(300,Math.max(60,up?above:below))+'px';menu.style.top=(up?Math.max(8,r.top-menu.offsetHeight-6):r.bottom+6)+'px';menu.style.transformOrigin=up?'bottom':'top';
+  openSelect=c;c.button.setAttribute('aria-expanded','true');activateSelect(c,c.active);}
+function activateSelect(c,i){c.active=i;c.items.forEach((el,n)=>el.classList.toggle('active',n===i));const el=c.items[i];if(el){c.button.setAttribute('aria-activedescendant',el.id);el.scrollIntoView({block:'nearest'});}}
+function chooseSelect(c,i){if(c.sel.options[i].disabled)return;c.sel.selectedIndex=i;c.sel.dispatchEvent(new Event('change',{bubbles:true}));syncSelect(c.sel);closeSelect(true);}
+document.querySelectorAll('select').forEach(sel=>{const host=document.createElement('span');host.className='cselect';const button=document.createElement('button');button.type='button';button.className='selectTrigger';button.setAttribute('role','combobox');button.setAttribute('aria-haspopup','listbox');button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls',sel.id+'-options');button.innerHTML='<span></span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i>';host.appendChild(button);sel.after(host);sel.classList.add('selectNative');sel.tabIndex=-1;sel.setAttribute('aria-hidden','true');
+  const c={sel,button,menu:null,active:0,items:[]};customSelects.set(sel,c);button.onclick=e=>{e.preventDefault();openSelect===c?closeSelect():showSelect(c);};sel.addEventListener('change',()=>syncSelect(sel));new MutationObserver(()=>{syncSelect(sel);if(openSelect===c)closeSelect();}).observe(sel,{subtree:true,childList:true,characterData:true,attributes:true});
+  let typed='',typedAt=0;button.onkeydown=e=>{if(['ArrowDown','ArrowUp','Home','End','Enter',' '].includes(e.key)){e.preventDefault();if(openSelect!==c){showSelect(c);return;}if(e.key==='Enter'||e.key===' '){chooseSelect(c,c.active);return;}
+      const enabled=[...sel.options].map((o,i)=>o.disabled?-1:i).filter(i=>i>=0);let n=enabled.indexOf(c.active);n=e.key==='Home'?0:e.key==='End'?enabled.length-1:(n+(e.key==='ArrowUp'?-1:1)+enabled.length)%enabled.length;if(enabled.length)activateSelect(c,enabled[n]);}
+    else if(e.key==='Escape'&&openSelect===c){e.preventDefault();e.stopPropagation();closeSelect(true);}else if(e.key==='Tab')closeSelect();
+    else if(e.key.length===1&&!e.ctrlKey&&!e.metaKey){e.preventDefault();if(Date.now()-typedAt>700)typed='';typed+=e.key.toLowerCase();typedAt=Date.now();if(openSelect!==c)showSelect(c);const i=[...sel.options].findIndex(o=>!o.disabled&&o.textContent.toLowerCase().startsWith(typed));if(i>=0)activateSelect(c,i);}};
+  syncSelect(sel);});
+document.addEventListener('pointerdown',e=>{if(openSelect&&!openSelect.menu.contains(e.target)&&!openSelect.button.contains(e.target))closeSelect();});
+addEventListener('resize',()=>closeSelect());document.addEventListener('scroll',e=>{if(openSelect&&!openSelect.menu.contains(e.target))closeSelect();},true);
 function applyLang(){
   document.documentElement.lang=cfg.lang;document.title='ORION';document.querySelectorAll('[data-tt]').forEach(el=>el.dataset.tip=T(el.dataset.tt));
   document.querySelectorAll('[data-t]').forEach(el=>el.textContent=T(el.dataset.t));
@@ -1179,7 +1230,7 @@ $('#lRu').onclick=()=>setLang('ru');$('#lEn').onclick=()=>setLang('en');
 setTimeout(segAll,60);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(segAll);
 setInterval(()=>{renderChip();renderPop();if(TM&&TM.phase==='vote'&&where==='tamada'){renderTamNote();maybeFinish();}},500);
 function renderTamNote(){const vs=voters();$('#tamNote').textContent=T('tam_note',{v:vs.filter(v=>TM.votes[v]).length,n:Math.max(vs.length,1)});}
-applyLang();show('vHome');
+applyLang();show('vHome');if(prof)setTab(pTab);
 if(!prof)openProfile(true);
 try{const c=sessionStorage.getItem('gs-lobby');if(c&&/^[a-z0-9]{3,8}$/.test(c)){joinLobby(c,false).then(r=>{if(r==='nf')joinLobby(c,true).then(()=>renderHome());else renderHome();});}}catch(e){}
 })();
