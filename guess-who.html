@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Угадай героя</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: a walnut tabletop; the board of flip-cards dominates, a narrow ledger column on the right holds turn, questions and log. */
+:root{
+  --wood:#15110e;
+  --wood2:#201914;
+  --wood3:#2b221b;
+  --paper:#efe7d6;
+  --ink:#1c1814;
+  --muted:#a89a86;
+  --line:rgba(239,231,214,.14);
+  --yes:#7fb36a;
+  --no:#c8564a;
+  --acc:#c8a24a;
+  --acc2:#5a8fd6;
+  --display:"Alegreya SC", Georgia, serif;
+  --body:"Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--wood);color:var(--paper)}
+body{font:400 16px/1.45 var(--body);background:radial-gradient(ellipse at 50% -10%,var(--wood3),var(--wood) 70%);min-height:100vh;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:inherit}
+button{font:inherit;color:inherit}
+.btn{font:700 14px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:12px 20px;border:0;border-radius:3px;background:var(--paper);color:var(--ink);cursor:pointer;transition:transform .1s,background .15s}
+.btn:hover{background:var(--acc);color:var(--ink)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 1px var(--acc);color:var(--acc)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:focus-visible,.tile:focus-visible,.card:focus-visible,.q:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 40px;display:flex;flex-direction:column;gap:24px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.back{font:500 14px var(--body);color:var(--muted);text-decoration:none}
+.back:hover{color:var(--acc)}
+.seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:6px 12px;font:600 12px var(--mono);letter-spacing:.08em;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+h1{margin:0;font:700 clamp(44px,8vw,88px)/.95 var(--display);letter-spacing:.01em;text-wrap:balance}
+h1 em{font-style:normal;color:var(--acc)}
+h2{margin:0;font:700 28px/1.1 var(--display);text-wrap:balance}
+.lede{margin:0;max-width:56ch;color:var(--muted);font-size:18px}
+.eyebrow{margin:0;font:600 11px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.panel{background:var(--wood2);border:1px solid var(--line);border-radius:6px;padding:20px;display:flex;flex-direction:column;gap:14px}
+label{display:flex;flex-direction:column;gap:6px;font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+input[type=text]{font:500 17px var(--body);color:var(--paper);background:var(--wood);border:1px solid var(--line);border-radius:3px;padding:10px 12px;width:100%}
+.note{margin:0;color:var(--muted);font-size:15px}
+.note.err{color:var(--no)}
+.code{font:700 64px/1 var(--display);color:var(--acc);letter-spacing:.06em}
+
+/* theme tiles */
+.themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.tile{position:relative;text-align:left;border:1px solid var(--line);border-radius:6px;background:var(--wood2);padding:16px;cursor:pointer;display:flex;flex-direction:column;gap:8px;min-height:120px;overflow:hidden}
+.tile b{font:700 22px/1.1 var(--display)}
+.tile span{font-size:14px;color:var(--muted)}
+.tile::after{content:"";position:absolute;right:-30px;bottom:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,var(--tc) 0,transparent 70%);opacity:.5}
+.tile[aria-pressed="true"]{border-color:var(--tc);box-shadow:inset 0 0 0 1px var(--tc)}
+.sizes .seg button{padding:10px 16px;font-size:13px}
+
+/* board */
+.game{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:20px;align-items:start}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;perspective:1200px}
+.card{position:relative;aspect-ratio:3/4;border:0;padding:0;background:none;cursor:pointer;min-width:0}
+.card .in{position:absolute;inset:0;transition:transform .45s cubic-bezier(.3,.7,.3,1);transform-style:preserve-3d}
+.card.down .in{transform:rotateX(180deg)}
+.face,.backf{position:absolute;inset:0;border-radius:6px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+.face{background:var(--paper);color:var(--ink);display:flex;flex-direction:column;align-items:center;padding:10px 8px 8px;gap:6px;box-shadow:0 2px 0 rgba(0,0,0,.4),0 10px 20px rgba(0,0,0,.25)}
+.face svg{width:62%;aspect-ratio:1;flex:none}
+.face b{font:700 16px/1.1 var(--display);text-align:center;text-wrap:balance;min-height:2.2em;display:flex;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}
+.chips i{font:600 9.5px/1 var(--mono);letter-spacing:.02em;font-style:normal;padding:3px 5px;border-radius:2px;background:rgba(28,24,20,.08);color:#4a4036;white-space:nowrap}
+.backf{transform:rotateX(180deg);background:repeating-linear-gradient(45deg,var(--wood3) 0 8px,var(--wood2) 8px 16px);border:1px solid var(--line);display:grid;place-items:center}
+.backf::after{content:"?";font:700 44px var(--display);color:var(--acc);opacity:.5}
+.card.cand .face{box-shadow:0 0 0 3px var(--acc),0 10px 20px rgba(0,0,0,.25)}
+.board.guessing .card:not(.down) .face{box-shadow:0 0 0 2px var(--no),0 10px 20px rgba(0,0,0,.25)}
+.board.guessing .card:not(.down):hover .face{box-shadow:0 0 0 4px var(--no)}
+.side{display:flex;flex-direction:column;gap:14px;position:sticky;top:16px}
+.turn{font:700 22px/1.15 var(--display);padding:14px 16px;border-radius:6px;background:var(--wood2);border-left:4px solid var(--muted)}
+.turn.me{border-left-color:var(--acc)}
+.turn small{display:block;font:500 14px var(--body);color:var(--muted);margin-top:4px}
+.mine{display:flex;gap:12px;align-items:center;padding:12px;border-radius:6px;background:var(--wood2);border:1px solid var(--line)}
+.mine svg{width:54px;height:54px;flex:none;background:var(--paper);border-radius:4px;padding:4px}
+.mine div{min-width:0}
+.mine b{display:block;font:700 18px/1.1 var(--display)}
+.mine span{font-size:13px;color:var(--muted)}
+.qs{display:flex;flex-wrap:wrap;gap:6px;max-height:260px;overflow:auto;padding-right:4px}
+.q{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 11px;font-size:14px;cursor:pointer;text-align:left}
+.q:hover:not(:disabled){border-color:var(--acc);color:var(--acc)}
+.q:disabled{opacity:.4;cursor:default}
+.q.used{text-decoration:line-through;opacity:.3}
+.ask{display:flex;gap:6px}
+.ask input{font-size:15px;padding:8px 10px}
+.ask .btn{padding:8px 12px}
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:220px;overflow:auto;font-size:14px}
+.log li{display:flex;gap:8px;align-items:baseline;border-bottom:1px dashed var(--line);padding-bottom:5px}
+.log .who{font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);flex:none;width:58px}
+.log .a{margin-left:auto;font:600 12px var(--mono);flex:none}
+.log .y{color:var(--yes)}.log .n{color:var(--no)}
+.count{font:600 12px var(--mono);letter-spacing:.06em;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--paper);color:var(--ink);padding:10px 16px;border-radius:4px;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:30;transition:opacity .3s;max-width:calc(100% - 32px)}
+.modal{position:fixed;inset:0;background:rgba(10,8,6,.7);display:grid;place-items:center;z-index:20;padding-block:24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.modal .panel{width:min(460px,100%)}
+.modal .qtext{font:700 24px/1.2 var(--display)}
+.result{display:flex;flex-direction:column;gap:18px;align-items:flex-start}
+.result .big{font:700 clamp(40px,7vw,72px)/1 var(--display)}
+.result .win{color:var(--acc)}.result .lose{color:var(--no)}
+.reveal{display:flex;gap:16px;flex-wrap:wrap}
+.reveal .card{width:150px;cursor:default}
+.reveal p{margin:6px 0 0;font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+@media (max-width:860px){.game{grid-template-columns:1fr}.side{position:static}.board{grid-template-columns:repeat(auto-fill,minmax(118px,1fr))}.face b{font-size:14px}}
+@media (prefers-reduced-motion:reduce){.card .in{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" id="hubLink" href="index.html" hidden data-t="all_games"></a>
+    <span></span>
+    <div class="seg" role="group" aria-label="Language"><button type="button" id="lRu">RU</button><button type="button" id="lEn">EN</button></div>
+  </div>
+
+  <!-- MENU -->
+  <section id="sMenu" class="result">
+    <p class="eyebrow" data-t="eyebrow"></p>
+    <h1 id="title"></h1>
+    <p class="lede" data-t="lede"></p>
+    <div class="row">
+      <button class="btn" id="bBot" type="button" data-t="vs_bot"></button>
+      <button class="btn ghost" id="bNet" type="button" data-t="vs_friend"></button>
+    </div>
+  </section>
+
+  <!-- ONLINE CONNECT -->
+  <section id="sNet" hidden>
+    <div class="panel" style="max-width:520px">
+      <h2 data-t="vs_friend"></h2>
+      <label for="nick"><span data-t="your_name"></span><input type="text" id="nick" maxlength="16" autocomplete="off"></label>
+      <div class="row"><button class="btn" id="bCreate" type="button" data-t="create"></button></div>
+      <div class="row" style="align-items:flex-end">
+        <label for="code" style="flex:1;min-width:160px"><span data-t="room_code"></span><input type="text" id="code" maxlength="8" autocomplete="off" placeholder="a7k2"></label>
+        <button class="btn ghost" id="bJoin" type="button" data-t="join"></button>
+      </div>
+      <p class="note" id="netNote"></p>
+      <div class="row"><button class="btn ghost" id="bNetBack" type="button" data-t="back"></button></div>
+    </div>
+  </section>
+
+  <!-- WAITING ROOM -->
+  <section id="sWait" hidden>
+    <div class="panel" style="max-width:520px">
+      <p class="eyebrow" data-t="room"></p>
+      <div class="code" id="roomCode">----</div>
+      <p class="note" id="waitNote"></p>
+      <div class="row"><button class="btn ghost" id="bLeave" type="button" data-t="leave"></button></div>
+    </div>
+  </section>
+
+  <!-- SETUP -->
+  <section id="sSetup" hidden>
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <h2 data-t="pick_theme"></h2>
+      <div class="themes" id="themes"></div>
+      <div class="row sizes"><span class="eyebrow" data-t="board_size"></span><div class="seg" id="sizes"></div></div>
+      <div class="row"><button class="btn" id="bSetupGo" type="button" data-t="next"></button><button class="btn ghost" id="bSetupBack" type="button" data-t="back"></button></div>
+    </div>
+  </section>
+
+  <!-- PICK SECRET -->
+  <section id="sPick" hidden>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="row" style="justify-content:space-between"><div><h2 data-t="pick_secret"></h2><p class="note" data-t="pick_secret_n"></p></div>
+        <div class="row"><button class="btn" id="bPickOk" type="button" disabled data-t="this_one"></button><button class="btn ghost" id="bPickRand" type="button" data-t="random"></button></div></div>
+      <p class="note" id="pickNote"></p>
+      <div class="board" id="pickBoard"></div>
+    </div>
+  </section>
+
+  <!-- PLAY -->
+  <section id="sPlay" hidden>
+    <div class="game">
+      <div class="board" id="board"></div>
+      <aside class="side">
+        <div class="turn" id="turn"></div>
+        <div class="mine" id="mine"></div>
+        <div class="row" style="justify-content:space-between"><span class="count" id="myLeft"></span><span class="count" id="oppLeft"></span></div>
+        <div class="panel" style="padding:14px;gap:10px">
+          <span class="eyebrow" data-t="questions"></span>
+          <div class="qs" id="qs"></div>
+          <form class="ask" id="askForm" hidden><input type="text" id="askText" maxlength="120" autocomplete="off"><button class="btn" type="submit" data-t="ask"></button></form>
+          <div class="row"><button class="btn ghost" id="bGuess" type="button" data-t="guess"></button></div>
+        </div>
+        <div class="panel" style="padding:14px;gap:8px"><span class="eyebrow" data-t="log"></span><ul class="log" id="log"></ul></div>
+        <button class="btn ghost" id="bQuit" type="button" data-t="quit"></button>
+      </aside>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="sResult" class="result" hidden>
+    <div class="big" id="resBig"></div>
+    <p class="lede" id="resText"></p>
+    <div class="reveal" id="reveal"></div>
+    <div class="row"><button class="btn" id="bAgain" type="button" data-t="again"></button><button class="btn ghost" id="bMenu" type="button" data-t="menu"></button></div>
+    <p class="note" id="resNote"></p>
+  </section>
+</div>
+
+<div class="modal" id="ansModal" hidden>
+  <div class="panel">
+    <span class="eyebrow" data-t="opp_asks"></span>
+    <div class="qtext" id="ansQ"></div>
+    <div class="row"><button class="btn" id="aYes" type="button" data-t="yes"></button><button class="btn" id="aNo" type="button" data-t="no"></button><button class="btn ghost" id="aUnk" type="button" data-t="unknown"></button></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+/* ---------- themes: [id, question RU, question EN, chip RU, chip EN] and heroes [RU, EN, features] ---------- */
+const THEMES=[
+{id:'witcher',name:['Ведьмак','The Witcher'],sub:['Континент, ведьмаки и чародейки','The Continent, witchers and sorceresses'],acc:'#b3262a',acc2:'#b8b2a3',
+ q:[['woman','Это женщина?','Is it a woman?','женщина','woman'],['witcher','Это ведьмак?','Is it a witcher?','ведьмак','witcher'],['wolf','Из Школы Волка?','From the School of the Wolf?','Школа Волка','Wolf School'],
+  ['mage','Это чародей или чародейка?','Is it a sorcerer or sorceress?','чародей','mage'],['nonhuman','Это не человек?','Is it not human?','не человек','non-human'],['elf','Это эльф?','Is it an elf?','эльф','elf'],
+  ['dwarf','Это краснолюд?','Is it a dwarf?','краснолюд','dwarf'],['ruler','Это правитель?','Is it a ruler?','правитель','ruler'],['white','Белые или седые волосы?','White or grey hair?','седые волосы','white hair'],
+  ['black','Чёрные волосы?','Black hair?','чёрные волосы','black hair'],['red','Рыжие волосы?','Red hair?','рыжие волосы','red hair'],['blonde','Это блондинка?','Is she blonde?','блондинка','blonde'],
+  ['scar','Шрам на лице?','A scar on the face?','шрам','facial scar'],['redania','Связан с Реданией?','Tied to Redania?','Редания','Redania'],['temeria','Связан с Темерией?','Tied to Temeria?','Темерия','Temeria'],
+  ['nilf','Из Нильфгаарда?','From Nilfgaard?','Нильфгаард','Nilfgaard'],['bard','Это музыкант?','Is it a musician?','музыкант','musician'],['bald','Лысый?','Bald?','лысый','bald']],
+ c:[['Геральт','Geralt','witcher wolf white scar'],['Цири','Ciri','woman white'],['Йеннифэр','Yennefer','woman mage black'],['Трисс','Triss','woman mage red temeria'],
+  ['Лютик','Dandelion','bard'],['Золтан','Zoltan','nonhuman dwarf'],['Весемир','Vesemir','witcher wolf white'],['Ламберт','Lambert','witcher wolf'],['Эскель','Eskel','witcher wolf scar'],
+  ['Лето','Letho','witcher bald'],['Эмгыр','Emhyr','ruler nilf'],['Радовид','Radovid','ruler redania'],['Филиппа','Philippa','woman mage redania'],['Кейра','Keira','woman mage blonde'],
+  ['Регис','Regis','nonhuman white'],['Иорвет','Iorveth','nonhuman elf scar'],['Эредин','Eredin','nonhuman elf ruler'],["Аваллак'х","Avallac'h",'nonhuman elf mage'],
+  ['Роше','Roche','temeria'],['Анна Генриетта','Anna Henrietta','woman ruler']]},
+{id:'lol',name:['League of Legends','League of Legends'],sub:['Чемпионы Рунтерры','Champions of Runeterra'],acc:'#c8a24a',acc2:'#2f6fb3',
+ q:[['woman','Это женщина?','Is it a woman?','женщина','woman'],['ranged','Атакует издалека?','Ranged attacker?','дальний бой','ranged'],['mage','Это маг?','Is it a mage?','маг','mage'],
+  ['marksman','Это стрелок?','Is it a marksman?','стрелок','marksman'],['assassin','Это убийца?','Is it an assassin?','убийца','assassin'],['tank','Это танк?','Is it a tank?','танк','tank'],
+  ['fighter','Это воин?','Is it a fighter?','воин','fighter'],['nonhuman','Это не человек?','Is it not human?','не человек','non-human'],['ionia','Из Ионии?','From Ionia?','Иония','Ionia'],
+  ['demacia','Из Демасии?','From Demacia?','Демасия','Demacia'],['noxus','Из Ноксуса?','From Noxus?','Ноксус','Noxus'],['pilt','Из Пилтовера или Зауна?','From Piltover or Zaun?','Пилтовер/Заун','Piltover/Zaun'],
+  ['frel','Из Фрельйорда?','From the Freljord?','Фрельйорд','Freljord']],
+ c:[['Ари','Ahri','woman ranged mage nonhuman ionia'],['Джинкс','Jinx','woman ranged marksman pilt'],['Ясуо','Yasuo','fighter ionia'],['Люкс','Lux','woman ranged mage demacia'],
+  ['Гарен','Garen','fighter demacia'],['Дариус','Darius','fighter noxus'],['Катарина','Katarina','woman assassin noxus'],['Тимо','Teemo','ranged marksman nonhuman'],
+  ['Треш','Thresh','ranged nonhuman'],['Эзреаль','Ezreal','ranged marksman pilt'],['Вай','Vi','woman fighter pilt'],['Кейтлин','Caitlyn','woman ranged marksman pilt'],
+  ['Леона','Leona','woman tank'],['Зед','Zed','assassin ionia'],['Ли Син','Lee Sin','fighter ionia'],['Энни','Annie','woman ranged mage noxus'],
+  ['Блицкранк','Blitzcrank','tank nonhuman pilt'],['Мисс Фортуна','Miss Fortune','woman ranged marksman'],['Браум','Braum','tank frel'],['Эш','Ashe','woman ranged marksman frel']]},
+{id:'dota',name:['Dota 2','Dota 2'],sub:['Герои Сил Света и Тьмы','Heroes of the Radiant and Dire'],acc:'#c0452e',acc2:'#5f9a46',
+ q:[['woman','Это героиня?','Is it a female hero?','героиня','female'],['ranged','Атакует издалека?','Ranged attacker?','дальний бой','ranged'],
+  ['str','Основной атрибут — сила?','Primary attribute: Strength?','сила','Strength'],['agi','Основной атрибут — ловкость?','Primary attribute: Agility?','ловкость','Agility'],
+  ['int','Основной атрибут — интеллект?','Primary attribute: Intelligence?','интеллект','Intelligence']],
+ c:[['Pudge','Pudge','str'],['Axe','Axe','str'],['Sven','Sven','str'],['Earthshaker','Earthshaker','str'],['Tiny','Tiny','str'],['Legion Commander','Legion Commander','woman str'],
+  ['Bristleback','Bristleback','str'],['Juggernaut','Juggernaut','agi'],['Phantom Assassin','Phantom Assassin','woman agi'],['Anti-Mage','Anti-Mage','agi'],['Slark','Slark','agi'],
+  ['Drow Ranger','Drow Ranger','woman ranged agi'],['Sniper','Sniper','ranged agi'],['Luna','Luna','woman ranged agi'],['Shadow Fiend','Shadow Fiend','ranged agi'],
+  ['Templar Assassin','Templar Assassin','woman ranged agi'],['Crystal Maiden','Crystal Maiden','woman ranged int'],['Lina','Lina','woman ranged int'],['Lion','Lion','ranged int'],
+  ['Queen of Pain','Queen of Pain','woman ranged int']]},
+{id:'sw',name:['Звёздные войны','Star Wars'],sub:['Далёкая-далёкая галактика','A galaxy far, far away'],acc:'#e5c33a',acc2:'#5a8fd6',
+ q:[['woman','Это женщина?','Is it a woman?','женщина','woman'],['force','Владеет Силой?','A Force user?','Сила','Force'],['dark','Тёмная сторона?','Dark side?','тёмная сторона','dark side'],
+  ['saber','Сражается световым мечом?','Fights with a lightsaber?','световой меч','lightsaber'],['droid','Это дроид?','Is it a droid?','дроид','droid'],['alien','Это инопланетянин?','Is it an alien?','инопланетянин','alien'],
+  ['helmet','Носит шлем или маску?','Wears a helmet or mask?','шлем/маска','helmet/mask'],['hunter','Охотник за головами?','A bounty hunter?','охотник','bounty hunter'],
+  ['rebel','Повстанцы или Сопротивление?','Rebels or Resistance?','повстанцы','rebels'],['empire','Империя или Первый орден?','Empire or First Order?','Империя','Empire'],
+  ['falcon','Летал на «Тысячелетнем соколе»?','Flew the Millennium Falcon?','«Сокол»','Falcon'],['green','Зелёная кожа?','Green skin?','зелёный','green']],
+ c:[['Люк Скайуокер','Luke Skywalker','force saber rebel'],['Лея Органа','Leia Organa','woman force rebel'],['Хан Соло','Han Solo','rebel falcon'],['Чубакка','Chewbacca','alien rebel falcon'],
+  ['Дарт Вейдер','Darth Vader','force dark saber helmet empire'],['Оби-Ван Кеноби','Obi-Wan Kenobi','force saber'],['Йода','Yoda','force saber alien green'],
+  ['Палпатин','Palpatine','force dark saber empire'],['R2-D2','R2-D2','droid rebel'],['C-3PO','C-3PO','droid rebel'],['Рей','Rey','woman force saber rebel falcon'],
+  ['Кайло Рен','Kylo Ren','force dark saber helmet empire'],['Падме Амидала','Padmé Amidala','woman'],['Боба Фетт','Boba Fett','helmet hunter'],['Лэндо Калриссиан','Lando Calrissian','rebel falcon'],
+  ['Мейс Винду','Mace Windu','force saber'],['Дарт Мол','Darth Maul','force dark saber alien'],['Асока Тано','Ahsoka Tano','woman force saber alien'],['Грогу','Grogu','force alien green'],['Джабба','Jabba','alien']]},
+{id:'got',name:['Игра престолов','Game of Thrones'],sub:['Вестерос и Эссос','Westeros and Essos'],acc:'#8fb4c8',acc2:'#c0682e',
+ q:[['woman','Это женщина?','Is it a woman?','женщина','woman'],['wf','Вырос в Винтерфелле?','Raised at Winterfell?','Винтерфелл','Winterfell'],['lan','Ланнистер по крови?','A Lannister by blood?','Ланнистер','Lannister'],
+  ['targ','Таргариен по крови?','A Targaryen by blood?','Таргариен','Targaryen'],['crown','Был королём или королевой?','Was a king or queen?','правил','ruled'],['knight','Посвящён в рыцари?','A knight?','рыцарь','knight'],
+  ['watch','Служил в Ночном Дозоре?',"Served in the Night's Watch?",'Ночной Дозор',"Night's Watch"],['blonde','Светлые или серебристые волосы?','Fair or silver hair?','светлые волосы','fair hair'],
+  ['red','Рыжие волосы?','Red hair?','рыжие волосы','red hair'],['magic','Магия или видения?','Magic or visions?','магия','magic'],['bald','Лысый?','Bald?','лысый','bald']],
+ c:[['Джон Сноу','Jon Snow','wf targ crown watch'],['Дейенерис','Daenerys','woman targ crown blonde'],['Тирион','Tyrion','lan blonde'],['Серсея','Cersei','woman lan crown blonde'],
+  ['Джейме','Jaime','lan knight blonde'],['Арья','Arya','woman wf'],['Санса','Sansa','woman wf crown red'],['Эддард Старк','Eddard Stark','wf'],['Бран','Bran','wf crown magic'],
+  ['Джоффри','Joffrey','lan crown blonde'],['Робб','Robb','wf crown'],['Сандор Клиган','Sandor Clegane',''],['Бриенна','Brienne','woman knight blonde'],['Джорах','Jorah','knight'],
+  ['Давос','Davos','knight'],['Мелисандра','Melisandre','woman red magic'],['Сэмвелл','Samwell','watch'],['Варис','Varys','bald'],['Мизинец','Littlefinger',''],['Станнис','Stannis','crown']]}
+];
+const D={
+eyebrow:['Настольная игра на двоих','A tabletop game for two'],lede:['Загадайте героя и найдите героя соперника раньше, чем он найдёт вашего. Один вопрос за ход, ответ только «да» или «нет».','Pick a secret hero and find your opponent’s before they find yours. One question per turn, answered only yes or no.'],
+vs_bot:['Против компьютера','Play the computer'],vs_friend:['С другом онлайн','Play a friend online'],your_name:['Ваше имя','Your name'],create:['Создать комнату','Create room'],
+room_code:['Код комнаты','Room code'],join:['Войти','Join'],back:['Назад','Back'],room:['Комната · назовите код другу','Room · give your friend the code'],leave:['Выйти','Leave'],
+pick_theme:['Выберите тему','Choose a theme'],board_size:['Героев на поле','Heroes on the board'],next:['Дальше','Next'],pick_secret:['Загадайте героя','Pick your secret hero'],
+pick_secret_n:['Соперник будет его угадывать. Нажмите на карточку.','Your opponent will try to guess it. Click a card.'],this_one:['Загадать','Choose'],random:['Случайно','Random'],
+questions:['Вопросы','Questions'],ask:['Спросить','Ask'],ask_ph:['Свой вопрос: «Носит шляпу?»','Your own question: “Wears a hat?”'],guess:['Назвать героя','Make a guess'],guess_on:['Нажмите на карточку · отмена','Click a card · cancel'],
+log:['Ход игры','Game log'],quit:['Сдаться и выйти','Resign and leave'],again:['Ещё партия','Play again'],menu:['В меню','Menu'],opp_asks:['Соперник спрашивает','Your opponent asks'],
+yes:['Да','Yes'],no:['Нет','No'],unknown:['Не знаю','Not sure'],all_games:['← Все игры','← All games'],
+your_turn:['Ваш ход','Your turn'],your_turn_n:['Задайте вопрос или назовите героя.','Ask a question or make a guess.'],opp_turn:['Ход соперника','Opponent’s turn'],opp_turn_n:['Ждём вопроса…','Waiting for a question…'],
+bot_turn_n:['Компьютер думает…','The computer is thinking…'],wait_ans:['Ждём ответа…','Waiting for the answer…'],my_secret:['Ваш герой','Your hero'],
+left_me:['У вас осталось: {n}','Your board: {n} left'],left_opp:['У соперника: {n}','Opponent: {n} left'],you:['Вы','You'],bot:['Компьютер','Computer'],
+flipped:['Опущено карточек: {n}','Cards flipped down: {n}'],win:['Победа','You win'],lose:['Поражение','You lose'],
+win_t:['Вы угадали: это был {n}.','You got it: it was {n}.'],lose_wrong:['Это не {g}. Соперник загадал {n}.','It wasn’t {g}. Your opponent had {n}.'],
+lose_t:['Соперник угадал вашего героя: {n}.','Your opponent guessed your hero: {n}.'],win_wrong:['Соперник ошибся и назвал {g}. Вы победили.','Your opponent guessed {g} and was wrong. You win.'],
+reveal_mine:['Ваш герой','Your hero'],reveal_opp:['Герой соперника','Opponent’s hero'],
+guess_q:['Это {n}?','Is it {n}?'],net_ok:['Создайте комнату и назовите другу код или введите код друга.','Create a room and give your friend the code, or enter theirs.'],
+net_off:['Онлайн работает на сайте игры. В этом окне доступна игра против компьютера.','Online play works on the game website. Here you can play the computer.'],
+net_lib:['Не загрузилась сетевая библиотека. Проверьте интернет и обновите страницу.','The networking library did not load. Check your connection and reload.'],
+connecting:['Подключаемся…','Connecting…'],not_found:['Комната не найдена. Проверьте код.','Room not found. Check the code.'],net_fail:['Не удалось подключиться. Попробуйте ещё раз или из другой сети.','Could not connect. Try again or from another network.'],
+code_bad:['Код — от 3 до 8 латинских букв или цифр.','A code is 3–8 Latin letters or digits.'],wait_friend:['Ждём друга…','Waiting for your friend…'],
+host_setup:['{n} выбирает тему…','{n} is choosing a theme…'],opp_picking:['Соперник ещё выбирает героя…','Your opponent is still choosing…'],
+opp_left:['Соперник отключился.','Your opponent disconnected.'],resigned:['Соперник сдался.','Your opponent resigned.'],you_resigned:['Вы сдались.','You resigned.'],
+again_wait:['Ждём, пока создатель комнаты начнёт новую партию.','Waiting for the host to start a new game.'],free_ans:['Ответ: {a}','Answer: {a}'],
+answered:['ответ','answer'],no_q:['Подходящих вопросов не осталось — назовите героя.','No useful questions left — make a guess.'],player:['Игрок','Player']
+};
+let cfg={lang:(navigator.language||'').toLowerCase().startsWith('ru')?'ru':'en'};try{Object.assign(cfg,JSON.parse(localStorage.getItem('svo-cfg')||'{}'));}catch(e){}
+const L=()=>cfg.lang==='en'?1:0;
+const T=(k,v)=>{let s=D[k]?D[k][L()]:k;if(v)for(const n in v)s=s.split('{'+n+'}').join(String(v[n]));return s;};
+const clean=s=>String(s||'').replace(/[^\p{L}\p{N} _.\-]/gu,'').trim().slice(0,16);
+function saveCfg(){try{const all=JSON.parse(localStorage.getItem('svo-cfg')||'{}');all.lang=cfg.lang;localStorage.setItem('svo-cfg',JSON.stringify(all));}catch(e){}}
+
+/* ---------- state ---------- */
+const G={mode:null,theme:THEMES[0],size:20,ids:[],secret:-1,oppSecret:-1,down:new Set(),turn:'me',asked:new Set(),botAsked:new Set(),botCand:[],
+  log:[],guessing:false,oppLeft:0,busy:false,meReady:false,oppReady:false,oppName:'',over:false,pickSel:-1,first:null};
+const N={peer:null,conn:null,role:null,code:'',name:''};
+const SECTIONS=['sMenu','sNet','sWait','sSetup','sPick','sPlay','sResult'];
+function show(id){for(const s of SECTIONS)$('#'+s).hidden=s!==id;window.scrollTo(0,0);}
+let toastT=0;function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;t.style.opacity=1;clearTimeout(toastT);toastT=setTimeout(()=>{t.style.opacity=0;setTimeout(()=>t.hidden=true,300);},2600);}
+const hero=id=>G.theme.c[id];
+const hname=id=>id>=0&&hero(id)?hero(id)[L()]:'—';
+const has=(id,f)=>(' '+hero(id)[2]+' ').includes(' '+f+' ');
+const qById=qid=>G.theme.q.find(q=>q[0]===qid);
+const qText=qid=>{const q=qById(qid);return q?q[1+L()]:'';};
+
+/* ---------- emblems (abstract seals, not portraits) ---------- */
+function hash(s){let h=2166136261;for(const ch of s){h^=ch.codePointAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+function sigil(id){
+  const h=hash(G.theme.id+hero(id)[1]),acc=G.theme.acc,acc2=G.theme.acc2;
+  const sides=3+(h%6),rot=(h>>3)%360,rings=1+((h>>7)%3),dots=(h>>9)%5,inner=4+((h>>12)%5),flip=(h>>15)&1;
+  const pts=(n,r,a)=>Array.from({length:n},(_,i)=>{const t=(i/n)*Math.PI*2+a*Math.PI/180;return (50+Math.cos(t)*r).toFixed(1)+','+(50+Math.sin(t)*r).toFixed(1);}).join(' ');
+  let s=`<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="${flip?acc:'#1c1814'}" opacity=".95"/>`;
+  for(let i=0;i<rings;i++)s+=`<circle cx="50" cy="50" r="${42-i*5}" fill="none" stroke="${flip?'#1c1814':acc}" stroke-width="1.2" opacity="${.8-i*.2}"/>`;
+  s+=`<polygon points="${pts(sides,30,rot)}" fill="none" stroke="${acc2}" stroke-width="3"/>`;
+  s+=`<polygon points="${pts(inner,15,rot+30)}" fill="${flip?'#1c1814':acc}"/>`;
+  for(let i=0;i<dots;i++){const t=(i/dots)*Math.PI*2+rot;s+=`<circle cx="${(50+Math.cos(t)*36).toFixed(1)}" cy="${(50+Math.sin(t)*36).toFixed(1)}" r="2.6" fill="${acc2}"/>`;}
+  const ini=hero(id)[L()].replace(/[^\p{L}\p{N}]/gu,'').slice(0,1).toUpperCase();
+  s+=`<circle cx="50" cy="50" r="12.5" fill="#1c1814"/><text x="50" y="57" text-anchor="middle" font-family="Alegreya SC, Georgia, serif" font-weight="700" font-size="19" fill="#efe7d6">${ini}</text></svg>`;
+  return s;
+}
+function cardEl(id,opts={}){
+  const b=document.createElement('button');b.type='button';b.className='card';b.dataset.id=id;
+  const chips=G.theme.q.filter(q=>has(id,q[0])).map(q=>`<i>${q[3+L()]}</i>`).join('');
+  b.innerHTML=`<div class="in"><div class="face">${sigil(id)}<b></b><div class="chips">${chips}</div></div><div class="backf"></div></div>`;
+  b.querySelector('b').textContent=hname(id);
+  b.setAttribute('aria-label',hname(id));
+  if(opts.down)b.classList.add('down');
+  return b;
+}
+
+/* ---------- static text ---------- */
+function applyLang(){
+  document.documentElement.lang=cfg.lang;document.title=L()?'Guess the Hero':'Угадай героя';
+  $('#title').innerHTML=L()?'Guess the <em>Hero</em>':'Угадай <em>героя</em>';
+  document.querySelectorAll('[data-t]').forEach(el=>el.textContent=T(el.dataset.t));
+  $('#askText').placeholder=T('ask_ph');$('#nick').placeholder=L()?'e.g. Dan':'Например, Дэн';
+  $('#lRu').setAttribute('aria-pressed',cfg.lang==='ru');$('#lEn').setAttribute('aria-pressed',cfg.lang==='en');
+  updateNetNote();renderThemes();
+  if(!$('#sPlay').hidden)renderPlay();if(!$('#sPick').hidden)renderPick();
+}
+$('#lRu').onclick=()=>{cfg.lang='ru';saveCfg();applyLang();};$('#lEn').onclick=()=>{cfg.lang='en';saveCfg();applyLang();};
+
+/* ---------- setup ---------- */
+function renderThemes(){
+  const box=$('#themes');box.innerHTML='';
+  for(const th of THEMES){const b=document.createElement('button');b.type='button';b.className='tile';b.style.setProperty('--tc',th.acc);b.setAttribute('aria-pressed',th===G.theme);
+    const n=document.createElement('b');n.textContent=th.name[L()];const s=document.createElement('span');s.textContent=th.sub[L()];b.append(n,s);
+    b.onclick=()=>{G.theme=th;setAcc();renderThemes();};box.appendChild(b);}
+  const sz=$('#sizes');sz.innerHTML='';
+  for(const n of [12,16,20]){const b=document.createElement('button');b.type='button';b.textContent=n;b.setAttribute('aria-pressed',G.size===n);b.onclick=()=>{G.size=n;renderThemes();};sz.appendChild(b);}
+}
+function setAcc(){document.documentElement.style.setProperty('--acc',G.theme.acc);document.documentElement.style.setProperty('--acc2',G.theme.acc2);}
+function randomIds(){const all=G.theme.c.map((_,i)=>i);for(let i=all.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[all[i],all[j]]=[all[j],all[i]];}return all.slice(0,G.size).sort((a,b)=>a-b);}
+function resetRound(){Object.assign(G,{secret:-1,oppSecret:-1,turn:'me',guessing:false,busy:false,meReady:false,oppReady:false,over:false,pickSel:-1,oppLeft:G.ids.length});G.down=new Set();G.asked=new Set();G.botAsked=new Set();G.log=[];G.botCand=G.ids.slice();}
+
+/* ---------- pick secret ---------- */
+function goPick(){resetRound();setAcc();show('sPick');renderPick();}
+function renderPick(){
+  const bd=$('#pickBoard');bd.innerHTML='';
+  for(const id of G.ids){const c=cardEl(id);if(id===G.pickSel)c.classList.add('cand');c.onclick=()=>{if(G.meReady)return;G.pickSel=id;renderPick();};bd.appendChild(c);}
+  $('#bPickOk').disabled=G.pickSel<0||G.meReady;$('#bPickRand').disabled=G.meReady;
+  $('#pickNote').textContent=G.meReady&&G.mode==='net'&&!G.oppReady?T('opp_picking'):'';
+}
+$('#bPickRand').onclick=()=>{G.pickSel=G.ids[Math.floor(Math.random()*G.ids.length)];renderPick();};
+$('#bPickOk').onclick=()=>{
+  if(G.pickSel<0)return;G.secret=G.pickSel;G.meReady=true;
+  if(G.mode==='bot'){G.oppSecret=G.ids[Math.floor(Math.random()*G.ids.length)];G.turn=Math.random()<.5?'me':'opp';startPlay();}
+  else{send({t:'ready'});renderPick();maybeStartNet();}
+};
+
+/* ---------- play ---------- */
+function startPlay(){show('sPlay');renderPlay();if(G.turn==='opp'&&G.mode==='bot')setTimeout(botTurn,1200);}
+function myLeft(){return G.ids.filter(id=>!G.down.has(id)).length;}
+function renderPlay(){
+  const bd=$('#board');bd.innerHTML='';bd.classList.toggle('guessing',G.guessing);
+  for(const id of G.ids){const c=cardEl(id,{down:G.down.has(id)});c.onclick=()=>onCard(id);bd.appendChild(c);}
+  renderSide();
+}
+function renderSide(){
+  const me=G.turn==='me';const t=$('#turn');t.className='turn'+(me?' me':'');
+  t.textContent=me?T('your_turn'):T('opp_turn');const sm=document.createElement('small');
+  sm.textContent=G.busy?T('wait_ans'):me?T('your_turn_n'):(G.mode==='bot'?T('bot_turn_n'):T('opp_turn_n'));t.appendChild(sm);
+  const mine=$('#mine');mine.innerHTML=sigil(G.secret)+'<div><span></span><b></b></div>';mine.querySelector('span').textContent=T('my_secret');mine.querySelector('b').textContent=hname(G.secret);
+  $('#myLeft').textContent=T('left_me',{n:myLeft()});
+  $('#oppLeft').textContent=T('left_opp',{n:G.mode==='bot'?G.botCand.length:G.oppLeft});
+  const qs=$('#qs');qs.innerHTML='';const can=me&&!G.busy&&!G.over;
+  for(const q of G.theme.q){const b=document.createElement('button');b.type='button';b.className='q'+(G.asked.has(q[0])?' used':'');b.textContent=q[1+L()];b.disabled=!can||G.asked.has(q[0]);b.onclick=()=>askQ(q[0]);qs.appendChild(b);}
+  $('#askForm').hidden=G.mode!=='net';$('#askForm').querySelector('button').disabled=!can;$('#askText').disabled=!can;
+  $('#bGuess').disabled=!can;$('#bGuess').textContent=G.guessing?T('guess_on'):T('guess');
+  const log=$('#log');log.innerHTML='';
+  for(const e of G.log.slice().reverse()){const li=document.createElement('li');const w=document.createElement('span');w.className='who';w.textContent=e.who;const q=document.createElement('span');q.textContent=e.q;li.append(w,q);
+    if(e.a!=null){const a=document.createElement('span');a.className='a '+(e.a===true?'y':e.a===false?'n':'');a.textContent=e.a===true?T('yes'):e.a===false?T('no'):T('unknown');li.appendChild(a);}log.appendChild(li);}
+}
+function onCard(id){
+  if(G.over)return;
+  if(G.guessing){if(G.down.has(id))return;G.guessing=false;makeGuess(id);return;}
+  if(G.down.has(id))G.down.delete(id);else G.down.add(id);
+  const el=$(`#board .card[data-id="${id}"]`);if(el)el.classList.toggle('down',G.down.has(id));
+  renderSide();if(G.mode==='net')send({t:'left',n:myLeft()});
+}
+$('#bGuess').onclick=()=>{G.guessing=!G.guessing;$('#board').classList.toggle('guessing',G.guessing);renderSide();};
+function addLog(who,q,a){G.log.push({who,q,a});}
+function autoFlip(qid,ans){let n=0;for(const id of G.ids){if(G.down.has(id))continue;if(has(id,qid)!==ans){G.down.add(id);n++;}}if(n)toast(T('flipped',{n}));if(G.mode==='net')send({t:'left',n:myLeft()});}
+function askQ(qid){
+  if(G.turn!=='me'||G.busy||G.over)return;G.asked.add(qid);
+  if(G.mode==='bot'){const ans=has(G.oppSecret,qid);addLog(T('you'),qText(qid),ans);autoFlip(qid,ans);G.turn='opp';renderPlay();setTimeout(botTurn,1300);}
+  else{G.busy=true;G.pendingQ=qid;send({t:'ask',q:qid});renderSide();}
+}
+$('#askForm').onsubmit=e=>{e.preventDefault();const txt=$('#askText').value.trim().slice(0,120);if(!txt||G.turn!=='me'||G.busy)return;G.busy=true;G.pendingText=txt;$('#askText').value='';send({t:'askt',text:txt});renderSide();};
+function makeGuess(id){
+  if(G.mode==='bot'){const ok=id===G.oppSecret;addLog(T('you'),T('guess_q',{n:hname(id)}),ok);finish(ok?'win':'lose_wrong',id);}
+  else{G.busy=true;G.pendingGuess=id;send({t:'guess',id});renderPlay();}
+}
+
+/* ---------- computer ---------- */
+function botTurn(){
+  if(G.over||G.mode!=='bot')return;
+  if(G.botCand.length===1){const g=G.botCand[0];addLog(T('bot'),T('guess_q',{n:hname(g)}),g===G.secret);finish(g===G.secret?'lose':'win_wrong',g);return;}
+  let best=null,bestScore=1e9;
+  for(const q of G.theme.q){if(G.botAsked.has(q[0]))continue;const y=G.botCand.filter(id=>has(id,q[0])).length,n=G.botCand.length-y;if(!y||!n)continue;const sc=Math.abs(y-n)+Math.random()*.9;if(sc<bestScore){bestScore=sc;best=q[0];}}
+  if(!best){const g=G.botCand[Math.floor(Math.random()*G.botCand.length)];addLog(T('bot'),T('guess_q',{n:hname(g)}),g===G.secret);finish(g===G.secret?'lose':'win_wrong',g);return;}
+  G.botAsked.add(best);const ans=has(G.secret,best);G.botCand=G.botCand.filter(id=>has(id,best)===ans);
+  addLog(T('bot'),qText(best),ans);G.turn='me';renderPlay();
+}
+
+/* ---------- finish ---------- */
+function finish(kind,guessId){
+  G.over=true;G.busy=false;G.guessing=false;
+  const win=kind==='win'||kind==='win_wrong'||kind==='opp_resigned';
+  $('#resBig').textContent=win?T('win'):T('lose');$('#resBig').className='big '+(win?'win':'lose');
+  const oppName=hname(G.oppSecret);
+  $('#resText').textContent=kind==='win'?T('win_t',{n:oppName}):kind==='lose_wrong'?T('lose_wrong',{g:hname(guessId),n:oppName}):kind==='lose'?T('lose_t',{n:hname(G.secret)}):
+    kind==='win_wrong'?T('win_wrong',{g:hname(guessId)}):kind==='opp_resigned'?T('resigned'):kind==='resigned'?T('you_resigned'):T('opp_left');
+  const rv=$('#reveal');rv.innerHTML='';
+  for(const [id,lab] of [[G.secret,'reveal_mine'],[G.oppSecret,'reveal_opp']]){if(id<0)continue;const w=document.createElement('div');w.appendChild(cardEl(id));const p=document.createElement('p');p.textContent=T(lab);w.appendChild(p);rv.appendChild(w);}
+  $('#resNote').textContent='';$('#bAgain').disabled=G.mode==='net'&&(N.role!=='host'||!N.conn);
+  if(G.mode==='net'&&N.role!=='host'&&N.conn)$('#resNote').textContent=T('again_wait');
+  show('sResult');
+}
+$('#bQuit').onclick=()=>{if(G.over)return;if(G.mode==='net')send({t:'resign',secret:G.secret});finish('resigned');};
+$('#bAgain').onclick=()=>{if(G.mode==='bot'){show('sSetup');renderThemes();}else if(N.role==='host'){show('sSetup');renderThemes();}};
+$('#bMenu').onclick=()=>{leaveNet();show('sMenu');};
+
+/* ---------- menu wiring ---------- */
+$('#bBot').onclick=()=>{G.mode='bot';show('sSetup');renderThemes();};
+$('#bNet').onclick=()=>{show('sNet');updateNetNote();};
+$('#bNetBack').onclick=()=>show('sMenu');
+$('#bSetupBack').onclick=()=>{if(G.mode==='net'){leaveNet();}show('sMenu');};
+$('#bSetupGo').onclick=()=>{G.ids=randomIds();if(G.mode==='net'){send({t:'setup',theme:G.theme.id,ids:G.ids});}goPick();};
+$('#bLeave').onclick=()=>{leaveNet();show('sMenu');};
+
+/* ---------- online (PeerJS, two players) ---------- */
+const inClaude=!!window.claude;
+function updateNetNote(){const n=$('#netNote');const ok=!inClaude&&typeof window.Peer==='function';n.textContent=inClaude?T('net_off'):ok?T('net_ok'):T('net_lib');n.classList.toggle('err',!ok);$('#bCreate').disabled=!ok;$('#bJoin').disabled=!ok;}
+const popts=()=>Object.assign({debug:0},window.SVO_PEER||{});
+function send(m){try{if(N.conn&&N.conn.open)N.conn.send(m);}catch(e){}}
+function leaveNet(){try{N.conn&&N.conn.close();}catch(e){}try{N.peer&&N.peer.destroy();}catch(e){}N.conn=null;N.peer=null;N.role=null;}
+function myName(){return clean($('#nick').value)||T('player');}
+function attach(c){
+  N.conn=c;N.hiBack=false;
+  c.on('open',()=>{send({t:'hi',name:myName()});});
+  c.on('data',onMsg);
+  c.on('close',()=>{if(N.conn!==c)return;N.conn=null;if(!G.over&&!$('#sPlay').hidden)finish('opp_left');else if(!$('#sMenu').hidden||!$('#sNet').hidden){}else{toast(T('opp_left'));if(N.role==='host'){show('sWait');$('#waitNote').textContent=T('wait_friend');}else{leaveNet();show('sMenu');}}});
+  c.on('error',()=>{});
+}
+$('#bCreate').onclick=()=>{
+  const note=$('#netNote');note.textContent=T('connecting');note.classList.remove('err');
+  const tryCode=(n)=>{const code=Math.random().toString(36).slice(2,6).replace(/[^a-z0-9]/g,'x');const p=new Peer('gwho1-'+code,popts());let opened=false;
+    p.on('open',()=>{opened=true;N.peer=p;N.role='host';N.code=code;G.mode='net';$('#roomCode').textContent=code;$('#waitNote').textContent=T('wait_friend');show('sWait');});
+    p.on('connection',c=>{if(N.conn&&N.conn.open){c.on('open',()=>c.close());return;}attach(c);});
+    p.on('error',e=>{if(!opened){p.destroy();if(e&&e.type==='unavailable-id'&&n<3)tryCode(n+1);else{note.textContent=T('net_fail');note.classList.add('err');}}});};
+  tryCode(0);
+};
+$('#bJoin').onclick=()=>{
+  const code=String($('#code').value||'').toLowerCase().trim();const note=$('#netNote');
+  if(!/^[a-z0-9]{3,8}$/.test(code)){note.textContent=T('code_bad');note.classList.add('err');return;}
+  note.textContent=T('connecting');note.classList.remove('err');
+  const p=new Peer(popts());let done=false;const fail=k=>{if(done)return;done=true;try{p.destroy();}catch(e){}note.textContent=T(k);note.classList.add('err');};
+  const to=setTimeout(()=>fail('net_fail'),12000);
+  p.on('open',()=>{const c=p.connect('gwho1-'+code,{reliable:true,serialization:'json'});c.on('open',()=>{done=true;clearTimeout(to);N.peer=p;N.role='guest';N.code=code;G.mode='net';$('#roomCode').textContent=code;$('#waitNote').textContent=T('host_setup',{n:G.oppName||'…'});show('sWait');});G.oppName='';attach(c);});
+  p.on('error',e=>{clearTimeout(to);fail(e&&e.type==='peer-unavailable'?'not_found':'net_fail');});
+};
+function maybeStartNet(){if(N.role==='host'&&G.meReady&&G.oppReady){const first=Math.random()<.5?'host':'guest';G.turn=first==='host'?'me':'opp';send({t:'start',first});startPlay();}}
+function onMsg(m){
+  if(!m||typeof m!=='object')return;
+  switch(m.t){
+    case 'hi':G.oppName=clean(m.name)||T('player');if(!N.hiBack){N.hiBack=true;send({t:'hi',name:myName()});}if(N.role==='host'){show('sSetup');renderThemes();}else{$('#waitNote').textContent=T('host_setup',{n:G.oppName});}break;
+    case 'setup':{if(N.role!=='guest')return;const th=THEMES.find(t=>t.id===m.theme);if(!th||!Array.isArray(m.ids))return;G.theme=th;G.ids=m.ids.filter(i=>Number.isInteger(i)&&i>=0&&i<th.c.length).slice(0,20);G.size=G.ids.length;goPick();break;}
+    case 'ready':G.oppReady=true;renderPick();maybeStartNet();break;
+    case 'start':if(N.role!=='guest')return;G.turn=m.first==='guest'?'me':'opp';startPlay();break;
+    case 'ask':{const qid=String(m.q||'');if(!qById(qid))return;const ans=has(G.secret,qid);addLog(G.oppName,qText(qid),ans);send({t:'ans',q:qid,v:ans});G.turn='me';renderPlay();break;}
+    case 'ans':{if(!G.busy)return;G.busy=false;const qid=G.pendingQ;const ans=!!m.v;addLog(T('you'),qText(qid),ans);autoFlip(qid,ans);G.turn='opp';renderPlay();break;}
+    case 'askt':{const txt=String(m.text||'').slice(0,120);$('#ansQ').textContent=txt;$('#ansModal').hidden=false;G.pendingAsk=txt;break;}
+    case 'anst':{if(!G.busy)return;G.busy=false;const v=m.v==='yes'?true:m.v==='no'?false:null;addLog(T('you'),G.pendingText,v);G.turn='opp';renderPlay();break;}
+    case 'guess':{const id=Number(m.id);const ok=id===G.secret;send({t:'gres',ok,id,secret:G.secret});addLog(G.oppName,T('guess_q',{n:hname(id)}),ok);finish(ok?'lose':'win_wrong',id);break;}
+    case 'gres':{G.oppSecret=Number(m.secret);const ok=!!m.ok;addLog(T('you'),T('guess_q',{n:hname(G.pendingGuess)}),ok);finish(ok?'win':'lose_wrong',G.pendingGuess);break;}
+    case 'resign':G.oppSecret=Number(m.secret);if(!G.over)finish('opp_resigned');break;
+    case 'left':G.oppLeft=Math.max(0,Math.min(20,Number(m.n)||0));if(!$('#sPlay').hidden)renderSide();break;
+  }
+}
+const answer=v=>{$('#ansModal').hidden=true;const vv=v===true?true:v===false?false:null;addLog(G.oppName,G.pendingAsk,vv);send({t:'anst',v:v===true?'yes':v===false?'no':'unk'});G.turn='me';renderPlay();};
+$('#aYes').onclick=()=>answer(true);$('#aNo').onclick=()=>answer(false);$('#aUnk').onclick=()=>answer(null);
+
+/* ---------- boot ---------- */
+if(!inClaude)$('#hubLink').hidden=false;
+try{$('#nick').value=clean(localStorage.getItem('svo-nick')||'');}catch(e){}
+$('#nick').addEventListener('change',()=>{try{localStorage.setItem('svo-nick',clean($('#nick').value));}catch(e){}});
+setAcc();applyLang();show('sMenu');
+})();
+</script>
+</body>
+</html>
