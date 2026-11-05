@@ -119,6 +119,14 @@ input[type=text]{font:500 17px var(--body);color:var(--paper);background:var(--w
 .reveal{display:flex;gap:16px;flex-wrap:wrap}
 .reveal .card{width:150px;cursor:default}
 .reveal p{margin:6px 0 0;font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.plist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.plist li{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--wood2);border:1px solid var(--line);border-radius:4px;flex-wrap:wrap}
+.plist li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plist li small{display:block;color:var(--muted);font:500 11px var(--mono);letter-spacing:.06em}
+.plist li.inv{border-color:var(--acc)}
+.btn.sm{padding:7px 12px;font-size:12px}
+.btn.bet{background:var(--acc);color:var(--ink);font:600 11px var(--mono);letter-spacing:.1em;padding:7px 10px}
+.btn.bet:hover{background:var(--paper)}
 @media (max-width:860px){.game{grid-template-columns:1fr}.side{position:static}.board{grid-template-columns:repeat(auto-fill,minmax(118px,1fr))}.face b{font-size:14px}}
 @media (prefers-reduced-motion:reduce){.card .in{transition:none}}
 </style>
@@ -142,17 +150,13 @@ input[type=text]{font:500 17px var(--body);color:var(--paper);background:var(--w
     </div>
   </section>
 
-  <!-- ONLINE CONNECT -->
+  <!-- ONLINE: players come from the site lobby -->
   <section id="sNet" hidden>
-    <div class="panel" style="max-width:520px">
+    <div class="panel" style="max-width:560px">
       <h2 data-t="vs_friend"></h2>
-      <label for="nick"><span data-t="your_name"></span><input type="text" id="nick" maxlength="16" autocomplete="off"></label>
-      <div class="row"><button class="btn" id="bCreate" type="button" data-t="create"></button></div>
-      <div class="row" style="align-items:flex-end">
-        <label for="code" style="flex:1;min-width:160px"><span data-t="room_code"></span><input type="text" id="code" maxlength="8" autocomplete="off" placeholder="a7k2"></label>
-        <button class="btn ghost" id="bJoin" type="button" data-t="join"></button>
-      </div>
-      <p class="note" id="netNote"></p>
+      <label for="nick"><span data-t="alias"></span><input type="text" id="nick" maxlength="16" autocomplete="off"></label>
+      <div id="netNeed" style="display:flex;flex-direction:column;gap:12px"><p class="note" id="netNote"></p><div class="row"><button class="btn" id="bNeed" type="button"></button></div></div>
+      <div id="netList" hidden style="display:flex;flex-direction:column;gap:10px"><p class="eyebrow" data-t="lobby_players"></p><ul class="plist" id="plist"></ul><p class="note" id="invNote"></p></div>
       <div class="row"><button class="btn ghost" id="bNetBack" type="button" data-t="back"></button></div>
     </div>
   </section>
@@ -160,8 +164,8 @@ input[type=text]{font:500 17px var(--body);color:var(--paper);background:var(--w
   <!-- WAITING ROOM -->
   <section id="sWait" hidden>
     <div class="panel" style="max-width:520px">
-      <p class="eyebrow" data-t="room"></p>
-      <div class="code" id="roomCode">----</div>
+      <p class="eyebrow" data-t="opponent"></p>
+      <div class="code" id="roomCode">—</div>
       <p class="note" id="waitNote"></p>
       <div class="row"><button class="btn ghost" id="bLeave" type="button" data-t="leave"></button></div>
     </div>
@@ -226,7 +230,6 @@ input[type=text]{font:500 17px var(--body);color:var(--paper);background:var(--w
 </div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -294,7 +297,13 @@ pick_theme:['Выберите тему','Choose a theme'],board_size:['Геро�
 pick_secret_n:['Соперник будет его угадывать. Нажмите на карточку.','Your opponent will try to guess it. Click a card.'],this_one:['Загадать','Choose'],random:['Случайно','Random'],
 questions:['Вопросы','Questions'],ask:['Спросить','Ask'],ask_ph:['Свой вопрос: «Носит шляпу?»','Your own question: “Wears a hat?”'],guess:['Назвать героя','Make a guess'],guess_on:['Нажмите на карточку · отмена','Click a card · cancel'],
 log:['Ход игры','Game log'],quit:['Сдаться и выйти','Resign and leave'],again:['Ещё партия','Play again'],menu:['В меню','Menu'],opp_asks:['Соперник спрашивает','Your opponent asks'],
-yes:['Да','Yes'],no:['Нет','No'],unknown:['Не знаю','Not sure'],all_games:['← Все игры','← All games'],
+yes:['Да','Yes'],no:['Нет','No'],unknown:['Не знаю','Not sure'],alias:['Псевдоним в этой игре','Alias in this game'],opponent:['Соперник','Opponent'],lobby_players:['Игроки в лобби','Players in the lobby'],
+need_lobby:['Соперника берём из лобби сайта. Создайте лобби или войдите в лобби друга.','Opponents come from the site lobby. Create a lobby or join a friend’s.'],
+lobby_btn:['Создать или войти в лобби','Create or join a lobby'],direct:['Онлайн работает через лобби сайта. Откройте игру с главной страницы.','Online play runs through the site lobby. Open the game from the main page.'],
+to_site:['На главную','Main page'],invite:['Позвать','Invite'],accept:['Принять','Accept'],decline:['Отклонить','Decline'],
+inv_from:['{n} зовёт сыграть','{n} wants to play'],inv_sent:['Ждём ответа от {n}…','Waiting for {n} to answer…'],inv_dec:['{n} отказался.','{n} declined.'],
+here:['в этой игре','in this game'],busy:['играет','playing'],elsewhere:['в другом месте','elsewhere'],nobody:['Пока никого нет. Позовите друзей в лобби — когда они откроют эту игру, их можно будет пригласить.','Nobody here yet. Bring friends into the lobby — once they open this game you can invite them.'],
+all_games:['← Все игры','← All games'],
 your_turn:['Ваш ход','Your turn'],your_turn_n:['Задайте вопрос или назовите героя.','Ask a question or make a guess.'],opp_turn:['Ход соперника','Opponent’s turn'],opp_turn_n:['Ждём вопроса…','Waiting for a question…'],
 bot_turn_n:['Компьютер думает…','The computer is thinking…'],wait_ans:['Ждём ответа…','Waiting for the answer…'],my_secret:['Ваш герой','Your hero'],
 left_me:['У вас осталось: {n}','Your board: {n} left'],left_opp:['У соперника: {n}','Opponent: {n} left'],you:['Вы','You'],bot:['Компьютер','Computer'],
@@ -366,7 +375,7 @@ function applyLang(){
   updateNetNote();renderThemes();
   if(!$('#sPlay').hidden)renderPlay();if(!$('#sPick').hidden)renderPick();
 }
-$('#lRu').onclick=()=>{cfg.lang='ru';saveCfg();applyLang();};$('#lEn').onclick=()=>{cfg.lang='en';saveCfg();applyLang();};
+$('#lRu').onclick=()=>{cfg.lang='ru';saveCfg();applyLang();shellPost('lang',{lang:'ru'});};$('#lEn').onclick=()=>{cfg.lang='en';saveCfg();applyLang();shellPost('lang',{lang:'en'});};
 
 /* ---------- setup ---------- */
 function renderThemes(){
@@ -392,7 +401,7 @@ function renderPick(){
 $('#bPickRand').onclick=()=>{G.pickSel=G.ids[Math.floor(Math.random()*G.ids.length)];renderPick();};
 $('#bPickOk').onclick=()=>{
   if(G.pickSel<0)return;G.secret=G.pickSel;G.meReady=true;
-  if(G.mode==='bot'){G.oppSecret=G.ids[Math.floor(Math.random()*G.ids.length)];G.turn=Math.random()<.5?'me':'opp';startPlay();}
+  if(G.mode==='bot'){G.oppSecret=G.ids[Math.floor(Math.random()*G.ids.length)];G.turn=Math.random()<.5?'me':'opp';if(G.gid)shellPost('start',{gid:G.gid,players:[Shell.me]});startPlay();}
   else{send({t:'ready'});renderPick();maybeStartNet();}
 };
 
@@ -427,7 +436,7 @@ function onCard(id){
   renderSide();if(G.mode==='net')send({t:'left',n:myLeft()});
 }
 $('#bGuess').onclick=()=>{G.guessing=!G.guessing;$('#board').classList.toggle('guessing',G.guessing);renderSide();};
-function addLog(who,q,a){G.log.push({who,q,a});}
+function addLog(who,q,a,g){G.log.push({who,q,a,g:!!g});}
 function autoFlip(qid,ans){let n=0;for(const id of G.ids){if(G.down.has(id))continue;if(has(id,qid)!==ans){G.down.add(id);n++;}}if(n)toast(T('flipped',{n}));if(G.mode==='net')send({t:'left',n:myLeft()});}
 function askQ(qid){
   if(G.turn!=='me'||G.busy||G.over)return;G.asked.add(qid);
@@ -436,33 +445,37 @@ function askQ(qid){
 }
 $('#askForm').onsubmit=e=>{e.preventDefault();const txt=$('#askText').value.trim().slice(0,120);if(!txt||G.turn!=='me'||G.busy)return;G.busy=true;G.pendingText=txt;$('#askText').value='';send({t:'askt',text:txt});renderSide();};
 function makeGuess(id){
-  if(G.mode==='bot'){const ok=id===G.oppSecret;addLog(T('you'),T('guess_q',{n:hname(id)}),ok);finish(ok?'win':'lose_wrong',id);}
+  if(G.mode==='bot'){const ok=id===G.oppSecret;addLog(T('you'),T('guess_q',{n:hname(id)}),ok,1);finish(ok?'win':'lose_wrong',id);}
   else{G.busy=true;G.pendingGuess=id;send({t:'guess',id});renderPlay();}
 }
 
 /* ---------- computer ---------- */
 function botTurn(){
   if(G.over||G.mode!=='bot')return;
-  if(G.botCand.length===1){const g=G.botCand[0];addLog(T('bot'),T('guess_q',{n:hname(g)}),g===G.secret);finish(g===G.secret?'lose':'win_wrong',g);return;}
+  if(G.botCand.length===1){const g=G.botCand[0];addLog(T('bot'),T('guess_q',{n:hname(g)}),g===G.secret,1);finish(g===G.secret?'lose':'win_wrong',g);return;}
   let best=null,bestScore=1e9;
   for(const q of G.theme.q){if(G.botAsked.has(q[0]))continue;const y=G.botCand.filter(id=>has(id,q[0])).length,n=G.botCand.length-y;if(!y||!n)continue;const sc=Math.abs(y-n)+Math.random()*.9;if(sc<bestScore){bestScore=sc;best=q[0];}}
-  if(!best){const g=G.botCand[Math.floor(Math.random()*G.botCand.length)];addLog(T('bot'),T('guess_q',{n:hname(g)}),g===G.secret);finish(g===G.secret?'lose':'win_wrong',g);return;}
+  if(!best){const g=G.botCand[Math.floor(Math.random()*G.botCand.length)];addLog(T('bot'),T('guess_q',{n:hname(g)}),g===G.secret,1);finish(g===G.secret?'lose':'win_wrong',g);return;}
   G.botAsked.add(best);const ans=has(G.secret,best);G.botCand=G.botCand.filter(id=>has(id,best)===ans);
   addLog(T('bot'),qText(best),ans);G.turn='me';renderPlay();
 }
 
 /* ---------- finish ---------- */
 function finish(kind,guessId){
-  G.over=true;G.busy=false;G.guessing=false;
+  const wasOver=G.over;G.over=true;G.busy=false;G.guessing=false;
   const win=kind==='win'||kind==='win_wrong'||kind==='opp_resigned';
+  if(SHELL&&G.gid&&!wasOver){const gid=G.gid;G.gid=null;
+    if(kind==='opp_left')shellPost('abort',{gid});
+    else{if(win)shellPost('event',{gid,ev:'gw.win'});if(kind==='lose_wrong')shellPost('event',{gid,ev:'gw.wrongguess'});
+      if(G.mode==='bot'||N.role==='host'){const q=G.log.filter(e=>!e.g).length;setTimeout(()=>shellPost('end',{gid,sum:{players:G.mode==='bot'?[Shell.me]:[Shell.me,N.opp],q}}),1500);}}}
   $('#resBig').textContent=win?T('win'):T('lose');$('#resBig').className='big '+(win?'win':'lose');
   const oppName=hname(G.oppSecret);
   $('#resText').textContent=kind==='win'?T('win_t',{n:oppName}):kind==='lose_wrong'?T('lose_wrong',{g:hname(guessId),n:oppName}):kind==='lose'?T('lose_t',{n:hname(G.secret)}):
     kind==='win_wrong'?T('win_wrong',{g:hname(guessId)}):kind==='opp_resigned'?T('resigned'):kind==='resigned'?T('you_resigned'):T('opp_left');
   const rv=$('#reveal');rv.innerHTML='';
   for(const [id,lab] of [[G.secret,'reveal_mine'],[G.oppSecret,'reveal_opp']]){if(id<0)continue;const w=document.createElement('div');w.appendChild(cardEl(id));const p=document.createElement('p');p.textContent=T(lab);w.appendChild(p);rv.appendChild(w);}
-  $('#resNote').textContent='';$('#bAgain').disabled=G.mode==='net'&&(N.role!=='host'||!N.conn);
-  if(G.mode==='net'&&N.role!=='host'&&N.conn)$('#resNote').textContent=T('again_wait');
+  $('#resNote').textContent='';$('#bAgain').disabled=G.mode==='net'&&(N.role!=='host'||!N.opp);
+  if(G.mode==='net'&&N.role!=='host'&&N.opp)$('#resNote').textContent=T('again_wait');
   show('sResult');
 }
 $('#bQuit').onclick=()=>{if(G.over)return;if(G.mode==='net')send({t:'resign',secret:G.secret});finish('resigned');};
@@ -471,57 +484,91 @@ $('#bMenu').onclick=()=>{leaveNet();show('sMenu');};
 
 /* ---------- menu wiring ---------- */
 $('#bBot').onclick=()=>{G.mode='bot';show('sSetup');renderThemes();};
-$('#bNet').onclick=()=>{show('sNet');updateNetNote();};
+$('#bNet').onclick=()=>{show('sNet');netSig='';renderNet();};
 $('#bNetBack').onclick=()=>show('sMenu');
 $('#bSetupBack').onclick=()=>{if(G.mode==='net'){leaveNet();}show('sMenu');};
-$('#bSetupGo').onclick=()=>{G.ids=randomIds();if(G.mode==='net'){send({t:'setup',theme:G.theme.id,ids:G.ids});}goPick();};
+$('#bSetupGo').onclick=()=>{G.ids=randomIds();G.gid=SHELL?rid():null;if(G.mode==='net'){send({t:'setup',theme:G.theme.id,ids:G.ids,gid:G.gid});}goPick();pushGp();};
 $('#bLeave').onclick=()=>{leaveNet();show('sMenu');};
 
-/* ---------- online (PeerJS, two players) ---------- */
+/* ---------- online: through the site lobby ---------- */
 const inClaude=!!window.claude;
-function updateNetNote(){const n=$('#netNote');const ok=!inClaude&&typeof window.Peer==='function';n.textContent=inClaude?T('net_off'):ok?T('net_ok'):T('net_lib');n.classList.toggle('err',!ok);$('#bCreate').disabled=!ok;$('#bJoin').disabled=!ok;}
-const popts=()=>Object.assign({debug:0},window.SVO_PEER||{});
-function send(m){try{if(N.conn&&N.conn.open)N.conn.send(m);}catch(e){}}
-function leaveNet(){try{N.conn&&N.conn.close();}catch(e){}try{N.peer&&N.peer.destroy();}catch(e){}N.conn=null;N.peer=null;N.role=null;}
-function myName(){return clean($('#nick').value)||T('player');}
-function attach(c){
-  N.conn=c;N.hiBack=false;
-  c.on('open',()=>{send({t:'hi',name:myName()});});
-  c.on('data',onMsg);
-  c.on('close',()=>{if(N.conn!==c)return;N.conn=null;if(!G.over&&!$('#sPlay').hidden)finish('opp_left');else if(!$('#sMenu').hidden||!$('#sNet').hidden){}else{toast(T('opp_left'));if(N.role==='host'){show('sWait');$('#waitNote').textContent=T('wait_friend');}else{leaveNet();show('sMenu');}}});
-  c.on('error',()=>{});
+const SHELL=(()=>{try{return window.parent!==window&&!!window.parent.__gameShell;}catch(e){return false;}})();
+const Shell={me:null,name:'',inLobby:false,peers:[]};
+function shellPost(type,o){if(SHELL){try{parent.postMessage(Object.assign({svo:1,type},o||{}),'*');}catch(e){}}}
+const rid=()=>Math.random().toString(36).slice(2,10);
+N.opp=null;N.inv=null;N.invFrom=new Map();N.goneT=0;
+function send(m){if(N.opp)shellPost('emit',{to:N.opp,d:m});}
+function sendTo(l,m){shellPost('emit',{to:l,d:m});}
+function leaveNet(){if(N.opp)send({t:'bye'});N.opp=null;N.role=null;N.inv=null;G.gid=null;pushGp();}
+function myName(){return clean($('#nick').value)||Shell.name||T('player');}
+function pushGp(){shellPost('gp',{d:{n:myName(),busy:N.opp?1:0,gid:G.gid||null}});}
+function peerName(q){return clean(q.gp&&q.gp.n)||clean(q.name)||T('player');}
+function oppGone(){
+  if(!N.opp)return;N.opp=null;
+  if(!G.over&&!$('#sPlay').hidden)finish('opp_left');
+  else{toast(T('opp_left'));N.role=null;show('sNet');renderNet();}
+  pushGp();
 }
-$('#bCreate').onclick=()=>{
-  const note=$('#netNote');note.textContent=T('connecting');note.classList.remove('err');
-  const tryCode=(n)=>{const code=Math.random().toString(36).slice(2,6).replace(/[^a-z0-9]/g,'x');const p=new Peer('gwho1-'+code,popts());let opened=false;
-    p.on('open',()=>{opened=true;N.peer=p;N.role='host';N.code=code;G.mode='net';$('#roomCode').textContent=code;$('#waitNote').textContent=T('wait_friend');show('sWait');});
-    p.on('connection',c=>{if(N.conn&&N.conn.open){c.on('open',()=>c.close());return;}attach(c);});
-    p.on('error',e=>{if(!opened){p.destroy();if(e&&e.type==='unavailable-id'&&n<3)tryCode(n+1);else{note.textContent=T('net_fail');note.classList.add('err');}}});};
-  tryCode(0);
-};
-$('#bJoin').onclick=()=>{
-  const code=String($('#code').value||'').toLowerCase().trim();const note=$('#netNote');
-  if(!/^[a-z0-9]{3,8}$/.test(code)){note.textContent=T('code_bad');note.classList.add('err');return;}
-  note.textContent=T('connecting');note.classList.remove('err');
-  const p=new Peer(popts());let done=false;const fail=k=>{if(done)return;done=true;try{p.destroy();}catch(e){}note.textContent=T(k);note.classList.add('err');};
-  const to=setTimeout(()=>fail('net_fail'),12000);
-  p.on('open',()=>{const c=p.connect('gwho1-'+code,{reliable:true,serialization:'json'});c.on('open',()=>{done=true;clearTimeout(to);N.peer=p;N.role='guest';N.code=code;G.mode='net';$('#roomCode').textContent=code;$('#waitNote').textContent=T('host_setup',{n:G.oppName||'…'});show('sWait');});G.oppName='';attach(c);});
-  p.on('error',e=>{clearTimeout(to);fail(e&&e.type==='peer-unavailable'?'not_found':'net_fail');});
-};
-function maybeStartNet(){if(N.role==='host'&&G.meReady&&G.oppReady){const first=Math.random()<.5?'host':'guest';G.turn=first==='host'?'me':'opp';send({t:'start',first});startPlay();}}
+function updateNetNote(){
+  $('#netNeed').hidden=SHELL&&Shell.inLobby;$('#netList').hidden=!(SHELL&&Shell.inLobby);
+  $('#netNote').textContent=SHELL?T('need_lobby'):inClaude?T('net_off'):T('direct');
+  $('#bNeed').textContent=SHELL?T('lobby_btn'):T('to_site');$('#bNeed').hidden=inClaude&&!SHELL;
+}
+let netSig='';
+function renderNet(){
+  updateNetNote();if(!(SHELL&&Shell.inLobby))return;
+  const others=Shell.peers.filter(q=>q&&q.label!==Shell.me);
+  const sig=others.map(q=>q.label+peerName(q)+q.w+(q.gp&&q.gp.busy)).join('|')+[...N.invFrom.keys()].join()+N.inv+cfg.lang;if(sig===netSig)return;netSig=sig;
+  const ul=$('#plist');ul.innerHTML='';
+  if(!others.length){const li=document.createElement('li');li.textContent=T('nobody');ul.appendChild(li);}
+  for(const q of others){
+    const li=document.createElement('li');const inv=N.invFrom.has(q.label);if(inv)li.className='inv';
+    const nm=document.createElement('div');nm.className='nm';nm.textContent=peerName(q);const sm=document.createElement('small');
+    const here=q.w==='gw';const busy=here&&q.gp&&q.gp.busy;sm.textContent=inv?T('inv_from',{n:peerName(q)}):busy?T('busy'):here?T('here'):T('elsewhere');nm.appendChild(sm);li.appendChild(nm);
+    const bet=document.createElement('button');bet.type='button';bet.className='btn bet';bet.textContent='BET';bet.onclick=()=>shellPost('bet',{target:q.label});li.appendChild(bet);
+    if(inv){const a=document.createElement('button');a.type='button';a.className='btn sm';a.textContent=T('accept');a.onclick=()=>acceptInv(q.label);
+      const d=document.createElement('button');d.type='button';d.className='btn ghost sm';d.textContent=T('decline');d.onclick=()=>{N.invFrom.delete(q.label);sendTo(q.label,{t:'dec'});netSig='';renderNet();};li.append(a,d);}
+    else if(here&&!busy){const b=document.createElement('button');b.type='button';b.className='btn sm';b.textContent=T('invite');b.disabled=N.inv===q.label;
+      b.onclick=()=>{N.inv=q.label;sendTo(q.label,{t:'inv',name:myName()});$('#invNote').textContent=T('inv_sent',{n:peerName(q)});netSig='';renderNet();};li.appendChild(b);}
+    ul.appendChild(li);}
+}
+function acceptInv(from){
+  const name=N.invFrom.get(from);N.invFrom.clear();N.inv=null;N.opp=from;N.role='guest';G.mode='net';G.oppName=name||T('player');
+  send({t:'acc',name:myName()});$('#roomCode').textContent=G.oppName;$('#waitNote').textContent=T('host_setup',{n:G.oppName});show('sWait');pushGp();
+}
+function onShellG(from,m){
+  if(!m||typeof m!=='object')return;
+  if(m.t==='inv'){if(N.opp)return sendTo(from,{t:'dec'});N.invFrom.set(from,clean(m.name)||T('player'));netSig='';if(!$('#sNet').hidden)renderNet();else toast(T('inv_from',{n:clean(m.name)||T('player')}));return;}
+  if(m.t==='acc'){if(N.inv!==from||N.opp)return;N.inv=null;N.opp=from;N.role='host';G.mode='net';G.oppName=clean(m.name)||T('player');$('#invNote').textContent='';pushGp();show('sSetup');renderThemes();return;}
+  if(m.t==='dec'){if(N.inv===from){N.inv=null;const q=Shell.peers.find(x=>x.label===from);$('#invNote').textContent=T('inv_dec',{n:q?peerName(q):T('player')});netSig='';renderNet();}return;}
+  if(from!==N.opp)return;
+  if(m.t==='bye'){oppGone();return;}
+  onMsg(m);
+}
+addEventListener('message',e=>{if(!SHELL||e.source!==parent)return;const m=e.data;if(!m||m.svo!==1)return;
+  if(m.type==='hello'||m.type==='peers'){if(typeof m.me==='string')Shell.me=m.me;Shell.inLobby=!!m.inLobby;Shell.peers=Array.isArray(m.peers)?m.peers.slice(0,16):[];
+    if(m.type==='hello'){Shell.name=clean(m.name);if(!$('#nick').value)$('#nick').value=Shell.name;pushGp();}
+    if(!$('#sNet').hidden)renderNet();}
+  else if(m.type==='ev'&&m.k==='g'&&m.d&&m.d.game==='gw')onShellG(String(m.from||''),m.d.m);});
+setInterval(()=>{if(!SHELL)return;
+  for(const k of [...N.invFrom.keys()]){const q=Shell.peers.find(x=>x.label===k);if(!q||q.w!=='gw'){N.invFrom.delete(k);netSig='';}}
+  if(N.opp){const q=Shell.peers.find(x=>x.label===N.opp);if(Shell.inLobby&&q&&q.w==='gw'){N.goneT=0;}else if(!N.goneT)N.goneT=performance.now();else if(performance.now()-N.goneT>3000){N.goneT=0;oppGone();}}
+  pushGp();},1000);
+$('#bNeed').onclick=()=>{if(SHELL)shellPost('lobby');else location.href='index.html';};
+function maybeStartNet(){if(N.role==='host'&&G.meReady&&G.oppReady){const first=Math.random()<.5?'host':'guest';G.turn=first==='host'?'me':'opp';send({t:'start',first});shellPost('start',{gid:G.gid,players:[Shell.me,N.opp]});startPlay();}}
 function onMsg(m){
   if(!m||typeof m!=='object')return;
   switch(m.t){
     case 'hi':G.oppName=clean(m.name)||T('player');if(!N.hiBack){N.hiBack=true;send({t:'hi',name:myName()});}if(N.role==='host'){show('sSetup');renderThemes();}else{$('#waitNote').textContent=T('host_setup',{n:G.oppName});}break;
-    case 'setup':{if(N.role!=='guest')return;const th=THEMES.find(t=>t.id===m.theme);if(!th||!Array.isArray(m.ids))return;G.theme=th;G.ids=m.ids.filter(i=>Number.isInteger(i)&&i>=0&&i<th.c.length).slice(0,20);G.size=G.ids.length;goPick();break;}
+    case 'setup':{if(N.role!=='guest')return;const th=THEMES.find(t=>t.id===m.theme);if(!th||!Array.isArray(m.ids))return;G.theme=th;G.ids=m.ids.filter(i=>Number.isInteger(i)&&i>=0&&i<th.c.length).slice(0,20);G.size=G.ids.length;G.gid=typeof m.gid==='string'?m.gid.slice(0,16):null;goPick();pushGp();break;}
     case 'ready':G.oppReady=true;renderPick();maybeStartNet();break;
     case 'start':if(N.role!=='guest')return;G.turn=m.first==='guest'?'me':'opp';startPlay();break;
     case 'ask':{const qid=String(m.q||'');if(!qById(qid))return;const ans=has(G.secret,qid);addLog(G.oppName,qText(qid),ans);send({t:'ans',q:qid,v:ans});G.turn='me';renderPlay();break;}
     case 'ans':{if(!G.busy)return;G.busy=false;const qid=G.pendingQ;const ans=!!m.v;addLog(T('you'),qText(qid),ans);autoFlip(qid,ans);G.turn='opp';renderPlay();break;}
     case 'askt':{const txt=String(m.text||'').slice(0,120);$('#ansQ').textContent=txt;$('#ansModal').hidden=false;G.pendingAsk=txt;break;}
     case 'anst':{if(!G.busy)return;G.busy=false;const v=m.v==='yes'?true:m.v==='no'?false:null;addLog(T('you'),G.pendingText,v);G.turn='opp';renderPlay();break;}
-    case 'guess':{const id=Number(m.id);const ok=id===G.secret;send({t:'gres',ok,id,secret:G.secret});addLog(G.oppName,T('guess_q',{n:hname(id)}),ok);finish(ok?'lose':'win_wrong',id);break;}
-    case 'gres':{G.oppSecret=Number(m.secret);const ok=!!m.ok;addLog(T('you'),T('guess_q',{n:hname(G.pendingGuess)}),ok);finish(ok?'win':'lose_wrong',G.pendingGuess);break;}
+    case 'guess':{const id=Number(m.id);const ok=id===G.secret;send({t:'gres',ok,id,secret:G.secret});addLog(G.oppName,T('guess_q',{n:hname(id)}),ok,1);finish(ok?'lose':'win_wrong',id);break;}
+    case 'gres':{G.oppSecret=Number(m.secret);const ok=!!m.ok;addLog(T('you'),T('guess_q',{n:hname(G.pendingGuess)}),ok,1);finish(ok?'win':'lose_wrong',G.pendingGuess);break;}
     case 'resign':G.oppSecret=Number(m.secret);if(!G.over)finish('opp_resigned');break;
     case 'left':G.oppLeft=Math.max(0,Math.min(20,Number(m.n)||0));if(!$('#sPlay').hidden)renderSide();break;
   }
@@ -531,8 +578,10 @@ $('#aYes').onclick=()=>answer(true);$('#aNo').onclick=()=>answer(false);$('#aUnk
 
 /* ---------- boot ---------- */
 if(!inClaude)$('#hubLink').hidden=false;
-try{$('#nick').value=clean(localStorage.getItem('svo-nick')||'');}catch(e){}
-$('#nick').addEventListener('change',()=>{try{localStorage.setItem('svo-nick',clean($('#nick').value));}catch(e){}});
+if(SHELL)$('#hubLink').addEventListener('click',e=>{e.preventDefault();if(N.opp)send({t:'bye'});shellPost('exit');});
+try{$('#nick').value=clean(localStorage.getItem('gs-alias-gw')||'');}catch(e){}
+$('#nick').addEventListener('input',()=>{try{localStorage.setItem('gs-alias-gw',clean($('#nick').value));}catch(e){}pushGp();});
+shellPost('ready');
 setAcc();applyLang();show('sMenu');
 })();
 </script>

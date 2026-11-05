@@ -162,6 +162,11 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
 #lobby li{display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--night2);font-size:14px}
 #lobby li .rd{color:var(--ok)}
 #lobby li .nr{color:var(--dim)}
+#lobby li .bet{font:600 11px var(--mono);letter-spacing:.1em;padding:5px 9px;border:0;background:var(--sodium);color:#0b0d10;cursor:pointer}
+#lobby li .bet:hover{background:var(--paper)}
+#lobby li.away{opacity:.6}
+#lobby .alias{display:flex;flex-direction:column;gap:8px;font:600 10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--frost);margin-bottom:6px}
+#lobby .alias input{font:400 16px var(--mono);color:var(--paper);background:var(--night2);border:1px solid rgba(232,226,210,.25);padding:10px 12px;border-radius:2px;width:100%;box-sizing:border-box;-webkit-user-select:text;user-select:text;text-transform:none;letter-spacing:0}
 #lobby li small{margin-left:auto;color:var(--frost);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
 .pbox p{margin:0;font:400 16px/1.5 var(--serif);color:var(--frost)}
 
@@ -294,6 +299,10 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
         </div>
         <p class="note" id="coopNote"></p>
       </div>
+      <div class="coop" id="coopShell" hidden>
+        <p class="note" id="coopShellNote"></p>
+        <div class="row"><button class="btn" id="lobNeed" type="button"></button></div>
+      </div>
     <div class="cta"><button class="btn ghost" id="coopBack" type="button" data-t="back_menu"></button></div>
   </div>
 </section>
@@ -333,6 +342,7 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
   <div class="dbox">
     <p class="eyebrow" data-t="lob_eyebrow"></p>
     <div class="code" id="lobCode">----</div>
+    <label class="alias" id="lobAliasW" for="lobAlias" hidden><span data-t="alias"></span><input type="text" id="lobAlias" maxlength="16" autocomplete="off"></label>
     <ul id="lobList"></ul>
     <p class="note" id="lobNote"></p>
     <p class="note" id="lobConn"></p>
@@ -412,7 +422,6 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
 </section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -440,6 +449,12 @@ coop_off:['В этом окне кооператив недоступен. Во�
 coop_ok_p:['Создайте комнату и назовите друзьям код. Игра соединяет браузеры напрямую. Если друг не может подключиться, попробуйте без VPN или из другой сети.','Create a room and give your friends the code. The game connects browsers directly. If a friend cannot connect, try without a VPN or from another network.'],
 coop_off_p:['Не загрузилась сетевая библиотека. Проверьте интернет и обновите страницу.','The networking library did not load. Check your connection and reload the page.'],
 room_nf:['Комната не найдена. Проверьте код или попросите друга создать новую.','Room not found. Check the code or ask your friend to create a new one.'],
+alias:['Псевдоним в этой игре','Alias in this game'],
+coop_need:['Кооператив идёт через лобби сайта. Создайте лобби или войдите в лобби друга, и игроки появятся здесь.','Co-op runs through the site lobby. Create a lobby or join a friend’s, and the players will show up here.'],
+lobby_btn:['Создать или войти в лобби','Create or join a lobby'],
+coop_direct:['Кооператив работает через лобби сайта. Откройте игру с главной страницы.','Co-op runs through the site lobby. Open the game from the main page.'],
+to_site:['На главную','Main page'],lob_site:['Кооператив · игроки из лобби сайта','Co-op · players from the site lobby'],
+st_away:['не в этой игре','not in this game'],
 all_games:['← Все игры','← All games'],
 back_menu:['Назад в меню','Back to menu'],ready:['Готов','Ready'],unready:['Не готов','Not ready'],st_ready:['готов','ready'],st_notready:['не готов','not ready'],
 lob_wait_ready:['Ждём готовности: {n}','Waiting for: {n}'],lob_all_ready:['Все готовы. Можно начинать.','Everyone is ready. You can start.'],
@@ -1137,6 +1152,13 @@ const P={x:4,z:4,yaw:-Math.PI/2,pitch:0,eye:1.65,bob:0,bobAmp:0,stamina:1,exhaus
 const S={mode:'menu',ui:null,nick:'',gid:null,lastGid:null,slot:0,st:'free',money:0,battery:100,hoodT:0,energyT:0,
   inv:[],sel:0,hasPP:false,hasKeys:false,earned:0,alive:0,detT:0,graceT:0,inside:null,act:null,drunkT:0,highT:0,exEvict:-1,paid:new Set(),friendGifts:new Set(),leakT:0,
   bribeT:0,bribeId:-1,hold:0,holdKey:'',ePulse:false,hb:0,lastSting:-99,wasDay:false,warned:false,result:null,spec:0,msgI:0,curInter:null,dogWarn:-99,screenFrom:null,stopped:false};
+const SHELL=(()=>{try{return window.parent!==window&&!!window.parent.__gameShell;}catch(e){return false;}})();
+const Shell={me:null,name:'',inLobby:false,hub:null,peers:[]};
+function shellPost(type,o){if(SHELL){try{parent.postMessage(Object.assign({svo:1,type},o||{}),'*');}catch(e){}}}
+function gev(ev,sub){if(SHELL&&S.gid)shellPost('event',{gid:S.gid,ev,sub:sub||Net.myPeer});}
+addEventListener('message',e=>{if(!SHELL||e.source!==parent)return;const m=e.data;if(!m||m.svo!==1)return;
+  if(m.type==='hello'||m.type==='peers'){if(typeof m.me==='string')Shell.me=m.me.slice(0,40);Shell.inLobby=!!m.inLobby;Shell.hub=typeof m.hub==='string'?m.hub:null;Shell.peers=Array.isArray(m.peers)?m.peers.slice(0,16):[];
+    if(m.type==='hello'&&typeof m.name==='string')Shell.name=cleanName(m.name);}});
 const Net={room:null,rm:null,code:'',solo:true,myPeer:'local',t0:0,sendT:0,host:null};
 let myPres={};let HS=null,H=null,lastH=null,amHost=false;
 const hostSim={enemies:[],nextId:1,cd:{},keysLost:0};
@@ -1235,107 +1257,56 @@ function flushPresence(force){if(Net.solo||!Net.rm)return;const now=performance.
 let actSeq=Math.floor(Math.random()*1000);
 function act(type,...args){actSeq++;const a=(Array.isArray(myPres.a)?myPres.a:[]).slice(-5);a.push([actSeq,type,...args]);myPres.a=a;flushPresence(true);}
 
-/* PeerJS rooms for hosting outside claude.ai (GitHub Pages etc.).
-   Same surface the game uses from claude.ai rooms: join() -> {presence, peers, connected, leave}.
-   One player holds the room id and relays everyone's state; if that player leaves, the next one takes the id over. */
-function makePeerRoom(){
-  if(typeof window.Peer!=='function')return null;
-  return {join(name,o){return new Promise((resolve,reject)=>{
-    const roomId='svo5-'+String(name).replace(/^svo-/,'');
-    const label='p'+Math.random().toString(36).slice(2,11);
-    const opts=Object.assign({debug:0},window.SVO_PEER||{});
-    const st={mine:{},others:new Map(),hub:null,client:null,conn:null,connected:false,closed:false,hubLabel:null,pend:null,migrating:false};
-    const hubConns=new Set();
-    let settled=false;
-    const api={
-      presence:async p=>{for(const k in p){if(p[k]===null)delete st.mine[k];else st.mine[k]=p[k];}},
-      peers:()=>{const out=[{peer:label,by:null,isMe:true,sameTab:true,kind:'viewer',guest:false,presence:st.mine}];for(const [k,v] of st.others)out.push({peer:k,by:null,isMe:false,sameTab:false,kind:'viewer',guest:false,presence:v.pres});return out;},
-      connected:()=>st.connected,
-      leave:async()=>{st.closed=true;clearInterval(timer);for(const c of hubConns){try{c.close();}catch(_){}}try{st.conn&&st.conn.close();}catch(_){}try{st.client&&st.client.destroy();}catch(_){}try{st.hub&&st.hub.destroy();}catch(_){}st.connected=false;}
-    };
-    const done=(ok,err)=>{if(settled)return;settled=true;if(ok)resolve(api);else{api.leave();reject(err);}};
-    function startHub(cb){
-      let ok=false;const hp=new Peer(roomId,opts);
-      hp.on('open',()=>{ok=true;st.hub=hp;st.hubLabel=label;st.connected=true;cb(true);});
-      hp.on('error',e=>{if(!ok){try{hp.destroy();}catch(_){}cb(false,e&&e.type==='unavailable-id'?'taken':'net');}});
-      hp.on('connection',c=>{hubConns.add(c);
-        c.on('data',m=>{if(m&&m.t==='p'&&typeof m.l==='string'&&m.l.length<40){c.label=m.l;st.others.set(m.l,{pres:(m.d&&typeof m.d==='object'&&!Array.isArray(m.d))?m.d:{},t:performance.now()});}});
-        const drop=()=>{hubConns.delete(c);if(c.label)st.others.delete(c.label);};c.on('close',drop);c.on('error',drop);});
-      hp.on('disconnected',()=>{if(!st.closed&&st.hub===hp)setTimeout(()=>{try{hp.reconnect();}catch(_){}},1000);});
-    }
-    function ensureClient(cb){
-      if(st.client&&st.client.open&&!st.client.destroyed){cb(true);return;}
-      if(st.client){try{st.client.destroy();}catch(_){}}
-      const cp=new Peer(opts);st.client=cp;let opened=false;
-      cp.on('open',()=>{opened=true;cb(true);});
-      cp.on('error',e=>{if(!opened){cb(false,'net');return;}if(e&&e.type==='peer-unavailable'&&st.pend)st.pend(false,'nf');});
-      cp.on('disconnected',()=>{if(!st.closed&&st.client===cp)setTimeout(()=>{try{cp.reconnect();}catch(_){}},1000);});
-    }
-    function connectClient(cb){
-      ensureClient((ok,err)=>{
-        if(!ok){cb(false,err);return;}
-        const c=st.client.connect(roomId,{reliable:true,serialization:'json'});
-        let called=false,to=0;
-        const fin=(a,b)=>{if(called)return;called=true;clearTimeout(to);if(st.pend===fin)st.pend=null;if(!a){try{c.close();}catch(_){}}cb(a,b);};
-        st.pend=fin;to=setTimeout(()=>fin(false,'timeout'),9000);
-        c.on('open',()=>{st.conn=c;st.connected=true;st.lastAll=performance.now();fin(true);});
-        c.on('data',m=>{if(!m||m.t!=='all'||!m.ps||typeof m.ps!=='object')return;st.lastAll=performance.now();st.hubLabel=typeof m.h==='string'?m.h:null;const now=performance.now(),seen=new Set();
-          for(const k in m.ps){if(k===label||k.length>40)continue;const v=m.ps[k];st.others.set(k,{pres:(v&&typeof v==='object'&&!Array.isArray(v))?v:{},t:now});seen.add(k);}
-          for(const k of [...st.others.keys()])if(!seen.has(k))st.others.delete(k);});
-        c.on('close',()=>{if(st.conn===c){st.conn=null;st.connected=false;if(!st.closed)migrate();}});
-        c.on('error',()=>{});
-      });
-    }
-    function migrate(){
-      if(st.migrating||st.closed)return;st.migrating=true;
-      if(st.hubLabel)st.others.delete(st.hubLabel);
-      const first=[label,...st.others.keys()].sort()[0];let tries=0;
-      const again=()=>{if(!st.closed&&tries<40)setTimeout(attempt,1500);};
-      const attempt=()=>{
-        if(st.closed)return;tries++;
-        if(first===label||tries>5)startHub(ok=>{if(ok){st.migrating=false;st.conn=null;try{st.client&&st.client.destroy();}catch(_){}st.client=null;}else connectClient(ok2=>{if(ok2)st.migrating=false;else again();});});
-        else connectClient(ok=>{if(ok)st.migrating=false;else again();});
-      };
-      setTimeout(attempt,first===label?600:2200);
-    }
-    const timer=setInterval(()=>{
-      if(st.hub){const now=performance.now();for(const [k,v] of st.others)if(now-v.t>8000)st.others.delete(k);
-        const ps={};ps[label]=st.mine;for(const [k,v] of st.others)ps[k]=v.pres;const msg={t:'all',h:label,ps};
-        for(const c of hubConns)if(c.open){try{c.send(msg);}catch(_){}}}
-      else if(st.conn){
-        if(performance.now()-(st.lastAll||0)>4000){const c=st.conn;st.conn=null;st.connected=false;try{c.close();}catch(_){}if(!st.closed)migrate();}
-        else if(st.conn.open){try{st.conn.send({t:'p',l:label,d:st.mine});}catch(_){}}}
-    },100);
-    if(o&&o.creator)startHub((ok,err)=>done(ok,err));else connectClient((ok,err)=>done(ok,err));
-  });}};
+/* Co-op inside the site shell: the site lobby carries presence; this adapter gives the game the same surface as a room. */
+function makeShellRoom(){
+  return {join(){return new Promise((resolve,reject)=>{
+    if(!Shell.inLobby||!Shell.me){reject('nolobby');return;}
+    let mine={};let open=true;
+    resolve({
+      presence:async p=>{if(!open)return;for(const k in p){if(p[k]===null)delete mine[k];else mine[k]=p[k];}shellPost('gp',{d:mine});},
+      peers:()=>{const out=[{peer:Shell.me,isMe:true,sameTab:true,kind:'viewer',presence:mine}];
+        for(const q of Shell.peers){if(!q||q.label===Shell.me||q.w!=='svo')continue;out.push({peer:String(q.label),isMe:false,sameTab:false,kind:'viewer',presence:(q.gp&&typeof q.gp==='object')?q.gp:{}});}return out;},
+      connected:()=>Shell.inLobby,
+      leave:async()=>{open=false;shellPost('gp',{d:{st:'left'}});}
+    });});}};
 }
-async function initRoom(){try{if(window.claude&&typeof window.claude.use==='function')Net.room=await window.claude.use('room');}catch(e){Net.room=null;}
-  if(Net.room)Net.kind='claude';else if(!window.claude){Net.room=makePeerRoom();Net.kind=Net.room?'peer':null;}
-  updateCoopNote();}
+async function initRoom(){
+  if(SHELL){Net.room=makeShellRoom();Net.kind='shell';updateCoopNote();shellPost('ready');return;}
+  try{if(window.claude&&typeof window.claude.use==='function')Net.room=await window.claude.use('room');}catch(e){Net.room=null;}
+  Net.kind=Net.room?'claude':null;updateCoopNote();}
+function shellAlias(){let a='';try{a=cleanName(localStorage.getItem('gs-alias-svo')||'');}catch(e){}return a||Shell.name||cleanName($('#nick').value)||(cfg.lang==='en'?'Player':'Игрок');}
+async function enterShellCoop(){if(enterShellCoop.busy)return;enterShellCoop.busy=true;try{$('#nick').value=shellAlias();await joinRoom('site',false);$('#lobAlias').value=S.nick;}finally{enterShellCoop.busy=false;}}
+setInterval(()=>{if(!SHELL)return;
+  if(curScreen()==='coopScr'&&Shell.inLobby&&Shell.me&&S.mode==='menu')enterShellCoop();
+  else if(S.mode==='lobby'&&!Shell.inLobby){teardownToMenu();showScreen('coopScr');updateCoopNote();}},300);
 function updateCoopNote(){const n=$('#coopNote');if(!n)return;
+  if(SHELL||!window.claude){$('#coopBox').hidden=true;$('#coopShell').hidden=false;$('#coopShellNote').textContent=T(SHELL?'coop_need':'coop_direct');$('#lobNeed').textContent=T(SHELL?'lobby_btn':'to_site');return;}
   if(!Net.room){n.textContent=T(window.claude?'coop_off':'coop_off_p');n.classList.add('err');$('#createBtn').disabled=true;$('#joinBtn').disabled=true;}
   else{n.textContent=T(Net.kind==='peer'?'coop_ok_p':'coop_ok');n.classList.remove('err');$('#createBtn').disabled=false;$('#joinBtn').disabled=false;}}
 async function joinRoom(code,creator){
   const nick=cleanName($('#nick').value);if(!nick){$('#coopNote').textContent=T('need_name');$('#coopNote').classList.add('err');return;}
   S.nick=nick;try{localStorage.setItem('svo-nick',nick);}catch(e){}
   if(!Net.room)return;$('#coopNote').textContent=T('connecting');$('#coopNote').classList.remove('err');
-  try{Net.rm=await Net.room.join('svo-'+code,{creator:!!creator});}catch(e){if(e==='taken')return 'taken';$('#coopNote').textContent=T(e==='nf'?'room_nf':'join_fail');$('#coopNote').classList.add('err');return 'fail';}
+  try{Net.rm=await Net.room.join('svo-'+code,{creator:!!creator});}catch(e){$('#coopNote').textContent=T('join_fail');$('#coopNote').classList.add('err');return 'fail';}
   initAudio();Net.solo=false;Net.code=code;Net.t0=Date.now();Net.myPeer=null;HS=null;H=null;lastH=null;amHost=false;S.gid=null;S.lastGid=null;
   myPres={v:VER,n:S.nick,t0:Net.t0,st:'lobby',g:null,a:[],h:null,cr:creator?1:0,rd:0};try{Net.rm.presence(myPres).catch(()=>{});}catch(e){}
-  $('#lobCode').textContent=code;S.mode='lobby';showScreen('lobby');
+  $('#lobCode').textContent=code;$('#lobCode').hidden=SHELL;$('#lobAliasW').hidden=!SHELL;{const eb=$('#lobby .eyebrow');eb.dataset.t=SHELL?'lob_site':'lob_eyebrow';eb.textContent=T(eb.dataset.t);}S.mode='lobby';showScreen('lobby');
 }
 function lobbyFrame(){
+  if(SHELL)myPres.cr=Shell.hub&&Shell.hub===Net.myPeer?1:0;
   const list=getPeers();updateHostRole(list);
   const players=list.filter(p=>p.presence.v===VER&&p.presence.st!=='left'&&(p.presence.st==='lobby'||p.presence.g)).sort((a,b)=>(b.presence.cr===1)-(a.presence.cr===1)||num(a.presence.t0)-num(b.presence.t0));
   const lobbyP=players.filter(p=>p.presence.st==='lobby');
   const inGame=H&&H.ph==='play';
-  const sig=players.map(p=>p.peer+nameOf(p)+p.presence.st+p.presence.rd).join('|')+Net.host+inGame+cfg.lang;
+  const away=SHELL?Shell.peers.filter(q=>q&&q.label!==Net.myPeer&&!players.some(p=>p.peer===q.label)):[];
+  const sig=players.map(p=>p.peer+nameOf(p)+p.presence.st+p.presence.rd).join('|')+'/'+away.map(q=>q.label+q.name).join('|')+Net.host+inGame+cfg.lang;
   if(sig!==lobbySig){lobbySig=sig;const ul=$('#lobList');ul.innerHTML='';
     players.forEach((p,i)=>{const li=document.createElement('li');const sw=document.createElement('span');sw.className='sw';sw.style.cssText='margin:0;background:'+SLOT_CSS[i%8];li.appendChild(sw);
       li.appendChild(document.createTextNode(nameOf(p)+(p.isMe?T('you'):'')+(p.peer===Net.host?' · '+T('lob_creator'):'')));
       const sm=document.createElement('small');
       if(p.presence.st==='lobby'){const r=p.presence.rd===1;sm.className=r?'rd':'nr';sm.textContent=r?T('st_ready'):T('st_notready');}else sm.textContent=T('lob_game');
-      li.appendChild(sm);ul.appendChild(li);});}
+      li.appendChild(sm);if(SHELL)li.appendChild(betBtn(p.peer));ul.appendChild(li);});
+    for(const q of away){const li=document.createElement('li');li.className='away';li.appendChild(document.createTextNode(cleanName(q.name)||'—'));const sm=document.createElement('small');sm.textContent=T('st_away');li.appendChild(sm);li.appendChild(betBtn(String(q.label)));ul.appendChild(li);}}
   const iAmHost=Net.host===Net.myPeer;const notReady=lobbyP.filter(p=>p.presence.rd!==1);
   $('#lobReady').textContent=myPres.rd===1?T('unready'):T('ready');$('#lobReady').hidden=!!(inGame&&H.gid===S.lastGid);
   $('#lobStart').hidden=!iAmHost||inGame;$('#lobStart').disabled=!lobbyP.length||notReady.length>0;
@@ -1346,18 +1317,20 @@ function lobbyFrame(){
   if(inGame&&H.gid!==S.lastGid&&slotOf(Net.myPeer)>=0)startRun(H);
   myPres.st='lobby';myPres.h=amHost?HS:null;flushPresence();
 }
+function betBtn(label){const b=document.createElement('button');b.type='button';b.className='bet';b.textContent='BET';b.addEventListener('click',()=>shellPost('bet',{target:label}));return b;}
 function hostStartCoop(){
   const list=getPeers();const players=list.filter(p=>p.presence.v===VER&&p.presence.st==='lobby'&&p.presence.rd===1).sort((a,b)=>num(a.presence.t0)-num(b.presence.t0));
   HS={ph:'play',gid:rid(),seed:(Math.random()*2147483647)|0,tm:0,slots:players.map((p,i)=>[p.peer,i]),en:[],tk:[],cg:0};
-  H=HS;myPres.h=HS;flushPresence(true);startRun(HS);
+  H=HS;myPres.h=HS;flushPresence(true);shellPost('start',{gid:HS.gid,players:HS.slots.map(x=>x[0])});startRun(HS);
 }
 
 /* ================= run lifecycle ================= */
 function startSolo(){
   initAudio();S.nick=cleanName($('#nick').value)||(cfg.lang==='en'?'You':'Вы');
-  Net.solo=true;Net.rm=null;Net.myPeer='local';Net.t0=Date.now();
-  HS={ph:'play',gid:rid(),seed:(Math.random()*2147483647)|0,tm:0,slots:[['local',0]],en:[],tk:[],cg:0};
-  H=HS;amHost=true;myPres={};startRun(HS);
+  if(SHELL)S.nick=shellAlias();
+  Net.solo=true;Net.rm=null;Net.myPeer=SHELL&&Shell.me?Shell.me:'local';Net.t0=Date.now();
+  HS={ph:'play',gid:rid(),seed:(Math.random()*2147483647)|0,tm:0,slots:[[Net.myPeer,0]],en:[],tk:[],cg:0};
+  H=HS;amHost=true;myPres={};shellPost('start',{gid:HS.gid,players:[Net.myPeer]});startRun(HS);
 }
 function startRun(h){
   disposeInterior();
@@ -1365,7 +1338,7 @@ function startRun(h){
   eviews.clear();rviews.clear();seen.clear();pending.clear();
   S.gid=h.gid;S.lastGid=h.gid;S.slot=Math.max(0,slotOf(Net.myPeer));
   Object.assign(S,{ui:null,st:'free',money:0,hoodT:0,energyT:0,battery:100,hasPP:false,hasKeys:false,earned:0,alive:0,detT:0,graceT:3,inside:null,act:null,drunkT:0,highT:0,exEvict:-1,leakT:0,
-    bribeT:0,hold:0,holdKey:'',hb:0,lastSting:-99,wasDay:false,warned:false,result:null,msgI:0,dogWarn:-99,sel:0});
+    bribeT:0,hold:0,holdKey:'',hb:0,lastSting:-99,wasDay:false,warned:false,result:null,msgI:0,dogWarn:-99,sel:0,n2:false});
   S.inv=[{id:'flash',n:1},{id:'energy',n:1},{id:'fire',n:1},null,null];S.paid=new Set();S.friendGifts=new Set();hotbarSig='';
   const off=[[0,0],[1.4,0],[0,1.4],[1.4,1.4],[-1,1],[1,-1],[2.5,.6],[.6,2.5]][S.slot%8];
   Object.assign(P,{x:C.start.x+off[0],z:C.start.z+off[1],yaw:-Math.PI*.75,pitch:0,stamina:1,exhausted:false,crouch:false,sprint:false,eye:1.65,bob:0});
@@ -1380,6 +1353,8 @@ function startRun(h){
   requestLock();
 }
 function teardownToMenu(){
+  if(SHELL&&Net.solo&&HS&&HS.ph==='play')shellPost('abort',{gid:HS.gid});
+  if(SHELL)shellPost('gp',{d:{}});
   if(Net.rm){try{Net.rm.presence({st:'left',h:null}).catch(()=>{});Net.rm.leave().catch(()=>{});}catch(e){}}
   Net.rm=null;Net.solo=true;Net.myPeer='local';HS=null;H=null;lastH=null;amHost=false;S.gid=null;S.ui=null;S.act=null;S.inside=null;hostSim.enemies=[];
   disposeInterior();setFx();releaseLock();$('#hud').hidden=true;$('#panel').hidden=true;$('#mapView').hidden=true;$('#vignette').style.opacity=0;
@@ -1508,7 +1483,8 @@ function hostTick(dt,list){
   for(const a of sim){if(a.type>=4)continue;for(const b of sim){if(a===b||b.type>=4)continue;const sx=a.x-b.x,sz=a.z-b.z;if(Math.abs(sx)>.8||Math.abs(sz)>.8)continue;const sd=Math.hypot(sx,sz);if(sd<.8&&sd>.001)moveBody(a,sx/sd*(.8-sd)*.5,sz/sd*(.8-sd)*.5,.3);}}
   if(keysTaken){const holder=list.some(p=>p.presence.g===HS.gid&&p.presence.k===1&&['free','det','esc'].includes(p.presence.st));
     if(holder)hostSim.keysLost=0;else{hostSim.keysLost+=dt;if(hostSim.keysLost>3){HS.tk=HS.tk.filter(id=>id!==C.keysId);hostSim.keysLost=0;}}}
-  if(HS.slots.length&&HS.ph==='play'){const done=HS.slots.every(([peer])=>{const p=list.find(q=>q.peer===peer);const st=p?p.presence.st:'left';return !p||p.presence.g!==HS.gid||st==='out'||st==='esc'||st==='left';});if(done&&HS.tm>5)HS.ph='over';}
+  if(HS.slots.length&&HS.ph==='play'){const done=HS.slots.every(([peer])=>{const p=list.find(q=>q.peer===peer);const st=p?p.presence.st:'left';return !p||p.presence.g!==HS.gid||st==='out'||st==='esc'||st==='left';});if(done&&HS.tm>5){HS.ph='over';
+    {const endMsg={gid:HS.gid,sum:{players:HS.slots.map(x=>x[0]),esc:HS.slots.filter(([peer])=>{const p=list.find(q=>q.peer===peer);return p&&p.presence.g===HS.gid&&p.presence.st==='esc';}).map(x=>x[0])}};setTimeout(()=>shellPost('end',endMsg),1500);}}}
   HS.en=sim.map(e=>[e.id,r1(e.x),r1(e.z),r1(e.dir),e.state,e.type,e.v]);
 }
 
@@ -1525,9 +1501,9 @@ function handleAct(p,type,args,list){
   const me=Net.myPeer;
   if(type==='take'){const id=num(args[0],-1);if(id<0)return;if(amHost&&HS&&!HS.tk.includes(id))HS.tk.push(id);if(!p.isMe)pending.set(id,performance.now());}
   else if(type==='noise'){const x=num(args[0]),z=num(args[1]);if(amHost)alertAt(x,z,26,10);fireworkFx(x,z);}
-  else if(type==='donos'){const t=str(args[0],64);const pr=presOf(list,t);if(amHost&&pr)alertAt(num(pr.x),num(pr.z),48,14);if(t===me&&!p.isMe)phone('src_cop',T('m_donos'));}
+  else if(type==='donos'){const t=str(args[0],64);const pr=presOf(list,t);if(amHost&&pr)alertAt(num(pr.x),num(pr.z),48,14);if(t===me&&!p.isMe){phone('src_cop',T('m_donos'));gev('svo.donos');}}
   else if(type==='self'){if(amHost)alertAt(num(args[0]),num(args[1]),40,14);}
-  else if(type==='fsb'){const t=str(args[0],64);if(amHost)spawnFsb(t,list);if(t===me)phone('src_unk',T('m_fsb'));}
+  else if(type==='fsb'){const t=str(args[0],64);if(amHost)spawnFsb(t,list);if(t===me){phone('src_unk',T('m_fsb'));gev('svo.donos');}}
   else if(type==='free'){const t=str(args[0],64);if(t===me&&S.st==='det'){S.st='free';S.graceT=6;$('#det').hidden=true;phone(nameOf(p),T('m_freed'));sfx.door();}}
   else if(type==='gift'){const t=str(args[0],64),amt=clamp(Math.floor(num(args[1])),0,500);if(t===me&&!p.isMe&&amt>0){S.money+=amt;sfx.cash();phone(nameOf(p),T('m_gift',{a:amt}));}}
   else if(type==='esc'){const ids=Array.isArray(args[0])?args[0].map(x=>str(x,64)):[];if(amHost&&HS&&str(args[1],8)==='car')HS.cg=1;if(!p.isMe&&ids.includes(me)&&S.st==='free'&&S.hasPP)escapeMe('ride');}
@@ -1549,6 +1525,8 @@ function writePresence(){
   const cp=cityPos();
   Object.assign(myPres,{v:VER,n:S.nick,t0:Net.t0,st:S.st,g:S.gid,x:r2(cp.x),z:r2(cp.z),y:r2(P.yaw),f:flags(),m:S.money,pp:S.hasPP?1:0,k:S.hasKeys?1:0,dl:Math.ceil(S.detT),sp:S.act?ACT_RATE[S.act]:1});
   myPres.h=amHost?HS:null;
+  if(SHELL&&Net.solo){const t=performance.now();if(!writePresence.t||t-writePresence.t>500){writePresence.t=t;shellPost('gp',{d:{g:S.gid,st:S.st}});}}
+  if(S.st==='free'&&H&&!S.n2&&nightNo(num(H.tm))>=2){S.n2=true;gev('svo.night2');}
 }
 function othersFree(list){return list.some(p=>!p.isMe&&p.presence.g===S.gid&&p.presence.st==='free');}
 function setFx(){
@@ -1600,17 +1578,18 @@ function checkCaught(list){
 }
 function caught(v,list){
   flash(.6);sfx.caught();
-  if(v.type===2){if(S.money>0){phone('lbl_raid',T('m_robbed',{a:S.money}));S.money=0;}detainMe(list);return;}
+  if(v.type===2){gev('svo.robbed');if(S.money>0){phone('lbl_raid',T('m_robbed',{a:S.money}));S.money=0;}detainMe(list);return;}
   if(S.money>=600){openBribe(v.id);return;}
   detainMe(list);
 }
 function detainMe(list){
+  gev('svo.detained');
   if(Net.solo||!othersFree(list)){outMe();return;}
   S.st='det';const z=count('zak');S.detT=z>0?30:60;if(z>0){phone('src_prot',T('m_zak_taken'));removeItem('zak',z);}
   $('#det').hidden=false;
 }
-function outMe(){S.st='out';S.hasKeys=false;flash(.9);showResult('out');}
-function escapeMe(via,n){S.st='esc';sfx.engine();showResult('esc',via,n);}
+function outMe(){gev('svo.drafted');S.st='out';S.hasKeys=false;flash(.9);showResult('out');}
+function escapeMe(via,n){gev('svo.escape');if(via==='car'||via==='ride')gev('svo.escape_car');if(via==='bus')gev('svo.escape_bus');S.st='esc';sfx.engine();showResult('esc',via,n);}
 
 /* ================= interiors: enter / leave / activities ================= */
 function reqWord(r){if(r.t==='money')return T('w_money',{a:r.a});return T('w_'+r.i);}
@@ -1655,7 +1634,7 @@ function interactions(dt,list){
         cand(d,3.6,{key:'car',label:S.hasPP?T('car_go')+(riders.length?T('car_take',{n:riders.length}):''):T('car_nopp'),run:()=>driveOff(list)});}
       else cand(d,3.6,{key:'carx',label:isTaken(C.keysId)?T('car_locked2'):T('car_locked'),run:()=>{}});}
     cand(Math.hypot(C.bus.x-P.x,C.bus.z-P.z),3.2,{key:'bus',label:S.hasPP?T('bus'):T('bus_nopp'),run:()=>takeBus()});
-    for(const p of list){if(p.isMe||p.presence.g!==S.gid||p.presence.st!=='det')continue;cand(Math.hypot(num(p.presence.x)-P.x,num(p.presence.z)-P.z),3.4,{key:'r'+p.peer,label:T('rescue',{n:nameOf(p)}),hold:2.5,run:()=>{act('free',p.peer);phone('src_you',T('m_rescued',{n:nameOf(p)}));}});}
+    for(const p of list){if(p.isMe||p.presence.g!==S.gid||p.presence.st!=='det')continue;cand(Math.hypot(num(p.presence.x)-P.x,num(p.presence.z)-P.z),3.4,{key:'r'+p.peer,label:T('rescue',{n:nameOf(p)}),hold:2.5,run:()=>{act('free',p.peer);gev('svo.rescuer');phone('src_you',T('m_rescued',{n:nameOf(p)}));}});}
   }
   let giftTo=null;if(!S.inside)for(const p of list){if(p.isMe||p.presence.g!==S.gid||p.presence.st!=='free'||(num(p.presence.f)&16))continue;if(Math.hypot(num(p.presence.x)-P.x,num(p.presence.z)-P.z)<2.6)giftTo=p;}
   S.giftTo=giftTo;S.curInter=best;
@@ -1675,8 +1654,8 @@ function takeLoot(l){
   if(l.kind==='money'){S.money+=l.amt;S.earned+=l.amt;sfx.cash();caption('',T('f_money',{a:l.amt}),3);}
   else if(l.kind==='zak'){sfx.pick();caption('',T('f_zak'),4);}
   else if(itemKinds.includes(l.kind)){sfx.pick();caption('',T('f_item',{i:T('it_'+l.kind)}),2.5);}
-  else if(l.kind==='keys'){S.hasKeys=true;sfx.pick();caption('',T('f_keys'),5);phone('src_ser',T('m_keys'));}
-  else if(l.kind==='pp'){S.hasPP=true;sfx.pick();caption('',T('f_pp'),5);}
+  else if(l.kind==='keys'){S.hasKeys=true;gev('svo.keys');sfx.pick();caption('',T('f_keys'),5);phone('src_ser',T('m_keys'));}
+  else if(l.kind==='pp'){S.hasPP=true;gev('svo.passport');sfx.pick();caption('',T('f_pp'),5);}
   else caption('',T('f_empty'),2.5);
 }
 function giveMoney(){if(!S.giftTo||S.money<100||S.st!=='free'||S.ui)return;S.money-=100;act('gift',S.giftTo.peer,100);sfx.cash();caption('',T('m_gave',{n:nameOf(S.giftTo)}),2.5);}
@@ -1727,7 +1706,7 @@ function openBribe(id){
     row(b,T('br_no'),T('br_no_n'),T('br_no_b'),true,()=>{closePanel(true);detainMe(S._list||[]);},true);
   });
 }
-function payBribe(){if(S.ui!=='bribe'||S.money<600)return;S.money-=600;act('bribe',S.bribeId);S.graceT=8;sfx.cash();closePanel();caption(T('lbl_off'),T('br_done'),3);}
+function payBribe(){if(S.ui!=='bribe'||S.money<600)return;S.money-=600;act('bribe',S.bribeId);gev('svo.bribe');S.graceT=8;sfx.cash();closePanel();caption(T('lbl_off'),T('br_done'),3);}
 
 /* ================= views ================= */
 function makeView(type,v){if(type===2||type===3)return makeCivilian(v);if(type===4)return makeDog(v);if(type===5)return makeVan();return makeEnemyModel(type);}
@@ -1925,7 +1904,9 @@ addEventListener('wheel',e=>{if(S.mode!=='play'||S.ui)return;e.preventDefault();
 
 
 $('#soloBtn').addEventListener('click',startSolo);
-$('#coopBtn').addEventListener('click',()=>{showScreen('coopScr');updateCoopNote();$('#nick').focus();});
+$('#coopBtn').addEventListener('click',()=>{showScreen('coopScr');updateCoopNote();if(SHELL&&Shell.inLobby)enterShellCoop();else if(!SHELL&&window.claude)$('#nick').focus();});
+$('#lobNeed').addEventListener('click',()=>{if(SHELL)shellPost('lobby');else location.href='index.html';});
+$('#lobAlias').addEventListener('input',()=>{const a=cleanName($('#lobAlias').value);if(!a)return;S.nick=a;myPres.n=a;lobbySig='';try{localStorage.setItem('gs-alias-svo',a);}catch(e){}flushPresence(true);});
 $('#coopBack').addEventListener('click',()=>showScreen('menu'));
 $('#lobReady').addEventListener('click',()=>{myPres.rd=myPres.rd===1?0:1;lobbySig='';flushPresence(true);});
 $('#createBtn').addEventListener('click',async()=>{for(let i=0;i<4;i++){const r=await joinRoom(Math.random().toString(36).slice(2,6).replace(/[^a-z0-9]/g,'x'),true);if(r!=='taken')break;}});
@@ -1936,7 +1917,7 @@ $('#setBack').addEventListener('click',closeSub);$('#helpBack').addEventListener
 $('#vol').addEventListener('input',e=>{cfg.vol=+e.target.value;$('#volV').textContent=cfg.vol+'%';setVolume();saveCfg();});
 $('#vol').addEventListener('change',()=>{initAudio();sfx.pick();});
 $('#sens').addEventListener('input',e=>{cfg.sens=+e.target.value;$('#sensV').textContent=(cfg.sens/100).toFixed(1)+'×';saveCfg();});
-$('#langRu').addEventListener('click',()=>{cfg.lang='ru';saveCfg();applyLang();});$('#langEn').addEventListener('click',()=>{cfg.lang='en';saveCfg();applyLang();});
+$('#langRu').addEventListener('click',()=>{cfg.lang='ru';saveCfg();applyLang();shellPost('lang',{lang:'ru'});});$('#langEn').addEventListener('click',()=>{cfg.lang='en';saveCfg();applyLang();shellPost('lang',{lang:'en'});});
 $('#lobStart').addEventListener('click',()=>{initAudio();hostStartCoop();});
 $('#lobLeave').addEventListener('click',teardownToMenu);
 $('#resumeBtn').addEventListener('click',resume);
@@ -1984,10 +1965,10 @@ function frame(now){
   renderer.render(scene,camera);
 }
 if(!window.claude)$('#hubLink').hidden=false;
+if(SHELL)$('#hubLink').addEventListener('click',e=>{e.preventDefault();shellPost('exit');});
 applyLang();
 C=genCity((Math.random()*1e9)|0);buildWorld();P.x=C.start.x;P.z=C.start.z;
 initRoom();
-addEventListener('pagehide',()=>{try{if(Net.rm&&Net.kind==='peer')Net.rm.leave();}catch(e){}});
 requestAnimationFrame(frame);
 })();
 </script>
