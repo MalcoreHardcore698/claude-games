@@ -164,6 +164,9 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
 #lobby li .nr{color:var(--dim)}
 #lobby li .bet{font:600 11px var(--mono);letter-spacing:.1em;padding:5px 9px;border:0;background:var(--sodium);color:#0b0d10;cursor:pointer}
 #lobby li .bet:hover{background:var(--paper)}
+#lobby li .bet:disabled{opacity:.35;cursor:not-allowed}
+#lobby li .bet.inv{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 1px rgba(232,226,210,.35);margin-left:6px}
+#lobby li .bet.inv:hover{color:var(--sodium)}
 #lobby li.away{opacity:.6}
 #lobby .alias{display:flex;flex-direction:column;gap:8px;font:600 10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--frost);margin-bottom:6px}
 #lobby .alias input{font:400 16px var(--mono);color:var(--paper);background:var(--night2);border:1px solid rgba(232,226,210,.25);padding:10px 12px;border-radius:2px;width:100%;box-sizing:border-box;-webkit-user-select:text;user-select:text;text-transform:none;letter-spacing:0}
@@ -454,6 +457,7 @@ coop_need:['Кооператив идёт через лобби сайта. Со
 lobby_btn:['Создать или войти в лобби','Create or join a lobby'],
 coop_direct:['Кооператив работает через лобби сайта. Откройте игру с главной страницы.','Co-op runs through the site lobby. Open the game from the main page.'],
 to_site:['На главную','Main page'],lob_site:['Кооператив · игроки из лобби сайта','Co-op · players from the site lobby'],
+invite:['Позвать','Invite'],st_ingame:['в партии','in a game'],
 st_away:['не в этой игре','not in this game'],
 all_games:['← Все игры','← All games'],
 back_menu:['Назад в меню','Back to menu'],ready:['Готов','Ready'],unready:['Не готов','Not ready'],st_ready:['готов','ready'],st_notready:['не готов','not ready'],
@@ -1153,12 +1157,13 @@ const S={mode:'menu',ui:null,nick:'',gid:null,lastGid:null,slot:0,st:'free',mone
   inv:[],sel:0,hasPP:false,hasKeys:false,earned:0,alive:0,detT:0,graceT:0,inside:null,act:null,drunkT:0,highT:0,exEvict:-1,paid:new Set(),friendGifts:new Set(),leakT:0,
   bribeT:0,bribeId:-1,hold:0,holdKey:'',ePulse:false,hb:0,lastSting:-99,wasDay:false,warned:false,result:null,spec:0,msgI:0,curInter:null,dogWarn:-99,screenFrom:null,stopped:false};
 const SHELL=(()=>{try{return window.parent!==window&&!!window.parent.__gameShell;}catch(e){return false;}})();
-const Shell={me:null,name:'',inLobby:false,hub:null,peers:[]};
+const Shell={me:null,name:'',inLobby:false,hub:null,peers:[],wantCoop:false};
 function shellPost(type,o){if(SHELL){try{parent.postMessage(Object.assign({svo:1,type},o||{}),'*');}catch(e){}}}
 function gev(ev,sub){if(SHELL&&S.gid)shellPost('event',{gid:S.gid,ev,sub:sub||Net.myPeer});}
 addEventListener('message',e=>{if(!SHELL||e.source!==parent)return;const m=e.data;if(!m||m.svo!==1)return;
   if(m.type==='hello'||m.type==='peers'){if(typeof m.me==='string')Shell.me=m.me.slice(0,40);Shell.inLobby=!!m.inLobby;Shell.hub=typeof m.hub==='string'?m.hub:null;Shell.peers=Array.isArray(m.peers)?m.peers.slice(0,16):[];
-    if(m.type==='hello'&&typeof m.name==='string')Shell.name=cleanName(m.name);}});
+    if(m.type==='hello'&&typeof m.name==='string')Shell.name=cleanName(m.name);}
+  else if(m.type==='accept')Shell.wantCoop=true;});
 const Net={room:null,rm:null,code:'',solo:true,myPeer:'local',t0:0,sendT:0,host:null};
 let myPres={};let HS=null,H=null,lastH=null,amHost=false;
 const hostSim={enemies:[],nextId:1,cd:{},keysLost:0};
@@ -1277,7 +1282,8 @@ async function initRoom(){
 function shellAlias(){let a='';try{a=cleanName(localStorage.getItem('gs-alias-svo')||'');}catch(e){}return a||Shell.name||cleanName($('#nick').value)||(cfg.lang==='en'?'Player':'Игрок');}
 async function enterShellCoop(){if(enterShellCoop.busy)return;enterShellCoop.busy=true;try{$('#nick').value=shellAlias();await joinRoom('site',false);$('#lobAlias').value=S.nick;}finally{enterShellCoop.busy=false;}}
 setInterval(()=>{if(!SHELL)return;
-  if(curScreen()==='coopScr'&&Shell.inLobby&&Shell.me&&S.mode==='menu')enterShellCoop();
+  if(Shell.wantCoop&&S.mode==='menu'&&Shell.inLobby&&Shell.me){Shell.wantCoop=false;showScreen('coopScr');updateCoopNote();enterShellCoop();}
+  else if(curScreen()==='coopScr'&&Shell.inLobby&&Shell.me&&S.mode==='menu')enterShellCoop();
   else if(S.mode==='lobby'&&!Shell.inLobby){teardownToMenu();showScreen('coopScr');updateCoopNote();}},300);
 function updateCoopNote(){const n=$('#coopNote');if(!n)return;
   if(SHELL||!window.claude){$('#coopBox').hidden=true;$('#coopShell').hidden=false;$('#coopShellNote').textContent=T(SHELL?'coop_need':'coop_direct');$('#lobNeed').textContent=T(SHELL?'lobby_btn':'to_site');return;}
@@ -1299,14 +1305,15 @@ function lobbyFrame(){
   const lobbyP=players.filter(p=>p.presence.st==='lobby');
   const inGame=H&&H.ph==='play';
   const away=SHELL?Shell.peers.filter(q=>q&&q.label!==Net.myPeer&&!players.some(p=>p.peer===q.label)):[];
-  const sig=players.map(p=>p.peer+nameOf(p)+p.presence.st+p.presence.rd).join('|')+'/'+away.map(q=>q.label+q.name).join('|')+Net.host+inGame+cfg.lang;
+  const sig=players.map(p=>p.peer+nameOf(p)+p.presence.st+p.presence.rd).join('|')+'/'+away.map(q=>q.label+q.name+q.w).join('|')+'/'+(SHELL?Shell.peers.map(q=>q.ig).join(''):'')+Net.host+inGame+cfg.lang;
   if(sig!==lobbySig){lobbySig=sig;const ul=$('#lobList');ul.innerHTML='';
     players.forEach((p,i)=>{const li=document.createElement('li');const sw=document.createElement('span');sw.className='sw';sw.style.cssText='margin:0;background:'+SLOT_CSS[i%8];li.appendChild(sw);
       li.appendChild(document.createTextNode(nameOf(p)+(p.isMe?T('you'):'')+(p.peer===Net.host?' · '+T('lob_creator'):'')));
       const sm=document.createElement('small');
       if(p.presence.st==='lobby'){const r=p.presence.rd===1;sm.className=r?'rd':'nr';sm.textContent=r?T('st_ready'):T('st_notready');}else sm.textContent=T('lob_game');
       li.appendChild(sm);if(SHELL)li.appendChild(betBtn(p.peer));ul.appendChild(li);});
-    for(const q of away){const li=document.createElement('li');li.className='away';li.appendChild(document.createTextNode(cleanName(q.name)||'—'));const sm=document.createElement('small');sm.textContent=T('st_away');li.appendChild(sm);li.appendChild(betBtn(String(q.label)));ul.appendChild(li);}}
+    for(const q of away){const li=document.createElement('li');li.className='away';li.appendChild(document.createTextNode(cleanName(q.name)||'—'));const sm=document.createElement('small');sm.textContent=q.ig?T('st_ingame'):T('st_away');li.appendChild(sm);li.appendChild(betBtn(String(q.label)));
+      if(!q.ig){const iv=document.createElement('button');iv.type='button';iv.className='bet inv';iv.textContent=T('invite');iv.addEventListener('click',()=>{shellPost('invite',{to:String(q.label)});iv.disabled=true;setTimeout(()=>{iv.disabled=false;},4000);});li.appendChild(iv);}ul.appendChild(li);}}
   const iAmHost=Net.host===Net.myPeer;const notReady=lobbyP.filter(p=>p.presence.rd!==1);
   $('#lobReady').textContent=myPres.rd===1?T('unready'):T('ready');$('#lobReady').hidden=!!(inGame&&H.gid===S.lastGid);
   $('#lobStart').hidden=!iAmHost||inGame;$('#lobStart').disabled=!lobbyP.length||notReady.length>0;
@@ -1317,7 +1324,7 @@ function lobbyFrame(){
   if(inGame&&H.gid!==S.lastGid&&slotOf(Net.myPeer)>=0)startRun(H);
   myPres.st='lobby';myPres.h=amHost?HS:null;flushPresence();
 }
-function betBtn(label){const b=document.createElement('button');b.type='button';b.className='bet';b.textContent='BET';b.addEventListener('click',()=>shellPost('bet',{target:label}));return b;}
+function betBtn(label){const b=document.createElement('button');b.type='button';b.className='bet';b.textContent='BET';const q=Shell.peers.find(x=>x&&x.label===label);b.disabled=!!(q&&q.ig);b.addEventListener('click',()=>shellPost('bet',{target:label}));return b;}
 function hostStartCoop(){
   const list=getPeers();const players=list.filter(p=>p.presence.v===VER&&p.presence.st==='lobby'&&p.presence.rd===1).sort((a,b)=>num(a.presence.t0)-num(b.presence.t0));
   HS={ph:'play',gid:rid(),seed:(Math.random()*2147483647)|0,tm:0,slots:players.map((p,i)=>[p.peer,i]),en:[],tk:[],cg:0};

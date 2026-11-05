@@ -466,7 +466,7 @@ function finish(kind,guessId){
   const win=kind==='win'||kind==='win_wrong'||kind==='opp_resigned';
   if(SHELL&&G.gid&&!wasOver){const gid=G.gid;G.gid=null;
     if(kind==='opp_left')shellPost('abort',{gid});
-    else{if(win)shellPost('event',{gid,ev:'gw.win'});if(kind==='lose_wrong')shellPost('event',{gid,ev:'gw.wrongguess'});
+    else{shellPost('event',{gid,ev:'gw.fin',x:{win,theme:G.theme.id,bot:G.mode==='bot',myQ:G.log.filter(e=>!e.g&&e.who===T('you')).length}});if(win)shellPost('event',{gid,ev:'gw.win'});if(kind==='lose_wrong')shellPost('event',{gid,ev:'gw.wrongguess'});
       if(G.mode==='bot'||N.role==='host'){const q=G.log.filter(e=>!e.g).length;setTimeout(()=>shellPost('end',{gid,sum:{players:G.mode==='bot'?[Shell.me]:[Shell.me,N.opp],q}}),1500);}}}
   $('#resBig').textContent=win?T('win'):T('lose');$('#resBig').className='big '+(win?'win':'lose');
   const oppName=hname(G.oppSecret);
@@ -518,22 +518,22 @@ let netSig='';
 function renderNet(){
   updateNetNote();if(!(SHELL&&Shell.inLobby))return;
   const others=Shell.peers.filter(q=>q&&q.label!==Shell.me);
-  const sig=others.map(q=>q.label+peerName(q)+q.w+(q.gp&&q.gp.busy)).join('|')+[...N.invFrom.keys()].join()+N.inv+cfg.lang;if(sig===netSig)return;netSig=sig;
+  const sig=others.map(q=>q.label+peerName(q)+q.w+(q.gp&&q.gp.busy)+q.ig).join('|')+[...N.invFrom.keys()].join()+N.inv+cfg.lang;if(sig===netSig)return;netSig=sig;
   const ul=$('#plist');ul.innerHTML='';
   if(!others.length){const li=document.createElement('li');li.textContent=T('nobody');ul.appendChild(li);}
   for(const q of others){
     const li=document.createElement('li');const inv=N.invFrom.has(q.label);if(inv)li.className='inv';
     const nm=document.createElement('div');nm.className='nm';nm.textContent=peerName(q);const sm=document.createElement('small');
-    const here=q.w==='gw';const busy=here&&q.gp&&q.gp.busy;sm.textContent=inv?T('inv_from',{n:peerName(q)}):busy?T('busy'):here?T('here'):T('elsewhere');nm.appendChild(sm);li.appendChild(nm);
-    const bet=document.createElement('button');bet.type='button';bet.className='btn bet';bet.textContent='BET';bet.onclick=()=>shellPost('bet',{target:q.label});li.appendChild(bet);
+    const here=q.w==='gw';const busy=here&&q.gp&&q.gp.busy;sm.textContent=inv?T('inv_from',{n:peerName(q)}):(busy||q.ig)?T('busy'):here?T('here'):T('elsewhere');nm.appendChild(sm);li.appendChild(nm);
+    const bet=document.createElement('button');bet.type='button';bet.className='btn bet';bet.textContent='BET';bet.disabled=!!q.ig;bet.onclick=()=>shellPost('bet',{target:q.label});li.appendChild(bet);
     if(inv){const a=document.createElement('button');a.type='button';a.className='btn sm';a.textContent=T('accept');a.onclick=()=>acceptInv(q.label);
       const d=document.createElement('button');d.type='button';d.className='btn ghost sm';d.textContent=T('decline');d.onclick=()=>{N.invFrom.delete(q.label);sendTo(q.label,{t:'dec'});netSig='';renderNet();};li.append(a,d);}
-    else if(here&&!busy){const b=document.createElement('button');b.type='button';b.className='btn sm';b.textContent=T('invite');b.disabled=N.inv===q.label;
-      b.onclick=()=>{N.inv=q.label;sendTo(q.label,{t:'inv',name:myName()});$('#invNote').textContent=T('inv_sent',{n:peerName(q)});netSig='';renderNet();};li.appendChild(b);}
+    else if(!busy&&!q.ig){const b=document.createElement('button');b.type='button';b.className='btn sm';b.textContent=T('invite');b.disabled=N.inv===q.label;
+      b.onclick=()=>{N.inv=q.label;shellPost('invite',{to:q.label});$('#invNote').textContent=T('inv_sent',{n:peerName(q)});netSig='';renderNet();};li.appendChild(b);}
     ul.appendChild(li);}
 }
 function acceptInv(from){
-  const name=N.invFrom.get(from);N.invFrom.clear();N.inv=null;N.opp=from;N.role='guest';G.mode='net';G.oppName=name||T('player');
+  if(N.opp)return;const pq=Shell.peers.find(x=>x&&x.label===from);const name=N.invFrom.get(from)||(pq?peerName(pq):'');N.invFrom.clear();N.inv=null;N.opp=from;N.role='guest';G.mode='net';G.oppName=name||T('player');
   send({t:'acc',name:myName()});$('#roomCode').textContent=G.oppName;$('#waitNote').textContent=T('host_setup',{n:G.oppName});show('sWait');pushGp();
 }
 function onShellG(from,m){
@@ -549,7 +549,8 @@ addEventListener('message',e=>{if(!SHELL||e.source!==parent)return;const m=e.dat
   if(m.type==='hello'||m.type==='peers'){if(typeof m.me==='string')Shell.me=m.me;Shell.inLobby=!!m.inLobby;Shell.peers=Array.isArray(m.peers)?m.peers.slice(0,16):[];
     if(m.type==='hello'){Shell.name=clean(m.name);if(!$('#nick').value)$('#nick').value=Shell.name;pushGp();}
     if(!$('#sNet').hidden)renderNet();}
-  else if(m.type==='ev'&&m.k==='g'&&m.d&&m.d.game==='gw')onShellG(String(m.from||''),m.d.m);});
+  else if(m.type==='ev'&&m.k==='g'&&m.d&&m.d.game==='gw')onShellG(String(m.from||''),m.d.m);
+  else if(m.type==='accept'&&typeof m.from==='string')acceptInv(m.from);});
 setInterval(()=>{if(!SHELL)return;
   for(const k of [...N.invFrom.keys()]){const q=Shell.peers.find(x=>x.label===k);if(!q||q.w!=='gw'){N.invFrom.delete(k);netSig='';}}
   if(N.opp){const q=Shell.peers.find(x=>x.label===N.opp);if(Shell.inLobby&&q&&q.w==='gw'){N.goneT=0;}else if(!N.goneT)N.goneT=performance.now();else if(performance.now()-N.goneT>3000){N.goneT=0;oppGone();}}
