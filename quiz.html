@@ -214,6 +214,13 @@ input:focus{border-color:var(--gold);outline:none}
 .pod .pt{font:400 16px var(--display);color:var(--gold)}
 .big-res{text-align:center;font:400 clamp(30px,5vw,56px)/1.05 var(--display);margin:0}
 .big-res.ok{color:var(--ok)}.big-res.bad{color:var(--bad)}
+.ib{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center;font-size:16px}
+.ib:hover{color:var(--gold);border-color:var(--gold)}
+.imodal{position:fixed;inset:0;z-index:60;background:rgba(10,6,28,.8);display:grid;place-items:center;padding:20px;animation:fadeIn .2s}
+.imodal .panel{width:min(680px,100%);max-height:calc(100vh - 40px);overflow:auto;animation:popIn .3s cubic-bezier(.2,1.3,.4,1)}
+.imodal h3{margin:4px 0 0;font:400 17px var(--display);color:var(--gold)}
+.imodal p,.imodal li{margin:0;color:var(--muted)}
+.imodal ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
 .toast{position:fixed;left:50%;bottom:24px;translate:-50% 0;background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-weight:700;z-index:50;transition:opacity .3s}
 @media (max-width:900px){.hero,.grid2,.game{grid-template-columns:1fr}.board{position:static}}
 @media (prefers-reduced-motion:reduce){.stage .tile{animation:none}.wheelW .wheel{transition-duration:.01s}}
@@ -224,6 +231,7 @@ input:focus{border-color:var(--gold);outline:none}
   <div class="top">
     <a class="back" id="hubLink" href="index.html" hidden><i class="fa-solid fa-arrow-left"></i><span data-t="all_games"></span></a>
     <span class="sp"></span>
+    <button class="ib" id="bInfo" type="button" aria-label="Info"><i class="fa-solid fa-circle-info"></i></button>
     <div class="seg" id="langSeg" role="group" aria-label="Language"><button type="button" id="lRu">RU</button><button type="button" id="lEn">EN</button></div>
   </div>
 
@@ -314,6 +322,12 @@ input:focus{border-color:var(--gold);outline:none}
     </div>
   </section>
 </div>
+<div class="imodal" id="infoModal" hidden><div class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font:400 26px var(--display)" data-t="i_title"></h2><button class="ib" id="infoX" type="button" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div>
+  <p data-t="lede"></p>
+  <h3 data-t="i_h1"></h3><ul><li data-t="i_1"></li><li data-t="i_2"></li><li data-t="i_3"></li></ul>
+  <h3 data-t="i_h2"></h3><ul><li data-t="m_coop_d"></li><li data-t="m_ffa_d"></li><li data-t="m_teams_d"></li></ul>
+  <h3 data-t="i_h3"></h3><ul><li data-t="i_4"></li><li data-t="i_5"></li><li data-t="i_6"></li></ul></div></div>
 <div id="evo" hidden><div class="evbox" id="evBox"></div></div>
 <div class="toast" id="toast" hidden></div>
 
@@ -366,7 +380,13 @@ beat_prof:['Вы обыграли Профессора: {a} против {b}','Y
 again:['Ещё раз','Play again'],to_menu:['В меню','Menu'],again_wait:['Новую игру начинает создатель стола.','The host starts the next game.'],
 st_correct:['верных: {n}','correct: {n}'],st_streak:['лучшая серия: {n}','best streak: {n}'],st_ko:['выбит: {n} раз','knocked out: {n}'],
 host_left:['Создатель стола вышел.','The host left the table.'],table_closed:['Стол закрыт.','The table was closed.'],busy:['Этот стол уже играет.','That table is already playing.'],full:['Стол заполнен.','The table is full.'],
-cats:['Темы вопросов','Question topics'],freq:['Частота испытаний','Trial frequency'],diff:['Сложность испытаний','Trial difficulty'],
+cats:['Темы вопросов','Question topics'],
+i_title:['Викторина','Quiz Night'],i_h1:['Очки','Scoring'],i_1:['На вопрос — 15 секунд и четыре варианта.','15 seconds and four options per question.'],
+i_2:['Верный ответ — 100 очков и до 50 сверху за скорость.','A right answer scores 100 plus up to 50 for speed.'],i_3:['Колесо может удвоить следующий ответ, дать щит или отнять очки.','The wheel can double your next answer, give a shield or take points away.'],
+i_h2:['Режимы','Modes'],i_h3:['Испытания','Trials'],
+i_4:['Между раундами случайный игрок проходит испытание: колесо, память, счёт, блиц, реакцию, ритм или «найди лишнее».','Between rounds a random player faces a trial: the wheel, memory, maths, speed maths, reflexes, rhythm or spot the odd one.'],
+i_5:['Не справился — пропускаешь следующий вопрос. Щит с колеса спасает от вылета.','Fail and you sit out the next question. A shield from the wheel saves you.'],
+i_6:['Частоту, сложность и набор испытаний выбирает создатель стола.','The host picks the frequency, difficulty and set of trials.'],freq:['Частота испытаний','Trial frequency'],diff:['Сложность испытаний','Trial difficulty'],
 f_rare:['Редко','Rarely'],f_normal:['Иногда','Sometimes'],f_often:['Часто','Often'],f_always:['Каждый раунд','Every round'],
 d_easy:['Легко','Easy'],d_normal:['Средне','Medium'],d_hard:['Сложно','Hard'],d_grow:['Нарастает','Ramps up'],diff_is:['Сложность: {d}','Difficulty: {d}'],
 ev_sprint:['Блиц-счёт','Speed maths'],ev_rhythm:['Ритм','Rhythm'],ev_odd:['Найди лишнее','Spot the odd one'],
@@ -972,6 +992,7 @@ function renderLobby(){
 function joinTable(l){HOST=l;H=null;sendTo(l,{t:'join',n:myName()});}
 function leaveTable(){if(isHost()){if(!H.solo)for(const p of H.players)if(p.l!==ME())sendTo(p.l,{t:'closed'});if(H.gid&&H.ph!=='over'&&H.ph!=='lobby'&&SHELL)shellPost('abort',{gid:H.gid});}else if(HOST)toHost({t:'leave'});
   const wasSolo=H&&H.solo;H=null;HOST=null;ST=null;hideEv();if(wasSolo||!SHELL){show('sMenu');}else{show('sLobby');lobSig='';renderLobby();}pushGp();}
+$('#bInfo').onclick=()=>{$('#infoModal').hidden=false;};$('#infoX').onclick=()=>{$('#infoModal').hidden=true;};$('#infoModal').onclick=e=>{if(e.target.id==='infoModal')$('#infoModal').hidden=true;};
 $('#bSolo').onclick=()=>{newHost(true);};
 $('#bNet').onclick=()=>{show('sLobby');lobSig='';renderLobby();};
 $('#bLobbyBack').onclick=()=>show('sMenu');

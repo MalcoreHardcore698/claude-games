@@ -142,6 +142,8 @@ h1{margin:0;font-family:var(--display);font-weight:400;line-height:.92;display:f
 .note.err{color:#e07a6f}
 
 .dlg{place-items:center;background:rgba(11,12,13,.88)}
+.infoBtn{position:absolute;top:max(18px,env(safe-area-inset-top,0px));right:max(18px,env(safe-area-inset-right,0px));width:38px;height:38px;border-radius:50%;border:1px solid rgba(232,226,210,.35);background:rgba(11,12,13,.5);color:var(--paper);font:700 italic 18px Georgia,serif;cursor:pointer;z-index:2}
+.infoBtn:hover{border-color:var(--sodium);color:var(--sodium)}
 .dbox{display:flex;flex-direction:column;gap:20px;width:min(560px,100%)}
 .dbox h2{margin:0;font:400 40px/1 var(--display)}
 .set{display:flex;flex-direction:column;gap:22px}
@@ -276,6 +278,7 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
 </div>
 
 <section id="menu" class="screen">
+  <button class="infoBtn" id="infoBtn" type="button" aria-label="Info">i</button>
   <div class="twrap">
     <a class="hub" id="hubLink" href="index.html" hidden data-t="all_games"></a>
     <p class="eyebrow" data-t="eyebrow"></p>
@@ -284,7 +287,6 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
       <button class="mi main" id="soloBtn" type="button" data-t="play"></button>
       <button class="mi" id="coopBtn" type="button" data-t="coop"></button>
       <button class="mi" id="setBtn" type="button" data-t="settings"></button>
-      <button class="mi" id="helpBtn" type="button" data-t="help"></button>
       <button class="mi" id="quitBtn" type="button" data-t="exit"></button>
     </nav>
   </div>
@@ -325,7 +327,9 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
 
 <section id="helpScr" class="screen dlg" hidden>
   <div class="dbox" style="width:min(820px,100%)">
-    <h2 data-t="help_title"></h2>
+    <h2 data-t="info_title"></h2>
+    <p class="lede" data-t="info_rules" style="margin:0;max-width:70ch"></p>
+    <h3 data-t="help_title" style="margin:0"></h3>
     <div class="help">
       <div><h3 data-t="help_kb"></h3><dl id="helpKb"></dl></div>
     </div>
@@ -364,7 +368,7 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
     <div class="cta">
       <button class="btn" id="resumeBtn" type="button" data-t="resume"></button>
       <button class="btn ghost" id="pSetBtn" type="button" data-t="settings"></button>
-      <button class="btn ghost" id="pHelpBtn" type="button" data-t="help"></button>
+
       <button class="btn ghost" id="menuBtn" type="button"></button>
     </div>
   </div>
@@ -477,7 +481,8 @@ pause:['Пауза','Paused'],pause_solo:['Вы затаились за гара
 pause_coop:['Мир не стоит на паузе: военкомы и друзья продолжают ходить.','The world keeps going: officers and friends are still moving.'],resume:['Продолжить','Resume'],
 confirm_quit:['Точно выйти? Забег пропадёт','Really quit? The run will be lost'],
 s_volume:['Громкость','Volume'],s_lang:['Язык','Language'],s_sens:['Чувствительность мыши','Mouse sensitivity'],back:['Назад','Back'],
-help_title:['Управление','Controls'],help_kb:['Клавиатура и мышь','Keyboard and mouse'],help_touch:['Сенсорный экран','Touch screen'],
+help_title:['Управление','Controls'],info_title:['Об игре','About the game'],
+info_rules:['Ночь, спальный район, повестка уже в пути. Найдите свой загранпаспорт и уезжайте: на «Жигулях», если найдёте ключи, или на платной попутке. Днём на улицах опасно — пережидайте у друзей, в подвалах и ночлежках. Ищите закладки и лут, сдавайте их барыгам, откупайтесь от военкомов. В кооперативе помогайте друзьям или мешайте им доносами.','Night in a commuter district, and the summons is on its way. Find your passport and get out: in the Lada if you find the keys, or on a paid ride. Daytime streets are dangerous — wait it out at friends’ flats, basements and shelters. Find stashes and loot, sell them to dealers, bribe the officers. In co-op, help your friends or snitch on them.'],help_kb:['Клавиатура и мышь','Keyboard and mouse'],help_touch:['Сенсорный экран','Touch screen'],
 exit_title:['Вы вышли','You quit'],exit_text:['Игра остановлена, звук выключен. Можно закрыть вкладку.','The game is stopped and muted. You can close the tab.'],exit_back:['Вернуться в игру','Back to the game'],
 o_head:['Чтобы уехать','To get out'],o_pp:['Свой загранпаспорт','Your passport'],o_keys:['Ключи от «Жигулей»','Keys to the Lada'],o_keys_me:['Ключи у вас','You have the keys'],
 o_keys_who:['Ключи у {n}','{n} has the keys'],o_car_gone:['«Жигули» уже уехали','The Lada is gone'],o_exit:['«Жигули» или попутка за $2 000','The Lada or a $2,000 ride'],o_exit_bus:['Остаётся попутка за $2 000','Only the $2,000 ride is left'],
@@ -1918,8 +1923,8 @@ $('#coopBack').addEventListener('click',()=>showScreen('menu'));
 $('#lobReady').addEventListener('click',()=>{myPres.rd=myPres.rd===1?0:1;lobbySig='';flushPresence(true);});
 $('#createBtn').addEventListener('click',async()=>{for(let i=0;i<4;i++){const r=await joinRoom(Math.random().toString(36).slice(2,6).replace(/[^a-z0-9]/g,'x'),true);if(r!=='taken')break;}});
 $('#joinBtn').addEventListener('click',()=>{const code=String($('#codeIn').value||'').toLowerCase().trim();if(!/^[a-z0-9]{3,8}$/.test(code)){$('#coopNote').textContent=T('code_bad');$('#coopNote').classList.add('err');return;}joinRoom(code,false);});
-$('#setBtn').addEventListener('click',()=>openSub('settings'));$('#helpBtn').addEventListener('click',()=>openSub('helpScr'));$('#quitBtn').addEventListener('click',quitGame);
-$('#pSetBtn').addEventListener('click',()=>openSub('settings'));$('#pHelpBtn').addEventListener('click',()=>openSub('helpScr'));
+$('#setBtn').addEventListener('click',()=>openSub('settings'));$('#quitBtn').addEventListener('click',quitGame);
+$('#pSetBtn').addEventListener('click',()=>openSub('settings'));$('#infoBtn').addEventListener('click',()=>openSub('helpScr'));
 $('#setBack').addEventListener('click',closeSub);$('#helpBack').addEventListener('click',closeSub);$('#exitBack').addEventListener('click',unquit);
 $('#vol').addEventListener('input',e=>{cfg.vol=+e.target.value;$('#volV').textContent=cfg.vol+'%';setVolume();saveCfg();});
 $('#vol').addEventListener('change',()=>{initAudio();sfx.pick();});
