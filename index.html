@@ -140,7 +140,7 @@ a{color:inherit}
 .gpl span{display:inline-flex;gap:6px;align-items:center;font:600 12px var(--mono);padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.06)}
 .empty{color:var(--muted);font-size:14px;padding:14px 4px}
 .coin{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle,#f7b955 0 50%,#c27d1c 51% 58%,#f2a33a 59%);box-shadow:inset 0 0 0 3px #c27d1c;color:#7a4a0c;font-size:16px}
-.purse b{font:800 28px/1.15 var(--display);font-variant-numeric:tabular-nums}
+.purse b{font:800 24px/1.15 var(--display);font-variant-numeric:tabular-nums}
 .purse span{font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .stats{display:none}
 .stats div{font:600 12px var(--mono);color:var(--muted);display:flex;gap:7px;align-items:center}
@@ -355,7 +355,14 @@ select option:disabled{color:#555}
 @keyframes tm{to{transform:scaleX(0)}}
 @media (max-width:860px){.desk,.doors{grid-template-columns:1fr}.desk{grid-template-rows:470px 470px}}
 @media (prefers-reduced-motion:reduce){.tc .in,.door,.box,.nt{transition:none;animation:none}}
+
+.achHead{flex-wrap:nowrap;gap:8px}.achHead h2{font-size:19px;gap:7px;white-space:nowrap}.achHead small{font-size:11px}.achHead>.row{flex-wrap:nowrap;gap:7px;min-width:0}.achHead #achFilter{flex:none}.achHead #achFilter button{font-size:10px;padding:5px 10px;gap:0}.achHead .selw{height:27px;padding-left:8px;gap:4px;font-size:10px}.achHead .selw .cselect{width:117px}.achHead .selectTrigger{font-size:10px;padding:5px 9px 5px 0;gap:6px}
+.door>span{max-height:0;opacity:0;transform:translateY(10px);overflow:hidden;transition:max-height .28s ease,opacity .25s,transform .28s}.door:hover>span,.door:focus-visible>span{max-height:70px;opacity:1;transform:translateY(0)}
+
 </style>
+<link rel="stylesheet" href="tamada.css">
+<script src="tamada-core.js"></script>
+<script src="tamada.js"></script>
 </head>
 <body>
 <div class="app">
@@ -376,7 +383,7 @@ select option:disabled{color:#555}
           <div class="pv"><i class="gemc" aria-hidden="true"><i class="fa-solid fa-gem"></i></i><div><b id="myPts">0</b><span data-t="ach_points"></span></div></div>
           <button class="btn sm" id="bRefill" type="button" hidden><i class="fa-solid fa-hand-holding-dollar"></i><span data-t="refill"></span></button>
         </div>
-        <div class="seg ptabs" role="tablist" id="pTabs"><button type="button" data-v="games" role="tab"><i class="fa-solid fa-clock-rotate-left"></i><span data-t="t_games"></span></button><button type="button" data-v="bets" role="tab"><i class="fa-solid fa-receipt"></i><span id="tBetsT"></span></button><button type="button" data-v="stats" role="tab"><i class="fa-solid fa-chart-simple"></i><span data-t="t_stats"></span></button></div>
+        <div class="seg ptabs" role="tablist" id="pTabs"><button type="button" data-v="stats" role="tab"><i class="fa-solid fa-chart-simple"></i><span data-t="t_stats"></span></button><button type="button" data-v="bets" role="tab"><i class="fa-solid fa-receipt"></i><span id="tBetsT"></span></button><button type="button" data-v="games" role="tab"><i class="fa-solid fa-clock-rotate-left"></i><span data-t="t_games"></span></button></div>
         <div class="ppanel sf" id="pPanel" role="tabpanel" tabindex="0"></div>
       </section>
       <section class="card" aria-label="Achievements">
@@ -410,11 +417,8 @@ select option:disabled{color:#555}
   </main>
 
   <main id="vTamada" hidden>
-    <div class="tamhead" style="margin-bottom:20px">
-      <div><p class="eyebrow"><i class="fa-solid fa-champagne-glasses"></i><span data-t="tamada"></span></p><h2 id="tamTitle"></h2><p class="muted" id="tamNote" style="margin:8px 0 0"></p></div>
-      <div class="row"><button class="btn" id="bTamEnd" type="button"><i class="fa-solid fa-flag-checkered"></i><span data-t="tam_end"></span></button><button class="btn ghost sm" type="button" data-back><i class="fa-solid fa-arrow-left"></i><span data-t="back"></span></button></div>
-    </div>
-    <div class="tcards" id="tcards"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:4px"><p class="eyebrow"><i class="fa-solid fa-champagne-glasses"></i><span data-t="tamada"></span></p><button class="btn ghost sm" type="button" data-back><i class="fa-solid fa-arrow-left"></i><span data-t="back"></span></button></div>
+    <div id="tamadaRoot"></div>
   </main>
 </div>
 
@@ -508,7 +512,7 @@ my_bets:['Мои ставки','My bets'],my_bets_n:['Ставки · {n}','Bets
 lobby_d:['Лобби одно на весь сайт: все игры берут игроков отсюда. Создайте его и назовите друзьям код или войдите по коду друга.','One lobby for the whole site: every game takes its players from here. Create one and share the code, or join a friend’s.'],
 lobby_code:['Код лобби','Lobby code'],copy:['Код','Code'],leave:['Выйти','Leave'],bet_event:['Ставка на событие','Bet on an event'],
 shelf:['Игротека','Game shelf'],shelf_d:['Все игры сайта. Выберите сами.','All the games on the site. Pick one yourself.'],tamada:['Тамада','Tamada'],
-tamada_d:['Все в лобби вслепую голосуют за игру. Ничья — решит рулетка.','Everyone in the lobby votes blind. A tie goes to the roulette.'],back:['Назад','Back'],
+tamada_d:['Колесо фортуны, голосование в три раунда или случайная игра на ленте.','A wheel of fortune, three voting rounds, or a random game reel.'],back:['Назад','Back'],
 name:['Имя','Name'],status:['Статус','Status'],need_name:['Введите имя.','Enter a name.'],save:['Сохранить','Save'],cancel:['Отмена','Cancel'],
 welcome:['Добро пожаловать','Welcome'],welcome_d:['Как вас зовут? Имя увидят другие игроки в лобби, а статус — в вашем профиле. На старте у вас 1000 фишек.','What’s your name? Others in the lobby see it, and your status shows on your profile. You start with 1000 chips.'],
 edit_t:['Профиль','Profile'],edit_d:['Имя видно в лобби. В каждой игре можно взять отдельный псевдоним.','Your name shows in the lobby. Each game can use its own alias.'],
@@ -532,7 +536,7 @@ votes:['{n} голос.','{n} votes'],your_vote:['ваш голос','your vote'
 inv_t:['Приглашение в игру','Game invite'],inv:['{n} зовёт в «{g}»','{n} invites you to {g}'],inv_sent:['Приглашение отправлено','Invite sent'],inv_sent_d:['{n} получит уведомление','{n} will get a notification'],
 declined:['{n} отказался','{n} declined'],balance:['у вас {n}','you have {n}'],
 ach:['Достижения','Achievements'],pts:['очков','pts'],ach_pts:['{n} очков','{n} pts'],weight:['Вес: {n} очков','Worth {n} points'],f_all:['Все','All'],f_portal:['Портал','Portal'],f_open:['Открытые','Unlocked'],f_locked:['Закрытые','Locked'],g_any:['Любая игра','Any game'],ach_none:['Здесь пока пусто.','Nothing here yet.'],ach_points:['очки достижений','achievement pts'],
-t_games:['Последние игры','Recent games'],t_bets:['Ставки','Bets'],t_bets_n:['Ставки · {n}','Bets · {n}'],t_stats:['Статистика','Stats'],
+t_games:['Последние игры','Recent games'],t_bets:['Последние ставки','Recent bets'],t_bets_n:['Последние ставки · {n}','Recent bets · {n}'],t_stats:['Статистика','Stats'],
 no_games:['Вы ещё не играли. Откройте игротеку или позовите тамаду.','No games yet. Open the shelf or call the tamada.'],
 r_win:['победа','win'],r_lose:['поражение','loss'],r_play:['идёт','live'],r_aborted:['прервана','abandoned'],r_done:['сыграно','played'],
 ago_now:['только что','just now'],ago_m:['{n} мин назад','{n} min ago'],ago_h:['{n} ч назад','{n} h ago'],
@@ -780,7 +784,7 @@ let myLabel='';try{myLabel=sessionStorage.getItem('gs-label')||'';}catch(e){}
 if(!/^u[a-z0-9]{6,12}$/.test(myLabel)){myLabel='u'+Math.random().toString(36).slice(2,10);try{sessionStorage.setItem('gs-label',myLabel);}catch(e){}}
 const LB={label:myLabel,code:'',hub:null,client:null,conn:null,hubConns:new Set(),hubLabel:null,connected:false,closed:true,others:new Map(),lastAll:0,migrating:false,pend:null,t0:Date.now()};
 let where='home',curGame=null,GP=null;
-function myPres(){return {v:1,n:prof?prof.name:'',s:prof?prof.status:'',c:prof?prof.chips:0,w:where,t0:LB.t0,gk:curGame,gp:curGame?GP:null,ac:prof?Object.keys(prof.ach||{}):[]};}
+function myPres(){return {v:1,n:prof?prof.name:'',s:prof?prof.status:'',c:prof?prof.chips:0,w:where,t0:LB.t0,gk:curGame,gp:curGame?GP:null,ac:prof?Object.keys(prof.ach||{}):[],tm:TM};}
 function members(){const out=[{label:LB.label,me:true,p:myPres()}];for(const [k,v] of LB.others)out.push({label:k,me:false,p:v.pres});return out;}
 function inLobby(){return !!LB.code;}
 function deliver(m){try{onEvent(m);}catch(e){console.warn(e);}}
@@ -1000,58 +1004,17 @@ $('#bRefill').onclick=()=>{if(prof.chips>=10)return;const from=prof.chips;prof.c
 
 /* ================= tamada ================= */
 let TM=null;
-function startTamada(){
-  const order=GAMES.map(g=>g.id);for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
-  unlock('p_tamada');if(bump('tam')>=5)unlock('p_tam5');emit('tam',{a:'start',id:rnd(),order,by:LB.label});
-}
-function joinTamada(){if(!TM)return;if(curGame)closeGame(true);closePop();show('vTamada');renderTam();}
-function onTam(from,d){
-  const a=str(d.a);
-  if(a==='start'){const order=Array.isArray(d.order)?d.order.map(x=>str(x)).filter(x=>GM[x]):[];if(!order.length)return;
-    TM={id:str(d.id),order,votes:{},by:str(d.by),phase:'vote',result:null};
-    if(from===LB.label){joinTamada();return;}
-    const n=memberName(from);
-    notify({avatar:n,color:'var(--stamp)',title:T('tam_call_t'),text:T('tam_call',{n}),ttl:45000,key:'tam',
-      actions:[{label:T('accept'),icon:'fa-check',primary:true,fn:joinTamada},{label:T('decline'),icon:'fa-xmark',fn:()=>{}}]});
-    return;}
-  if(!TM||str(d.id)!==TM.id)return;
-  if(a==='vote'){if(TM.phase!=='vote')return;const g=str(d.g);if(!GM[g])return;TM.votes[from]=g;if(where==='tamada'){renderTam();maybeFinish();}}
-  else if(a==='result'){const g=str(d.g);if(!GM[g]||TM.phase!=='vote')return;TM.phase='spin';TM.result=g;dismissKey('tam');
-    const tied=Array.isArray(d.tied)?d.tied.map(x=>str(x)).filter(x=>GM[x]):[g];
-    if(where==='tamada'){if(tied.length>1)unlock('p_tie');spin(tied,g);}else{TM.phase='done';TM.tie=tied.length>1;}}
-}
-function voters(){return members().filter(m=>m.p.w==='tamada').map(m=>m.label);}
-function maybeFinish(){if(!TM||TM.phase!=='vote'||TM.by!==LB.label)return;const vs=voters();if(vs.length&&vs.every(v=>TM.votes[v]))finishTam();}
-function finishTam(){
-  if(!TM||TM.phase!=='vote')return;const tally={};for(const g of TM.order)tally[g]=0;for(const v in TM.votes)if(tally[TM.votes[v]]!==undefined)tally[TM.votes[v]]++;
-  const max=Math.max(...Object.values(tally));let tied=TM.order.filter(g=>tally[g]===max);const g=tied[Math.floor(Math.random()*tied.length)];
-  emit('tam',{a:'result',id:TM.id,g,tied});
-}
-function votesText(n){if(L())return n+(n===1?' vote':' votes');const m=n%10,h=n%100;return n+' '+(m===1&&h!==11?'голос':m>=2&&m<=4&&(h<12||h>14)?'голоса':'голосов');}
-function tallyOf(g){return Object.values(TM.votes).filter(x=>x===g).length;}
-function renderTam(){
-  if(!TM)return;const box=$('#tcards');box.innerHTML='';const mine=TM.votes[LB.label];
-  TM.order.forEach((g,i)=>{const G=GM[g];const b=document.createElement('button');b.type='button';
-    b.className='tc'+(mine===g?' mine':'')+(TM.phase==='done'?' open':'')+(TM.phase==='done'&&TM.result===g?' win':'');b.dataset.g=g;b.style.setProperty('--rc',rc(G.r));
-    b.innerHTML=`<div class="in"><div class="bk"></div><div class="fr"><div class="cover ${G.cover}">${coverHTML(g)}</div>${rarBadge(G.r)}<h3></h3></div></div>`;b.querySelector('h3').textContent=gname(g);
-    const n=tallyOf(g);const v=document.createElement('div');v.className='votes';
-    v.innerHTML=`<div class="pips">${'<i class="fa-solid fa-heart"></i>'.repeat(Math.min(n,12))}</div><span class="${mine===g&&TM.phase==='vote'?'mine':''}"></span>`;
-    v.querySelector('span').textContent=(mine===g&&TM.phase==='vote'?T('your_vote')+' · ':'')+votesText(n);b.appendChild(v);
-    b.setAttribute('aria-label',(TM.phase==='done'?gname(g):'#'+(i+1))+' · '+votesText(n));b.onclick=()=>{if(TM.phase!=='vote')return;emit('tam',{a:'vote',id:TM.id,g});};box.appendChild(b);});
-  const vs=voters();const voted=vs.filter(v=>TM.votes[v]).length;
-  $('#tamTitle').textContent=TM.phase==='vote'?T('tam_vote'):TM.phase==='spin'?T('tam_spin'):T('tam_won',{g:gname(TM.result)});
-  $('#tamNote').textContent=TM.phase==='vote'?T('tam_note',{v:voted,n:Math.max(vs.length,1)}):TM.tie?T('tam_tie'):'';
-  $('#bTamEnd').hidden=!(TM.phase==='vote'&&TM.by===LB.label);
-}
-function spin(tied,g){
-  TM.tie=tied.length>1;renderTam();const cards=[...document.querySelectorAll('#tcards .tc')];const pool=cards.filter(c=>tied.includes(c.dataset.g));
-  const target=pool.findIndex(c=>c.dataset.g===g);const steps=pool.length>1?pool.length*4+target:3;let i=0,delay=90;
-  const tick=()=>{cards.forEach(c=>c.classList.remove('lit'));const c=pool[i%pool.length];c.classList.add('lit');i++;
-    if(i<=steps){delay*=1.09;setTimeout(tick,delay);}else{setTimeout(()=>{TM.phase='done';renderTam();if(GM[g].r==='legendary'||GM[g].r==='epic')boom(true);
-      setTimeout(()=>{if(TM&&TM.result===g&&!curGame&&where==='tamada')openGame(g);},2200);},500);}};
-  tick();
-}
-$('#bTamEnd').onclick=finishTam;
+const tamadaUI=window.createOrionTamada({
+  root:$('#tamadaRoot'),games:GAMES,lang:()=>cfg.lang,me:()=>LB.label,host:()=>LB.hubLabel||LB.label,
+  members,name:gname,tag:T,color:rc,cover:coverHTML,id:rnd,visible:()=>where==='tamada',
+  emit:data=>emit('tam',data),changed:state=>{TM=state;if(where==='tamada'&&state.tied?.length>1)unlock('p_tie');},join:joinTamada,launch:openGame,
+  notice:text=>toast(text),started:()=>{unlock('p_tamada');if(bump('tam')>=5)unlock('p_tam5');},
+  invite:(title,text)=>notify({icon:'fa-champagne-glasses',color:'var(--amber)',title,text,ttl:45000,key:'tam',actions:[{label:T('accept'),icon:'fa-check',primary:true,fn:joinTamada},{label:T('decline'),icon:'fa-xmark',fn:()=>{}}]})
+});
+function startTamada(){if(curGame)closeGame(true);closePop();show('vTamada');tamadaUI.open();}
+function joinTamada(){if(curGame)closeGame(true);closePop();show('vTamada');tamadaUI.join();}
+function onTam(from,data){tamadaUI.receive(from,data);}
+function renderTam(){tamadaUI.render();}
 
 /* ================= views ================= */
 function show(id){for(const v of ['vHome','vShelf','vTamada','vEvents'])$('#'+v).hidden=v!==id;where=id==='vHome'?'home':id==='vShelf'?'shelf':id==='vEvents'?'events':'tamada';
@@ -1083,7 +1046,7 @@ function renderHome(){
   renderPanel();if(false)$('#stats').innerHTML=`<div><i class="fa-solid fa-coins"></i><b>${prof.bets.length}</b>${esc(T('s_bets'))}</div><div><i class="fa-solid fa-check"></i><b>${won}</b>${esc(T('s_won'))}</div><div><i class="fa-solid fa-trophy"></i><b>${fmtN(prof.best)}</b>${esc(T('s_best'))}</div><div><i class="fa-solid fa-gem"></i><b>${Object.keys(prof.ach).length}</b>${esc(T('s_ach'))} · <b>${fmtN(achPts(Object.keys(prof.ach)))}</b>${esc(T('pts'))}</div>`;
   renderAch();renderChip();
 }
-let pTab='games',panSig='';
+let pTab='stats',panSig='';
 function setTab(t){pTab=t;$('#pPanel').setAttribute('aria-labelledby','pTab-'+t);document.querySelectorAll('#pTabs button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.v===t);b.setAttribute('aria-selected',b.dataset.v===t);b.tabIndex=b.dataset.v===t?0:-1;});segThumb($('#pTabs'));panSig='';renderPanel();$('#pPanel').scrollTop=0;}
 document.querySelectorAll('#pTabs button').forEach(b=>{b.id='pTab-'+b.dataset.v;b.setAttribute('aria-controls','pPanel');b.onclick=()=>setTab(b.dataset.v);b.onkeydown=e=>{if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;e.preventDefault();const tabs=[...document.querySelectorAll('#pTabs button')];const next=tabs[(tabs.indexOf(b)+(e.key==='ArrowRight'?1:2))%3];setTab(next.dataset.v);next.focus();};});
 function ago(t){const m=Math.floor((Date.now()-t)/60000);if(m<1)return T('ago_now');if(m<60)return T('ago_m',{n:m});const h=Math.floor(m/60);if(h<24)return T('ago_h',{n:h});return new Date(t).toLocaleDateString(cfg.lang==='en'?'en-US':'ru-RU',{day:'numeric',month:'short'});}
@@ -1228,8 +1191,8 @@ function applyLang(){
 }
 $('#lRu').onclick=()=>setLang('ru');$('#lEn').onclick=()=>setLang('en');
 setTimeout(segAll,60);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(segAll);
-setInterval(()=>{renderChip();renderPop();if(TM&&TM.phase==='vote'&&where==='tamada'){renderTamNote();maybeFinish();}},500);
-function renderTamNote(){const vs=voters();$('#tamNote').textContent=T('tam_note',{v:vs.filter(v=>TM.votes[v]).length,n:Math.max(vs.length,1)});}
+setInterval(()=>{renderChip();renderPop();tamadaUI.tick();},500);
+
 applyLang();show('vHome');if(prof)setTab(pTab);
 if(!prof)openProfile(true);
 try{const c=sessionStorage.getItem('gs-lobby');if(c&&/^[a-z0-9]{3,8}$/.test(c)){joinLobby(c,false).then(r=>{if(r==='nf')joinLobby(c,true).then(()=>renderHome());else renderHome();});}}catch(e){}

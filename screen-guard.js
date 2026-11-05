@@ -4,6 +4,8 @@
   const media = matchMedia('(max-width: 700px), (max-height: 500px) and (pointer: coarse)');
   const style = document.createElement('style');
   style.textContent = `
+    *,*::before,*::after{-webkit-user-select:none;user-select:none}
+    ::selection{background:transparent;color:inherit}
     #screenGuard[hidden]{display:none!important}
     #screenGuard{position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;
       padding:28px;background:#0e0f11;color:#ece6d8;text-align:center;overflow:auto;

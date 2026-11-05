@@ -290,6 +290,30 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
 .toast{position:fixed;left:50%;bottom:24px;translate:-50% 0;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;font-weight:700;z-index:80}
 @media (max-width:1080px){.cards3{grid-template-columns:1fr}.deck,.field{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.foe .fig{animation:none!important}.scene .far,.scene .mid{transition:none}}
+
+/* A fixed cabinet: content scrolls inside its allocation instead of resizing it. */
+.wrap:has(#sPlay:not([hidden])){height:100dvh;max-width:1440px;padding-block:10px;gap:10px}
+.wrap:has(#sPlay:not([hidden]))>.top{flex:none;height:32px}
+#sPlay{flex:1;min-height:0}
+.playLayout{height:100%;min-height:0;display:grid;grid-template-rows:minmax(0,40fr) minmax(0,60fr);gap:12px}
+.playLayout .field{min-height:0;grid-template-columns:minmax(0,1fr) 300px;align-items:stretch}
+.playLayout .scene{height:100%;min-height:0}
+.playLayout .foep{min-height:0;overflow:hidden;display:grid;grid-template-rows:36px 12px 18px minmax(36px,.8fr) minmax(66px,1.2fr) 16px;gap:5px;padding:10px}
+.foep>.hd{grid-row:1}.foep>.bar{grid-row:2;height:12px}.foep>.traits{grid-row:3}.foep>.uniqueTraits{grid-row:4;overflow:auto;padding:6px 9px}.foep>.ereels{grid-row:5;min-height:0;height:100%}.foep>.elast{grid-row:6;min-height:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
+.foep>.uniqueTraits[hidden]{display:block!important;visibility:hidden}
+.foep .ic{width:34px;height:34px;font-size:19px}.foep h3{font-size:19px}.foep .uniqueTraits .eyebrow{font-size:9px;margin-bottom:4px}.uniqueTrait+.uniqueTrait{margin-top:5px}.uniqueTrait b{font-size:12px}.uniqueTrait p{font-size:11px}
+.playLayout .deck{min-height:0;grid-template-columns:minmax(210px,.95fr) 250px minmax(0,2.4fr);padding:12px;gap:12px;overflow:hidden}
+.playLayout .pane{min-height:0;display:grid;grid-template-rows:78px 14px minmax(0,1fr);gap:10px}
+.playLayout .pane:nth-child(2){grid-template-rows:14px 236px minmax(0,1fr)}
+.inv{min-height:0;height:100%;grid-template-rows:repeat(7,minmax(0,1fr))}.inv .slotc{aspect-ratio:auto;min-height:0}.inv .rn{min-height:0;overflow:hidden}
+.syns{min-height:0;overflow:auto;align-content:start;display:grid;grid-auto-rows:min-content}
+.reelsBox{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) 64px;gap:10px}.reelsBox>.reels{height:100%;min-height:0}.ctl{height:64px;flex-wrap:nowrap;gap:8px;min-width:0}.logPreview{height:64px;min-width:0;overflow:hidden}.logPreview>span{font-size:10px}.rollTools{height:100%;gap:8px;flex:none}.spins b{font-size:18px}#bRoll{height:100%;min-width:120px;padding:10px 18px}
+.autoButton{width:42px;height:64px;padding:0;flex:none;overflow:hidden}.autoButton>span{display:block;transform:rotate(90deg);font:700 13px var(--mono);letter-spacing:.1em}.autoButton.engaged{background:linear-gradient(180deg,#8a6220,#bd8c33);box-shadow:inset 0 3px 7px #4a310b,0 1px 0 rgba(255,255,255,.1);transform:translateY(3px);color:#ead5a8;filter:none}.autoButton.engaged:hover{filter:brightness(1.1)}
+.runePositions{bottom:4px;gap:1px;align-items:center;font-family:var(--mono)}.positionBadge{width:15px;height:15px;border:1px solid rgba(255,255,255,.85);border-radius:50%;display:grid;place-items:center;color:#fff;font:600 8px/1 var(--mono);background:transparent}.positionBadge.active{background:#fff;border-color:#fff;color:#17141c;text-shadow:none}.ring .runePositions{gap:2px}.ring .positionBadge{width:16px;height:16px;font-size:8px}.ring .positionBadge:first-child,.ring .positionBadge:last-child{transform:translateY(-8px)}.rn{padding-bottom:15px}.ring .sk .rn{padding-bottom:17px}
+.socketPos{inset:0;translate:none;display:grid;place-items:center;border-radius:50%;font:700 20px/1 var(--display);color:rgba(239,230,210,.42);pointer-events:none;z-index:3;transition:opacity .22s,background .22s;opacity:1}.sk.filled .socketPos{opacity:0}.ring.dragging .socketPos{opacity:1;background:rgba(13,11,18,.6);color:#f3cf7a}.ring.dragging .rn{opacity:.45;transition:opacity .22s}
+.sceneLoot{position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:12;width:min(440px,calc(100% - 40px));max-height:calc(100% - 28px);padding:12px 16px;background:rgba(15,12,20,.96);border:1px solid var(--brass);border-radius:14px;box-shadow:0 12px 38px #0009;display:flex;flex-direction:column;gap:8px;animation:mp .25s ease-out}
+.sceneLoot h2{margin:0;font:700 23px/1 var(--display);color:var(--brass2)}.sceneLoot .lootRewards{min-height:0;overflow:auto;gap:7px;font-size:13px}.sceneLoot .lootRewards p{margin:2px 0}.sceneLoot .lootReward b{font-size:17px}.sceneLoot .tipPositions{font-size:11px;gap:3px;margin-top:3px;padding-top:3px}.sceneLoot .btn{flex:none;align-self:stretch;min-height:32px}
+
 </style>
 </head>
 <body>
@@ -316,7 +340,7 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
   </section>
 
   <section id="sPlay" hidden>
-    <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="playLayout">
       <div class="field">
         <div class="scene" id="scene">
           <div class="far" id="far"></div><div class="mid" id="mid"></div><div class="ground" id="ground"></div><div class="fog"></div>
@@ -329,6 +353,7 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
           <div class="vig" id="vig"></div><div class="hitflash" id="hitflash"></div>
           <div class="banner" id="banner"></div>
           <div class="bufbar" id="bufbar"></div>
+          <div class="sceneLoot" id="mLoot" role="dialog" aria-modal="false" aria-labelledby="lootTitle" hidden><h2 id="lootTitle" data-t="loot"></h2><div class="lootRewards" id="lootRewards"></div><button class="btn sm" id="lootTake" type="button" data-t="take_loot"></button></div>
         </div>
         <aside class="foep" id="foep">
           <div class="hd"><span class="ic" id="pIc"></span><div style="min-width:0"><span class="tag" id="pTag"></span><h3 id="pName"></h3></div></div>
@@ -348,7 +373,6 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
         <div class="pane">
           <p class="eyebrow"><i class="fa-solid fa-circle-nodes"></i><span data-t="socks"></span></p>
           <div class="ring" id="ring"></div>
-          <div class="positionHelp" id="positionHelp"></div>
           <div class="syns" id="syns"></div>
         </div>
         <div class="reelsBox">
@@ -356,8 +380,7 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
           <div class="ctl">
             <button class="logPreview" id="bLogs" type="button" aria-haspopup="dialog"><i class="fa-solid fa-scroll" aria-hidden="true"></i><span id="logPreview" aria-live="polite"></span><i class="fa-solid fa-angle-up" aria-hidden="true"></i></button>
             <div class="rollTools"><div class="spins" id="spinsLeft"><i class="fa-solid fa-rotate" aria-hidden="true"></i><b id="spinN">0</b></div>
-            <label class="sw"><input type="checkbox" id="auto"><span data-t="auto"></span></label>
-            <button class="btn" id="bRoll" type="button"><i class="fa-solid fa-dice"></i>ROLL</button></div>
+            <button class="btn" id="bRoll" type="button"><i class="fa-solid fa-dice"></i>ROLL</button><button class="btn autoButton" id="auto" type="button" aria-pressed="false" aria-label="AUTO"><span>AUTO</span></button></div>
           </div>
         </div>
       </div>
@@ -377,7 +400,7 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
 </div>
 <div class="modal" id="mInfo" hidden><div class="mbox" id="infoBox"></div></div>
 <div class="modal" id="mLogs" role="dialog" aria-modal="true" aria-labelledby="logsTitle" hidden><div class="mbox logBox"><div class="dialogHead"><h2 id="logsTitle" data-t="logs"></h2><button class="ib" id="logsClose" type="button" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div><ol class="logList" id="logList"></ol></div></div>
-<div class="modal" id="mLoot" role="dialog" aria-modal="true" aria-labelledby="lootTitle" hidden><div class="mbox lootBox"><h2 id="lootTitle" data-t="loot"></h2><div class="lootRewards" id="lootRewards"></div><button class="btn" id="lootTake" type="button" data-t="take_loot"></button></div></div>
+
 <div id="tip" hidden></div>
 <div class="toast" id="toast" hidden></div>
 
@@ -392,6 +415,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const rid=()=>Math.random().toString(36).slice(2,10);
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
 const SPIN_MAX=100;
+const INV_CAP=35;
 
 /* ================= i18n ================= */
 const D={
@@ -501,7 +525,8 @@ const RUNE_POSITIONS={
 for(const [k,positions] of Object.entries(RUNE_POSITIONS))RUNES[k].positions=positions;
 const runePosition=(k,i)=>k&&RUNES[k].positions.find(p=>p.slot===i+1);
 const canPlace=(k,a,i)=>!k||a==='inv'||!!runePosition(k,i);
-function positionMarks(k,slot){return `<span class="runePositions">${RUNES[k].positions.map(p=>`<span class="${p.slot===slot?'active':''}">${POS[p.slot-1]}</span>`).join('')}</span>`;}
+const ROMAN=['I','II','III','IV','V','VI'];
+function positionMarks(k,slot){const positions=RUNES[k].positions;return `<span class="runePositions" aria-hidden="true">${Array.from({length:3},(_,i)=>{const p=positions[i];return `<span class="positionBadge${p?' exists':''}${p&&(!slot||p.slot===slot)?' active':''}">${p?ROMAN[p.slot-1]:''}</span>`;}).join('')}</span>`;}
 function positionDescription(k,slot){return `<div class="tipPositions">${RUNES[k].positions.map(p=>`<div class="${p.slot===slot?'current':''}"><strong>${POS[p.slot-1]}</strong> ${esc(tr(p.d))}</div>`).join('')}</div>`;}
 const BASIC=['raido','jera','teiwaz','algiz','berkana','thurs','gebo','fehu','hagal','uruz'];
 const SYN=[
@@ -660,13 +685,13 @@ function renderLogPreview(){if(!G)return;$('#logPreview').innerHTML=G.logs.slice
 function renderLogs(){const list=$('#logList');const bottom=list.scrollTop+list.clientHeight>=list.scrollHeight-24;
   list.innerHTML=(G?G.logs:[]).map(e=>`<li class="logEntry ${e.side}"><small>${esc((e.turn?T('log_turn',{n:e.turn})+' · ':'')+T('log_'+e.side))}</small>${esc(logText(e))}${e.grid?`<div class="logGrid">${e.grid.map(row=>`<span class="logRow">${row.map(k=>{const set=e.side==='enemy'?ESYM:SYM;return `<i class="fa-solid ${set[k].i}" style="color:${set[k].c}" title="${esc(T((e.side==='enemy'?'es_':'sym_')+k))}"></i>`;}).join('')}</span>`).join('')}</div>`:''}</li>`).join('');
   if(bottom)list.scrollTop=list.scrollHeight;}
-function openLogs(){if(!G||G.awaitingLoot)return;$('#mLogs').hidden=false;renderLogs();$('#logList').scrollTop=$('#logList').scrollHeight;$('#logsClose').focus();}
+function openLogs(){if(!G)return;$('#mLogs').hidden=false;renderLogs();$('#logList').scrollTop=$('#logList').scrollHeight;$('#logsClose').focus();}
 function closeLogs(){if($('#mLogs').hidden)return;$('#mLogs').hidden=true;$('#bLogs').focus();autoNext();}
 $('#bLogs').onclick=openLogs;$('#logsClose').onclick=closeLogs;$('#mLogs').onclick=e=>{if(e.target.id==='mLogs')closeLogs();};
 function newRun(mode,hk){
   const H=HEROES[hk];
-  G={mode,hk,H,th:H.th,hp:H.hp,max:H.hp,spins:H.spins,gold:0,depth:0,wins:0,rolls:0,inv:Array(20).fill(null),sock:Array(6).fill(null),buffs:[],rolling:false,over:false,
-     enemy:null,eBlock:0,eRage:0,first:true,fightHurt:0,gid:SHELL?rid():null,stake:0,events:{},path:null,timeEnd:0,wm:{},lastMult:1,lastGrid:null,logs:[],selectedRune:null,awaitingLoot:false};
+  G={mode,hk,H,th:H.th,hp:H.hp,max:H.hp,spins:H.spins,gold:0,depth:0,wins:0,rolls:0,inv:Array(INV_CAP).fill(null),sock:Array(6).fill(null),buffs:[],rolling:false,over:false,
+     enemy:null,eBlock:0,eRage:0,first:true,fightHurt:0,gid:SHELL?rid():null,stake:0,events:{},path:null,timeEnd:0,wm:{},lastMult:1,lastGrid:null,logs:[],selectedRune:null,awaitingLoot:false,auto:false,pendingLoot:null};
   H.start.forEach(r=>{const i=G.sock.findIndex((x,i)=>!x&&canPlace(r,'sock',i));if(i>=0)G.sock[i]=r;else giveRune(r);});
   if(mode==='camp')G.path=campPath(H.th);
   if(mode==='time'){G.spins=40;G.timeEnd=performance.now()+180000;}
@@ -685,7 +710,7 @@ function nextEnemyId(){
 function scale(){return G.mode==='endless'?1+.12*G.depth:G.mode==='time'?1+.08*G.depth:G.mode==='weekly'?1+.05*G.depth:1;}
 function spawn(){const id=nextEnemyId();const E=ENEMY[id];const sc=scale()*(G.wm.brutes?1.25:1);const tr2=E.tr.slice();if(G.wm.thorns&&!tr2.includes('thorns'))tr2.push('thorns');
   G.enemy={id,...E,tr:tr2,hp:Math.round(E.hp*sc),max:Math.round(E.hp*sc),atk:Math.round(E.atk*(1+(sc-1)*.6)),ar:E.ar||0,enr:0};
-  G.eBlock=tr2.includes('wall')?10:0;G.first=true;G.fightHurt=0;G.eRage=0;G.th=themeAt(G.depth);
+  G.lastEnemyGrid=null;G.eBlock=tr2.includes('wall')?10:0;G.first=true;G.fightHurt=0;G.eRage=0;G.th=themeAt(G.depth);
   logEvent('system','log_spawn',{n:G.depth+1,name:tr(E.n),hp:G.enemy.hp,atk:G.enemy.atk});}
 const has=b=>G.buffs.some(x=>x.id===b);
 const hasT=t=>G.enemy&&G.enemy.tr.includes(t);
@@ -715,8 +740,8 @@ function pickSym(w,rf=rnd){let t=0;for(const k in w)t+=w[k];let r=rf()*t;for(con
 function power(){if(!G)return 0;const C=cfgNow();return activeSyn().length*1.6+G.buffs.filter(b=>BUFFS[b.id].b).length+(C.rows*C.cols-3)/2.5+Math.min(6,(G.lastMult-1)*1.5);}
 
 /* ================= reels (strip animation) ================= */
-function reelGeom(box,rows){return clamp(Math.floor((box.clientHeight-24-(rows+1)*6)/(rows+1.3)),22,60);}
-function cellHTML(set,s,ch,cls='',row=null){const X=set[s];const desc=T((set===SYM?'sym_':'es_')+s);return `<div class="cell ${cls}" ${row==null?'':`data-row="${row}"`} style="height:${ch}px;--fs:${Math.round(ch*.42)}px" title="${esc(T(row==null?'not_landed':'landed')+': '+desc)}"><i class="fa-solid ${X.i}" style="color:${X.c}"></i></div>`;}
+function reelGeom(box,rows){return clamp(Math.floor((box.clientHeight-(box.id==='ereels'?20:28)-(rows+1)*6)/(rows+1.3)),10,180);}
+function cellHTML(set,s,ch,cls='',row=null){const X=set[s];const desc=T((set===SYM?'sym_':'es_')+s);return `<div class="cell ${cls}" ${row==null?'':`data-row="${row}"`} style="height:${ch}px;--fs:${Math.max(9,Math.round(ch*.42))}px" title="${esc(T(row==null?'not_landed':'landed')+': '+desc)}"><i class="fa-solid ${X.i}" style="color:${X.c}"></i></div>`;}
 function finalStrip(set,values,ch,w){return cellHTML(set,pickSym(w,Math.random),ch,'neighbor top')+values.map((s,r)=>cellHTML(set,s,ch,'selected',r)).join('')+cellHTML(set,pickSym(w,Math.random),ch,'neighbor bottom');}
 function drawReels(box,set,grid,rows,cols,ch){
   const w=set===SYM?cfgNow().w:G.enemy.w;const edge=Math.round(ch*.65),offset=edge-ch;const h=rows*ch+(rows+1)*6+edge*2;let html='';
@@ -883,7 +908,7 @@ async function foeTurn(blk,C){
   const frozen=C.freeze>0&&rnd()<C.freeze;
   const rows=clamp(E.reel[0]+(hasT('frenzy')&&E.hp<E.max/2?1:0),1,4),cols=E.reel[1];
   const eg=Array.from({length:rows},()=>Array.from({length:cols},()=>pickSym(E.w)));
-  await spinReels(eb,ESYM,E.w,eg,rows,cols,30,{fast:true,silent:true});snd(160,.06,'square',.05);logEvent('enemy','log_enemy_roll',{name:tr(E.n)},eg);
+  await spinReels(eb,ESYM,E.w,eg,rows,cols,reelGeom(eb,rows),{fast:true,silent:true});G.lastEnemyGrid=eg;snd(160,.06,'square',.05);logEvent('enemy','log_enemy_roll',{name:tr(E.n)},eg);
   if(frozen){$('#eLast').textContent=T('frozen',{n:tr(E.n)});logEvent('enemy','frozen',{n:tr(E.n)});popAt(fp.x,fp.y-fp.r,'❄','blk');burst(fp.x,fp.y,'#cfefff',30,3,40,2,.02);await sleep(300);enemyPassive();return;}
   let fangs=0,guard=0,drop=0,crit=0;
   eg.forEach((row,r)=>{let len=0;for(const s of row){if(s==='fang')len++;else break;}const m=len>=3?2:1;
@@ -913,7 +938,9 @@ function popHero(text,cls){const sc=$('#scene').getBoundingClientRect();popAt(80
 function hurtFoe(){const el=$('#foe');el.classList.remove('hurt');void el.offsetWidth;el.classList.add('hurt');}
 function hurtHero(){const c=$('#heroCard');c.classList.remove('hurt');void c.offsetWidth;c.classList.add('hurt');const f=$('#hitflash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');}
 let autoTimer=null;
-function autoNext(){clearTimeout(autoTimer);if($('#auto').checked&&G&&!G.over&&!G.awaitingLoot&&!G.rolling&&$('#mLogs').hidden&&$('#mInfo').hidden)autoTimer=setTimeout(()=>{if($('#auto').checked)roll();},420*SPEED);}
+function renderAuto(){const b=$('#auto');b.setAttribute('aria-pressed',!!G?.auto);b.classList.toggle('engaged',!!G?.auto);b.disabled=!!G?.over;}
+function setAuto(on){if(!G)return;G.auto=!!on;renderAuto();if(G.auto&&!G.rolling&&!G.awaitingLoot)autoNext();else if(!G.auto)clearTimeout(autoTimer);}
+function autoNext(){clearTimeout(autoTimer);if(G&&G.auto&&!G.over&&!G.awaitingLoot&&!G.rolling&&$('#mLogs').hidden&&$('#mInfo').hidden)autoTimer=setTimeout(()=>{if(G?.auto)roll();},420*SPEED);}
 function rollLoot(E){
   const H=G.H;const out=[];const r=rnd();
   const pickRune=()=>rnd()<.14?H.uRune:BASIC[R(BASIC.length)];
@@ -957,9 +984,9 @@ function renderLoot(loot,gain,gold){let html='';
   const actual=Math.min(gain,SPIN_MAX-G.spins);if(actual)html+=`<p style="color:var(--brass2)"><i class="fa-solid fa-rotate"></i> ${esc(T('spins_gain',{n:actual}))}</p>`;
   if(gold)html+=`<p style="color:var(--brass2)"><i class="fa-solid fa-coins"></i> +${gold} ${esc(T('gold'))}</p>`;$('#lootRewards').innerHTML=html;}
 async function showLoot(loot,gain,gold){
-  G.awaitingLoot=true;clearTimeout(autoTimer);const pause=performance.now();G.lootPauseAt=pause;hideTip();renderLoot(loot,gain,gold);$('#mLoot').hidden=false;$('#lootTake').disabled=false;$('#lootTake').focus();
+  G.awaitingLoot=true;G.rolling=false;G.pendingLoot={loot,gain,gold};renderDeck();clearTimeout(autoTimer);const pause=performance.now();G.lootPauseAt=pause;hideTip();renderLoot(loot,gain,gold);$('#mLoot').hidden=false;$('#lootTake').disabled=false;$('#lootTake').focus();
   await new Promise(resolve=>{$('#lootTake').onclick=()=>{$('#lootTake').disabled=true;resolve();};});
-  $('#lootTake').onclick=null;$('#mLoot').hidden=true;G.awaitingLoot=false;G.lootPauseAt=0;if(G.timeEnd)G.timeEnd+=performance.now()-pause;$('#bRoll').focus();
+  $('#lootTake').onclick=null;$('#mLoot').hidden=true;G.awaitingLoot=false;G.rolling=true;G.pendingLoot=null;G.lootPauseAt=0;if(G.timeEnd)G.timeEnd+=performance.now()-pause;$('#bRoll').focus();
 }
 async function banner(t,ms=1000){const f=$('#banner');f.textContent=t;f.classList.add('on');await sleep(ms);f.classList.remove('on');}
 let scroll=0;
@@ -972,7 +999,7 @@ async function walk(){
   if(G.enemy.boss)await banner(T('boss'),800);
 }
 function endRun(why){
-  if(G.over)return;logEvent('system','log_end',{reason:T(why==='win'?'end_win':why==='fall'?'end_fall':why==='time'?'end_time':'end_spins')});G.over=true;G.rolling=false;clearTimeout(autoTimer);$('#auto').checked=false;$('#tally').classList.remove('on');const win=why==='win';
+  if(G.over)return;logEvent('system','log_end',{reason:T(why==='win'?'end_win':why==='fall'?'end_fall':why==='time'?'end_time':'end_spins')});G.over=true;G.rolling=false;clearTimeout(autoTimer);if(G)G.auto=false;renderAuto();$('#tally').classList.remove('on');const win=why==='win';
   let payout=0;const score=G.wins;const key=G.mode==='camp'?G.hk:G.mode;const rec=store[key]||{};let newBest=false;
   if(G.mode==='camp'){payout=G.stake?(win?G.stake*2+G.gold:Math.min(G.stake,Math.floor(G.gold*.6))):0;if(win)rec.cleared=(rec.cleared||0)+1;rec.best=Math.max(rec.best||0,G.wins);}
   else if(score>(rec.best||0)){rec.best=score;newBest=true;}
@@ -1016,7 +1043,7 @@ function renderFoe(){const E=G.enemy;if(!E)return;
   $('#pTraits').innerHTML=`<span class="n"><i class="fa-solid fa-tooth"></i>${E.atk+E.enr}</span>`;
   const unique=$('#pUnique');unique.hidden=!E.tr.length;unique.innerHTML=`<p class="eyebrow"><i class="fa-solid fa-gem"></i>${esc(T('unique_effect'))}</p>`+E.tr.map(t=>{const X=TRAITS[t];return `<div class="uniqueTrait"><b><i class="fa-solid ${X.i}"></i>${esc(tr(X.n).replace('{v}',E.ar))}</b><p>${esc(tr(X.d).replace('{v}',E.ar))}</p></div>`;}).join('');
 }
-function drawEReels(){const E=G.enemy;drawReels($('#ereels'),ESYM,Array.from({length:E.reel[0]},()=>Array.from({length:E.reel[1]},()=>'blank')),E.reel[0],E.reel[1],30);$('#eLast').textContent='';}
+function drawEReels(){const E=G.enemy;const rows=G.lastEnemyGrid?.length||E.reel[0],cols=E.reel[1];drawReels($('#ereels'),ESYM,G.lastEnemyGrid||Array.from({length:rows},()=>Array(cols).fill('blank')),rows,cols,reelGeom($('#ereels'),rows));$('#eLast').textContent='';}
 function renderHero(){const H=G.H;$('#hIc').innerHTML=`<i class="fa-solid ${H.i}"></i>`;$('#hName').textContent=tr(H.n);
   const pc=Math.max(0,G.hp)/G.max*100;$('#hHp').style.width=pc+'%';$('#hHpG').style.width=pc+'%';$('#hHpT').textContent=Math.max(0,G.hp)+' / '+G.max;$('#hGold').textContent=G.gold;
   $('#hScore').innerHTML=`<i class="fa-solid fa-skull"></i>${G.wins}`;}
@@ -1026,48 +1053,47 @@ function renderHud(){const h=$('#hud');let s='';
   if(G.timeEnd){const left=Math.max(0,G.timeEnd-(G.lootPauseAt||performance.now()))/1000;s+=`<span class="${left<30?'low':''}"><i class="fa-solid fa-stopwatch"></i>${Math.floor(left/60)}:${String(Math.floor(left%60)).padStart(2,'0')}</span>`;}
   if(!G.path)s+=`<span><i class="fa-solid fa-stairs"></i>${esc(T('depth'))} ${G.depth+1}</span>`;
   if(h._s!==s){h._s=s;h.innerHTML=s;}}
-setInterval(()=>{if(G&&!G.over&&G.timeEnd&&!$('#sPlay').hidden){renderHud();if(performance.now()>G.timeEnd&&!G.rolling)endRun('time');}},250);
+setInterval(()=>{if(G&&!G.over&&G.timeEnd&&!$('#sPlay').hidden){renderHud();if(performance.now()>G.timeEnd&&!G.rolling&&!G.awaitingLoot)endRun('time');}},250);
 function runeEl(k,slot=null){const r=RUNES[k];return `<button type="button" class="rn${r.u?' u':''}" draggable="true" style="--rc:${r.c}" data-tip="rune:${k}:${slot||''}" aria-label="${esc(tr(r.n)+'; '+r.positions.map(p=>POS[p.slot-1]+' '+tr(p.d)).join('; '))}">${r.g}${positionMarks(k,slot)}</button>`;}
 const RING=(()=>{const o=[];for(let i=0;i<6;i++){const a=(i*60-90)*Math.PI/180;o.push([+(118+Math.cos(a)*86).toFixed(1),+(118+Math.sin(a)*86).toFixed(1)]);}return o;})();
 function renderDeck(){
   const inv=$('#inv');inv.innerHTML=G.inv.map((k,i)=>`<div class="slotc" data-a="inv" data-i="${i}">${k?runeEl(k):''}</div>`).join('');
-  $('#invN').textContent=G.inv.filter(Boolean).length+'/20';
+  $('#invN').textContent=G.inv.filter(Boolean).length+'/'+G.inv.length;
   const syn=activeSyn();const lit=new Set();
   let svg=`<svg viewBox="0 0 236 236"><polygon class="chan" points="${RING.map(p=>p.join(',')).join(' ')}"/>${RING.map(p=>`<line class="chan" x1="118" y1="118" x2="${p[0]}" y2="${p[1]}"/>`).join('')}`;
   syn.forEach((s,si)=>{const ids=synSockets(s);ids.forEach(i=>lit.add(i));const col=RUNES[G.sock[ids[0]]].c;const pts=ids.map(i=>RING[i]);
     if(pts.length===2)svg+=`<line class="syn" style="--sc:${col};stroke:${col};animation-delay:${-si*.2}s" x1="${pts[0][0]}" y1="${pts[0][1]}" x2="${pts[1][0]}" y2="${pts[1][1]}"/>`;
     else svg+=`<polygon class="syn" style="--sc:${col};stroke:${col};animation-delay:${-si*.2}s" points="${pts.map(p=>p.join(',')).join(' ')}"/>`;});
   svg+='</svg>';
-  $('#ring').innerHTML=svg+RING.map((p,i)=>`<div class="sk slotc${lit.has(i)?' lit':''}" data-a="sock" data-i="${i}" style="left:${p[0]}px;top:${p[1]}px"><span class="socketPos" aria-hidden="true">${POS[i]}</span>${G.sock[i]?runeEl(G.sock[i],i+1):''}</div>`).join('')+`<div class="core" style="--cp:${syn.length}">${syn.length}<small>${esc(T('syn_core'))}</small></div>`;
+  $('#ring').innerHTML=svg+RING.map((p,i)=>`<div class="sk slotc${G.sock[i]?' filled':''}${lit.has(i)?' lit':''}" data-a="sock" data-i="${i}" style="left:${p[0]}px;top:${p[1]}px"><span class="socketPos" aria-hidden="true">${ROMAN[i]}</span>${G.sock[i]?runeEl(G.sock[i],i+1):''}</div>`).join('')+`<div class="core" style="--cp:${syn.length}">${syn.length}<small>${esc(T('syn_core'))}</small></div>`;
   const C=cfgNow();const reso=Object.entries(C.c).filter(([k,n])=>n>=3).map(([k])=>k);
   const items=syn.map(s=>`<span class="cb" data-tip="syn:${s.id}"><i class="fa-solid ${s.i}"></i>${esc(tr(s.n))}</span>`).concat(reso.map(k=>`<span class="cb" data-tip="reso:${k}"><i class="fa-solid fa-wave-square"></i>${esc(T('reso'))}: ${esc(tr(RUNES[k].n))}</span>`));
   while(items.length<3)items.push(`<span class="cb ph"><i class="fa-regular fa-circle"></i>${esc(T('syn_ph'))}</span>`);
   $('#syns').innerHTML=items.join('');bindTips($('#syns'));bindTips($('#ring'));bindTips(inv);
   const selection=G.selectedRune;
-  const selectedKey=selection?(selection.a==='inv'?G.inv:G.sock)[selection.i]:null;
-  $('#positionHelp').innerHTML=selectedKey?`<b style="color:var(--brass2)">${esc(tr(RUNES[selectedKey].n))}</b><div>${esc(T('position_selected',{n:tr(RUNES[selectedKey].n),p:RUNES[selectedKey].positions.map(p=>POS[p.slot-1]).join(' ')}))}</div>${positionDescription(selectedKey,selection.a==='sock'?selection.i+1:null)}`:esc(T('position_help'));
   document.querySelectorAll('#inv .slotc,#ring .slotc').forEach(sl=>{
     const rn=sl.querySelector('.rn'),a=sl.dataset.a,i=+sl.dataset.i;
     const own=selection&&selection.a===a&&selection.i===i;
     const eligible=selection&&!own&&validSwap(selection.a,selection.i,a,i);sl.classList.toggle('chosen',!!own);sl.classList.toggle('eligible',!!eligible);
     sl.tabIndex=eligible&&!rn?0:-1;sl.setAttribute('role','group');sl.setAttribute('aria-label',a==='sock'?T('position',{p:POS[i]}):T('inv'));
     sl.onclick=()=>{if(G.selectedRune)swap(G.selectedRune.a,G.selectedRune.i,a,i);};sl.onkeydown=e=>{if(e.target===sl&&(e.key==='Enter'||e.key===' ')){e.preventDefault();sl.click();}};
-    if(rn){rn.onclick=e=>{e.stopPropagation();moveRune(a,i);};rn.disabled=G.rolling||G.over;rn.ondragstart=e=>{if(G.rolling||G.over){e.preventDefault();return;}hideTip();G.dragRune={a,i};e.dataTransfer.setData('text/plain',a+':'+i);e.dataTransfer.effectAllowed='move';};rn.ondragend=()=>{G.dragRune=null;document.querySelectorAll('.slotc.over').forEach(el=>el.classList.remove('over'));};}
+    if(rn){rn.onclick=e=>{e.stopPropagation();moveRune(a,i);};rn.disabled=G.rolling||G.over;rn.ondragstart=e=>{if(G.rolling||G.over){e.preventDefault();return;}hideTip();G.dragRune={a,i};setDragIndicators(true);e.dataTransfer.setData('text/plain',a+':'+i);e.dataTransfer.effectAllowed='move';};rn.ondragend=()=>{G.dragRune=null;setDragIndicators(false);document.querySelectorAll('.slotc.over').forEach(el=>el.classList.remove('over'));};}
     sl.ondragover=e=>{if(G.dragRune&&validSwap(G.dragRune.a,G.dragRune.i,a,i)){e.preventDefault();sl.classList.add('over');}};sl.ondragleave=()=>sl.classList.remove('over');
-    sl.ondrop=e=>{e.preventDefault();sl.classList.remove('over');const [fa,fi]=String(e.dataTransfer.getData('text/plain')).split(':');if(fa!=='inv'&&fa!=='sock')return;swap(fa,+fi,a,i);G.dragRune=null;};});
+    sl.ondrop=e=>{e.preventDefault();sl.classList.remove('over');const [fa,fi]=String(e.dataTransfer.getData('text/plain')).split(':');if(fa!=='inv'&&fa!=='sock')return;swap(fa,+fi,a,i);G.dragRune=null;setDragIndicators(false);};});
   const box=$('#reels');if(!G.rolling){const ch=reelGeom(box,C.rows);if(box._rows!==C.rows||box._cols!==C.cols||box._ch!==ch){const lg=G.lastGrid;drawReels(box,SYM,lg&&lg.length===C.rows&&lg[0].length===C.cols?lg:null,C.rows,C.cols,ch);}}
-  $('#spinN').textContent=G.spins;$('#spinsLeft').setAttribute('aria-label',T('spins_left',{n:G.spins}));$('#spinsLeft').title=T('spins_left',{n:G.spins});$('#bRoll').disabled=G.rolling||G.over||G.awaitingLoot;renderLogPreview();
+  $('#spinN').textContent=G.spins;$('#spinsLeft').setAttribute('aria-label',T('spins_left',{n:G.spins}));$('#spinsLeft').title=T('spins_left',{n:G.spins});$('#bRoll').disabled=G.rolling||G.over||G.awaitingLoot;renderAuto();renderLogPreview();if(G.awaitingLoot&&G.pendingLoot)renderLoot(G.pendingLoot.loot,G.pendingLoot.gain,G.pendingLoot.gold);
 }
+function setDragIndicators(on){$('#ring').classList.toggle('dragging',on);document.querySelectorAll('#ring .slotc').forEach(sl=>{sl.classList.toggle('eligible',!!(on&&G.dragRune&&validSwap(G.dragRune.a,G.dragRune.i,'sock',+sl.dataset.i)));});}
 function validSwap(fa,fi,ta,ti){if(!['inv','sock'].includes(fa)||!['inv','sock'].includes(ta)||!Number.isInteger(fi)||!Number.isInteger(ti))return false;
   const A=fa==='inv'?G.inv:G.sock,B=ta==='inv'?G.inv:G.sock;if(fi<0||fi>=A.length||ti<0||ti>=B.length||!A[fi])return false;
   return canPlace(A[fi],ta,ti)&&canPlace(B[ti],fa,fi);}
-function swap(fa,fi,ta,ti){if(G.rolling||G.over||G.awaitingLoot)return;if(fa===ta&&fi===ti){G.selectedRune=null;renderDeck();return;}if(!validSwap(fa,fi,ta,ti)){toast(T('position_invalid'));return;}
+function swap(fa,fi,ta,ti){if(G.rolling||G.over)return;if(fa===ta&&fi===ti){G.selectedRune=null;renderDeck();return;}if(!validSwap(fa,fi,ta,ti)){toast(T('position_invalid'));return;}
   const A=fa==='inv'?G.inv:G.sock,B=ta==='inv'?G.inv:G.sock,k=A[fi],other=B[ti];
   if(fa==='sock')logEvent('system','log_remove',{name:tr(RUNES[k].n),p:POS[fi]});if(ta==='sock'&&other)logEvent('system','log_remove',{name:tr(RUNES[other].n),p:POS[ti]});
   A[fi]=other;B[ti]=k;G.selectedRune=null;
   if(ta==='sock')logEvent('system','log_equip',{name:tr(RUNES[k].n),p:POS[ti]});if(fa==='sock'&&other)logEvent('system','log_equip',{name:tr(RUNES[other].n),p:POS[fi]});
   snd(700,.03);hideTip();renderDeck();renderFoe();}
-function moveRune(a,i){if(G.rolling||G.over||G.awaitingLoot)return;hideTip();const selected=G.selectedRune;
+function moveRune(a,i){if(G.rolling||G.over)return;hideTip();const selected=G.selectedRune;
   if(selected){swap(selected.a,selected.i,a,i);return;}G.selectedRune={a,i};renderDeck();document.querySelector(`[data-a="${a}"][data-i="${i}"] .rn`)?.focus();}
 function tipHTML(k){const [t,id,slot]=k.split(':');
   if(t==='rune'){const R3=RUNES[id];return `<b><span style="font-family:var(--rune);color:${R3.c}">${R3.g}</span> ${esc(tr(R3.n))}</b>${positionDescription(id,+slot)}${SYN.filter(s=>s.at&&s.need[id]).map(s=>`<div style="margin-top:6px;color:var(--arc)">${esc(tr(s.n))}: ${esc(synPositionText(s))}</div>`).join('')}`;}
@@ -1103,7 +1129,7 @@ function renderMenu(){
 function renderStakeNote(){const n=$('#stakeNote');if(!SHELL){n.textContent='';return;}const low=stake>0&&Shell.chips!=null&&Shell.chips<stake;n.textContent=low?T('stake_low'):T('stake_note');n.style.color=low?'var(--debuff)':'';
   document.querySelectorAll('#advs [data-camp]').forEach(b=>b.disabled=low);}
 async function start(mode,hk,W){
-  clearTimeout(autoTimer);$('#auto').checked=false;$('#mLogs').hidden=true;$('#mLoot').hidden=true;
+  clearTimeout(autoTimer);if(G)G.auto=false;renderAuto();$('#mLogs').hidden=true;$('#mLoot').hidden=true;
   if(mode==='camp'&&SHELL&&stake>0){const ok=await askStake(stake);if(!ok){toast(T('stake_low'));return;}}
   rnd=mode==='weekly'?mulberry(W.seed):Math.random;
   newRun(mode,hk);if(mode==='camp')G.stake=SHELL?stake:0;
@@ -1115,8 +1141,8 @@ async function start(mode,hk,W){
   if(!FX.cv)fxInit();
 }
 $('#bRoll').onclick=()=>roll();
-$('#auto').onchange=()=>{if($('#auto').checked&&G&&!G.rolling)roll();};
-addEventListener('keydown',e=>{const modal=!$('#mLoot').hidden?$('#mLoot'):!$('#mLogs').hidden?$('#mLogs'):!$('#mInfo').hidden?$('#mInfo'):null;
+$('#auto').onclick=()=>{if(G&&!G.over)setAuto(!G.auto);};
+addEventListener('keydown',e=>{const modal=!$('#mLogs').hidden?$('#mLogs'):!$('#mInfo').hidden?$('#mInfo'):null;
   if(modal){if(e.key==='Escape'){e.preventDefault();if(modal.id==='mLogs')closeLogs();else if(modal.id==='mInfo')closeInfo();return;}
     if(e.key==='Tab'){const focus=[...modal.querySelectorAll('button:not(:disabled),input,[tabindex="0"]')];if(focus.length){const first=focus[0],last=focus[focus.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}return;}
   if(e.key==='Escape'&&G&&G.selectedRune){G.selectedRune=null;renderDeck();return;}
@@ -1138,7 +1164,7 @@ function openInfo(){
     <h3>${esc(T('h_modes'))}</h3><p>${esc(T('info_modes'))}</p>`;
   $('#mInfo').hidden=false;$('#infoX').onclick=closeInfo;$('#infoX').focus();}
 function closeInfo(){$('#mInfo').hidden=true;$('#bInfo').focus();autoNext();}
-$('#bInfo').onclick=()=>{if(!G||!G.awaitingLoot)openInfo();};$('#mInfo').onclick=e=>{if(e.target.id==='mInfo')closeInfo();};
+$('#bInfo').onclick=()=>{openInfo();};$('#mInfo').onclick=e=>{if(e.target.id==='mInfo')closeInfo();};
 
 /* ================= seg + boot ================= */
 function segThumb(seg){let t=seg.querySelector('.thumb');if(!t){t=document.createElement('i');t.className='thumb';seg.prepend(t);}const b=seg.querySelector('button[aria-pressed="true"]');if(!b||!b.offsetWidth){t.style.opacity=0;return;}t.style.opacity=1;t.style.left=b.offsetLeft+'px';t.style.width=b.offsetWidth+'px';}
@@ -1148,11 +1174,11 @@ function show(id){for(const s of ['sMenu','sPlay','sEnd'])$('#'+s).hidden=s!==id
 function applyLang(){document.documentElement.lang=cfg.lang;document.title=T('title');document.querySelectorAll('[data-t]').forEach(el=>el.textContent=T(el.dataset.t));$('#title').textContent=T('title');
   buildSeg($('#langSeg'),[['ru','RU'],['en','EN']],cfg.lang,v=>{cfg.lang=v;saveCfg();applyLang();shellPost('lang',{lang:v});});
   $('#stakeSeg')._sig='';$('#heroSeg')._sig='';renderMenu();if(G&&!$('#sPlay').hidden){renderAll();renderDeck();$('#topTitle').textContent=G.mode==='camp'?tr(G.H.camp):T('m_'+G.mode);}if(!$('#mInfo').hidden)openInfo();}
-addEventListener('resize',()=>{document.querySelectorAll('.seg').forEach(segThumb);if(G&&!$('#sPlay').hidden&&!G.rolling){$('#reels')._ch=0;renderDeck();}});
+addEventListener('resize',()=>{document.querySelectorAll('.seg').forEach(segThumb);if(G&&!$('#sPlay').hidden&&!G.rolling){$('#reels')._ch=0;renderDeck();drawEReels();}});
 if(!window.claude)$('#hubLink').hidden=false;
 if(SHELL)$('#hubLink').addEventListener('click',e=>{e.preventDefault();if(G&&!G.over&&G.gid)shellPost('abort',{gid:G.gid});shellPost('exit');});
 applyLang();show('sMenu');shellPost('ready');
-window.__runes={get G(){return G},roll,setSpeed:v=>SPEED=v,cfgNow,scoreGrid,start,activeSyn,weekly};
+window.__runes={get G(){return G},roll,setSpeed:v=>SPEED=v,cfgNow,scoreGrid,start,activeSyn,weekly,setAuto};
 })();
 </script>
 </body>
