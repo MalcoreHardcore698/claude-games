@@ -200,7 +200,7 @@ a{color:inherit}
 .box:hover{transform:translateY(-3px);border-color:var(--rc);box-shadow:0 10px 40px color-mix(in srgb,var(--rc) 20%,transparent)}
 .box .rar{position:absolute;right:12px;top:12px;z-index:2}
 .box.legendary{border-color:color-mix(in srgb,var(--rc) 45%,transparent)}
-.cover{position:relative;aspect-ratio:16/9;overflow:hidden;width:100%}
+.cover{position:relative;aspect-ratio:16/5;overflow:hidden;width:100%}
 .label{padding:14px 15px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
 .label h2{margin:0;font:800 19px/1.2 var(--display);letter-spacing:-.01em;overflow-wrap:anywhere}
 .label p{margin:0;color:var(--muted);font-size:14px}
@@ -1122,8 +1122,8 @@ const GAME_ART={carcassonne:'carcassonne-menu',chess:'chess-menu',battleship:'ba
 function coverHTML(g){return `<img class="gameCoverArt" src="assets/${GAME_ART[g]||'runes-menu'}.webp" alt="" decoding="async" draggable="false"><span class="coverShade"></span>`;}
 function renderShelf(){const grid=$('#shelfGrid');grid.innerHTML='';
   for(const g of GAMES){const b=document.createElement('button');b.type='button';b.className='box '+g.r;b.style.setProperty('--rc',rc(g.r));
-    b.innerHTML=`<div class="cover ${g.cover}" aria-hidden="true">${coverHTML(g.id)}</div>${rarBadge(g.r)}<div class="label"><div class="tags">${g.tags.map(t=>`<i>${esc(T(t))}</i>`).join('')}</div><h2></h2><p></p><span class="play"><i class="fa-solid fa-play"></i>${esc(T('play'))}</span></div>`;
-    b.querySelector('h2').textContent=gname(g.id);b.querySelector('p').textContent=T(g.d);b.onclick=()=>openGame(g.id);grid.appendChild(b);}}
+    b.innerHTML=`<div class="cover ${g.cover}" aria-hidden="true">${coverHTML(g.id)}</div>${rarBadge(g.r)}<div class="label"><div class="tags">${g.tags.map(t=>`<i>${esc(T(t))}</i>`).join('')}</div><h2></h2></div>`;
+    b.querySelector('h2').textContent=gname(g.id);b.onclick=()=>openGame(g.id);grid.appendChild(b);}}
 function whereText(p,label){const ig=label&&inGame(label);const w=str(p.w);const base=w==='home'?T('at_home'):w==='shelf'?T('at_shelf'):w==='tamada'?T('at_tamada'):w==='events'?T('at_events'):GM[w]?T('at_game',{g:gname(w)}):'';return ig?base+' · '+T('in_game'):base;}
 function whereIcon(p){const w=str(p.w);return w==='home'?'fa-house':w==='shelf'?'fa-gamepad':w==='tamada'?'fa-champagne-glasses':GM[w]?GM[w].icon:'fa-circle';}
 function renderHome(){
@@ -1182,8 +1182,7 @@ function renderPop(){
     const sm=document.createElement('small');sm.innerHTML=`<i class="fa-solid ${whereIcon(m.p)}${ig?' ig':''}"></i>`;sm.appendChild(document.createTextNode(whereText(m.p,m.label)));info.append(b,sm);info.onclick=()=>viewMember(m.label);
     const ch=document.createElement('span');ch.className='ch';ch.textContent=fmtN(num(m.p.c));
     const tp=document.createElement('span');tp.className='tp';tp.title=T('ach');tp.innerHTML='<i class="fa-solid fa-gem"></i>'+fmtN(achPts((Array.isArray(m.p.ac)?m.p.ac:[]).map(x=>str(x))));ch.prepend(tp,document.createTextNode(' '));
-    const bt=document.createElement('button');bt.type='button';bt.className='btn bet';bt.textContent='BET';bt.disabled=!!ig;bt.title=ig?T('busy_bet',{n:clean(m.p.n)}):'';bt.onclick=()=>openBet(GM[m.p.w]?m.p.w:(curGame||'svo'),m.label);
-    li.append(a,info,ch,bt);ul.appendChild(li);}
+    li.append(a,info,ch);ul.appendChild(li);}
 }
 $('#bBetAny').onclick=()=>openBet(curGame||'svo',null);
 $('#bCopy').onclick=()=>{try{navigator.clipboard.writeText(LB.code).then(()=>toast(T('copied'),'fa-copy'),()=>toast(T('copy_fail',{c:LB.code})));}catch(e){toast(T('copy_fail',{c:LB.code}));}};
