@@ -563,6 +563,7 @@ ev_title:['Турниры','Tournaments'],ev_soon:['Скоро','Coming soon'],e
 ev_f1:['Создание турнира: игра, формат, число участников','Create a tournament: game, format, player count'],ev_f2:['Турнирная сетка с живыми результатами','A live bracket with results'],ev_f3:['Участие по приглашению или по коду','Join by invite or by code'],ev_f4:['Ставки на матчи и победителя турнира','Bets on matches and the overall winner'],ev_create:['Создать турнир','Create tournament'],ach_unl_t:['Достижение открыто','Achievement unlocked'],
 ach_open:['Открыто {d}','Unlocked {d}'],ach_locked:['Ещё не открыто','Not unlocked yet'],rarity:['Редкость: {r}','Rarity: {r}'],their_ach:['Достижения · {n}','Achievements · {n}'],
 s_bets:['ставок','bets'],s_won:['выиграно','won'],s_best:['лучший куш','best win'],s_ach:['достижений','achievements'],
+g_chess_d:['Классические шахматы с полным набором правил, часами и тремя уровнями компьютера. Играйте 1×1 или против ИИ.','Classic chess with full rules, clocks and three computer levels. Play 1×1 or against AI.'],g_battleship_d:['Расставьте корабли, скройте флот и найдите соперника. Ручная расстановка, разные моря и три уровня ИИ.','Deploy ships, hide your fleet and find your opponent. Manual deployment, different seas and three AI levels.'],g_carcassonne_d:['Постройте средневековый мир из тайлов. Дороги, города, монастыри, фермеры и настраиваемая партия на 1–8 игроков.','Build a medieval world from tiles. Roads, cities, monasteries, farmers and a customizable game for 1–8 players.'],t_strategy:['стратегия','strategy'],t_tactics:['тактика','tactics'],t_tiles:['тайлы','tiles'],
 g_tetris_d:['Одно поле на 1–6 игроков. Управляйте своими фигурами, собирайте общие линии и расширяйте команду.','One board for 1–6 players. Control your own pieces, clear shared lines and grow your team.'],g_codewords_d:['Капитаны, подсказки и 25 слов. Команда против ИИ, команды друг против друга или дуэль.','Captains, clues and 25 words. Team vs AI, team vs team, or a duel.'],t_puzzle:['головоломка','puzzle'],t_six:['1–6 игроков','1–6 players'],t_words:['ассоциации','word associations'],
 g_svo_d:['Ночь, спальный район, повестка уже в пути. Найдите паспорт и уезжайте, пока вас не нашли.','Night in a commuter district and a draft summons on its way. Find your passport and get out.'],
 g_gw_d:['Загадайте героя из «Ведьмака», LoL, Dota 2, «Звёздных войн» или «Игры престолов» и угадайте героя соперника.','Pick a hero from The Witcher, LoL, Dota 2, Star Wars or Game of Thrones and guess your opponent’s.'],
@@ -609,6 +610,11 @@ const EVENTS=[
  {id:'codewords.win',g:'codewords',kind:'yes',base:2.0,t:['Команда {n} победит','{n}’s team wins']},
  {id:'codewords.beat_ai',g:'codewords',kind:'group',base:2.0,t:['Игроки обыграют ИИ в «Шифре»','Players beat AI in Cipher']},
  {id:'tetris.lines20',g:'tetris',kind:'group',base:2.4,t:['Команда соберёт 20 линий','The team clears 20 lines']},
+ {id:'chess.win',g:'chess',kind:'yes',base:2.0,t:['{n} победит в шахматах','{n} wins at chess']},
+ {id:'chess.draw',g:'chess',kind:'group',base:3.0,t:['Шахматная партия завершится вничью','The chess game ends in a draw']},
+ {id:'chess.beat_ai',g:'chess',kind:'group',base:2.2,t:['Игрок обыграет шахматный ИИ','The player beats the chess AI']},
+ {id:'battleship.win',g:'battleship',kind:'yes',base:2.0,t:['Флот {n} победит','{n}’s fleet wins']},
+ {id:'battleship.beat_ai',g:'battleship',kind:'group',base:2.0,t:['Игрок обыграет морской ИИ','The player beats the naval AI']},
  {id:'runes.rich',g:'runes',kind:'group',base:2.6,t:['Добыча больше 300 золота','The haul tops 300 gold']}
 ];
 const EV=Object.fromEntries(EVENTS.map(e=>[e.id,e]));
@@ -618,10 +624,16 @@ const GAMES=[
  {id:'quiz',file:'quiz.html',name:['Викторина','Quiz Night'],d:'g_quiz_d',tags:['t_quiz','t_8','t_teams'],cover:'quizc',r:'epic',icon:'fa-circle-question'},
  {id:'tetris',file:'tetris.html',name:['Общий тетрис','Orbit Blocks'],d:'g_tetris_d',tags:['t_puzzle','t_six','t_online'],cover:'tetrisc',r:'rare',icon:'fa-cubes-stacked'},
  {id:'codewords',file:'codewords.html',name:['Шифр','Cipher'],d:'g_codewords_d',tags:['t_board','t_words','t_teams'],cover:'wordsc',r:'common',icon:'fa-user-secret'},
+ {id:'chess',file:'chess.html',name:['Шахматы','Chess'],d:'g_chess_d',tags:['t_strategy','t_two','t_online'],cover:'chessc',r:'common',icon:'fa-chess-knight'},
+ {id:'battleship',file:'battleship.html',name:['Морской бой','Battleship'],d:'g_battleship_d',tags:['t_tactics','t_two','t_online'],cover:'navalc',r:'common',icon:'fa-ship'},
  {id:'runes',file:'runes.html',name:['Руны удачи','Reels & Runes'],d:'g_runes_d',tags:['t_slots','t_solo','t_rpg'],cover:'runesc',r:'legendary',icon:'fa-dice-d20'}
 ];
 const GM=Object.fromEntries(GAMES.map(g=>[g.id,g]));
 const ACH=[
+ {id:'chess_first',g:'chess',r:'common',i:'fa-chess-knight',t:['Первый гамбит','First game'],d:['Завершите партию.','Finish a game.']},
+ {id:'chess_win',g:'chess',r:'rare',i:'fa-trophy',t:['Король под защитой','Victory'],d:['Победите в партии.','Win a game.']},
+ {id:'battleship_first',g:'battleship',r:'common',i:'fa-ship',t:['Первый залп','First game'],d:['Завершите партию.','Finish a game.']},
+ {id:'battleship_win',g:'battleship',r:'rare',i:'fa-trophy',t:['Адмирал','Victory'],d:['Победите в партии.','Win a game.']},
  {id:'t_first',g:'tetris',r:'common',i:'fa-cubes-stacked',t:['Общая орбита','Shared orbit'],d:['Завершите забег в общем тетрисе.','Finish a run in Orbit Blocks.']},
  {id:'t_twenty',g:'tetris',r:'rare',i:'fa-layer-group',t:['Линия связи','Lines of communication'],d:['Соберите 20 линий за один забег.','Clear 20 lines in one run.']},
  {id:'cw_win',g:'codewords',r:'common',i:'fa-key',t:['Шифр раскрыт','Cipher solved'],d:['Победите в «Шифре».','Win a game of Cipher.']},
@@ -948,7 +960,7 @@ function onGStart(d){const gid=str(d.gid),game=str(d.game);if(!gid||!GM[game])re
   for(const b of prof.bets)if(b.st==='open'&&b.game===game&&!b.gid&&(!b.sub||players.includes(b.sub)))b.gid=gid;saveProf();renderHome();}
 function onGev(d){
   const gid=str(d.gid),game=str(d.game),ev=str(d.ev),sub=str(d.sub);if(!gid||!GM[game])return;
-  if(sub===LB.label){ownEvent(ev,obj(d.x));const ge=(prof.games||[]).find(g=>g.gid===gid);if(ge){if(['svo.escape','gw.win','quiz.win','runes.castle','codewords.win'].includes(ev))ge.res='win';saveProf();}}
+  if(sub===LB.label){ownEvent(ev,obj(d.x));const ge=(prof.games||[]).find(g=>g.gid===gid);if(ge){if(['svo.escape','gw.win','quiz.win','runes.castle','codewords.win','chess.win','battleship.win','carcassonne.win'].includes(ev))ge.res='win';saveProf();}}
   const s=sessions[gid]||(sessions[gid]={game,players:[],first:{},ended:false,seen:performance.now()});if(s.ended)return;
   if(sub&&!s.players.includes(sub))s.players.push(sub);
   let firstSub=null;if(EVENTS.some(e=>e.kind==='first'&&e.on===ev)){if(s.first[ev]===undefined){s.first[ev]=sub;firstSub=sub;}}
@@ -1096,7 +1108,7 @@ $('#logo').onclick=()=>{if(!curGame)show('vHome');};
 $('#navHome').onclick=()=>{if(curGame)closeGame(true);show('vHome');};$('#navEvents').onclick=()=>{if(curGame)closeGame(true);show('vEvents');};
 $('#bShelf').onclick=()=>show('vShelf');
 $('#bTamada').onclick=()=>startTamada();
-const GAME_ART={tetris:'tetris-menu',codewords:'codewords-menu',svo:'svo-cover',gw:'guess-hero-menu',quiz:'quiz-menu',runes:'runes-menu'};
+const GAME_ART={chess:'chess-menu',battleship:'battleship-menu',tetris:'tetris-menu',codewords:'codewords-menu',svo:'svo-cover',gw:'guess-hero-menu',quiz:'quiz-menu',runes:'runes-menu'};
 function coverHTML(g){return `<img class="gameCoverArt" src="assets/${GAME_ART[g]||'runes-menu'}.webp" alt="" decoding="async" draggable="false"><span class="coverShade"></span>`;}
 function renderShelf(){const grid=$('#shelfGrid');grid.innerHTML='';
   for(const g of GAMES){const b=document.createElement('button');b.type='button';b.className='box '+g.r;b.style.setProperty('--rc',rc(g.r));
@@ -1195,7 +1207,7 @@ function closeGame(keepView){curGame=null;GP=null;if(window.OrionLoader)OrionLoa
 function peersForGame(){return members().map(m=>({label:m.label,name:clean(m.p.n),chips:num(m.p.c),w:str(m.p.w),ig:inGame(m.label)?1:0,gp:m.me?null:(m.p.gk===str(m.p.w)?obj(m.p.gp):null)}));}
 function hello(){const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'hello',me:LB.label,name:prof.name,lang:cfg.lang,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');}
 setInterval(()=>{if(!curGame)return;const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'peers',me:LB.label,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');},100);
-function ownEvent(ev,x){const a=EV_ACH[ev];if(a)unlock(a);if(ev==='tetris.fin'){unlock('t_first');if(x&&x.lines>=20)unlock('t_twenty');}if(ev==='codewords.win')unlock('cw_win');
+function ownEvent(ev,x){if(['chess.fin','battleship.fin','carcassonne.fin'].includes(ev)){const game=ev.split('.')[0];unlock(game+'_first');if(x&&x.win)unlock(game+'_win');}const a=EV_ACH[ev];if(a)unlock(a);if(ev==='tetris.fin'){unlock('t_first');if(x&&x.lines>=20)unlock('t_twenty');}if(ev==='codewords.win')unlock('cw_win');
   if(ev==='runes.castle'&&x){const k=str(x.adv,12);const id={knight:'r_knight',rogue:'r_rogue',mage:'r_mage'}[k];if(id){unlock(id);if(!Array.isArray(prof.runesDone))prof.runesDone=[];if(!prof.runesDone.includes(k))prof.runesDone.push(k);saveProf();if(prof.runesDone.length>=3)unlock('r_all');}}
   if(ev==='runes.fin'&&x&&num(x.gold)>=500)unlock('r_gold');
   if(ev==='quiz.fin'&&x){unlock('q_first');if(x.win){if(x.mode==='ffa')unlock('q_win');if(x.mode==='teams')unlock('q_team');if(x.mode==='coop')unlock(x.solo?'q_solo':'q_bot');}if(x.perfect)unlock('q_perfect');}
