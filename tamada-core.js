@@ -22,7 +22,7 @@
   function options(state, games) {
     const list = candidates(state, games);
     if (state.round === 'rarity') return [...new Set(list.map(g => g.r))];
-    if (state.round === 'tag') return [...new Set(list.flatMap(g => g.tags))];
+    if (state.round === 'tag') return [...new Set(list.flatMap(g => g.genres || g.tags))];
     return list.map(g => g.id);
   }
   function allocation(value, enabled, exact = false) {

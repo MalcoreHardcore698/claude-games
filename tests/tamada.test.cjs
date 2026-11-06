@@ -183,3 +183,9 @@ test('rapid guest clicks are accumulated by the host even while acknowledgements
   assert.equal(x.snapshots.guest.ballots.guest.a,10);
   x.roots.guest.click('ready');assert.equal(x.snapshots.host.ready.guest,true);
 });
+
+test('both wheel clients display shared totals, with personal votes separately in the game list',()=>{
+ const {roots}=lobby();roots.host.click('mode',{mode:'wheel'});for(let i=0;i<2;i++)roots.host.click('plus',{game:'a'});for(let i=0;i<3;i++)roots.guest.click('plus',{game:'a'});
+ for(const who of ['host','guest']){assert.match(roots[who].html(),/class="tmSectorVotes">5<\/text>/);assert.match(roots[who].html(),/class="tmGameTotal">5<\/b>/);}
+ assert.match(roots.host.html(),/yours: 2/);assert.match(roots.guest.html(),/yours: 3/);
+});

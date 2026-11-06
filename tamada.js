@@ -36,6 +36,7 @@
     const people = () => ctx.members();
     const players = () => people().map(p => p.label);
     const game = id => games.find(g => g.id === id);
+    const gameColor=id=>W.color(games.findIndex(g=>g.id===id));
     const name = id => ctx.name(id);
     const readyCount = () => players().filter(p => state?.ready[p]).length;
     function publish(next) {
@@ -99,10 +100,11 @@
         ${state?`<div class="tmResume">${actionButton('resume', t('resume'), '', false, true)}</div>`:''}${!isHost()?`<p class="tmHostHint"><i class="fa-solid fa-crown"></i> ${escape(t('only_host'))}</p>`:''}</section>`;
     }
     function membersMarkup() {
-      return `<div class="tmPlayers">${people().map(p=>`<span class="tmPlayer${state.ready[p.label]?' ready':''}"><i class="fa-solid ${state.ready[p.label]?'fa-check':'fa-user'}"></i><span>${escape(p.p.n || '—')}</span>${p.label===host()?'<i class="fa-solid fa-crown"></i>':''}</span>`).join('')}</div>`;
+      return `<div class="tmPlayers">${people().map(p=>`<span class="tmPlayer${state.ready[p.label]?' ready':''}"><i class="fa-solid ${state.ready[p.label]?'fa-check':'fa-user'}"></i><span>${escape(p.p.n||'—')}</span>${state.mode==='wheel'?`<b class="tmPlayerBudget">${C.sum(state.ballots[p.label]||{})}/10</b>`:''}${p.label===host()?'<i class="fa-solid fa-crown"></i>':''}</span>`).join('')}</div>`;
     }
     function includedMarkup() {
-      return `<div class="tmIncluded"><span class="eyebrow">${escape(t('include'))}</span><div>${games.map(g=>`<button type="button" class="tmInclude${state.enabled.includes(g.id)?' on':''}" data-tm-action="include" data-game="${g.id}" data-tm-focus="include-${g.id}" aria-pressed="${state.enabled.includes(g.id)}" ${!isHost()||state.phase!=='vote'?'disabled':''}><span class="tmIncludeArt" aria-hidden="true">${ctx.cover(g.id)}</span><span>${escape(name(g.id))}</span><i class="fa-solid ${state.enabled.includes(g.id)?'fa-check':'fa-plus'}"></i></button>`).join('')}</div>${isHost()&&state.phase==='vote'?`<p>${escape(t('include_d'))}</p>`:''}</div>`;
+      const totals=C.totals(state,players()),mine=state.ballots[ctx.me()]||{};
+      return `<div class="tmIncluded"><span class="eyebrow">${escape(t('include'))}</span><div>${games.map(g=>`<button type="button" class="tmInclude${state.enabled.includes(g.id)?' on':''}" style="--game-color:${gameColor(g.id)}" data-tm-action="include" data-game="${g.id}" data-tm-focus="include-${g.id}" aria-pressed="${state.enabled.includes(g.id)}" ${!isHost()||state.phase!=='vote'?'disabled':''}><span class="tmIncludeArt" aria-hidden="true">${ctx.cover(g.id)}</span><span class="tmIncludeName"><span>${escape(name(g.id))}</span>${state.mode==='wheel'?`<small>${escape(ctx.lang()==='en'?'Total':'Всего')}: <b class="tmGameTotal">${totals[g.id]||0}</b> · ${escape(ctx.lang()==='en'?'yours':'ваши')}: ${mine[g.id]||0}</small>`:''}</span><i class="fa-solid ${state.enabled.includes(g.id)?'fa-check':'fa-plus'}"></i></button>`).join('')}</div>${isHost()&&state.phase==='vote'?`<p>${escape(t('include_d'))}</p>`:''}</div>`;
     }
     function wheelTargets(){return C.sectors(state.spinWeights || C.wheelWeights(state,players()));}
     function wheelMarkup() {
@@ -112,7 +114,7 @@
       const selected=target.find(s=>s.id===state.result),angle=selected?2160+(360-selected.mid):0;
       const spinning=state.phase==='spin',finished=state.phase==='done';
       return `<div class="tmWheelArea"><div class="tmWheelFrame"><span class="tmWheelPointer"></span><div class="tmWheelRotor${spinning?' spinning':''}" style="--tm-rotation:${angle}deg;--tm-duration:${state.spinDuration}ms;animation-delay:${state.spinAt-Date.now()}ms;${finished?`transform:rotate(${angle}deg)`:''}"><svg viewBox="0 0 420 420" aria-label="${escape(t('wheel'))}">
-        ${segments.map(segment=>{const g=game(segment.id),label=t('sector_label',{g:name(g.id),mine:mine[g.id]||0,total:totals[g.id]||0});return `<g class="tmSector${mine[g.id]?' has-votes':''}" data-tm-action="sector" data-game="${g.id}" data-tm-focus="sector-${g.id}" role="button" tabindex="${locked?-1:0}" aria-disabled="${locked}" aria-label="${escape(label)}"><title>${escape(label)}</title><path class="tmSectorPath" d="${W.path(segment)}" fill="${ctx.color(g.r)}"/><text class="tmSectorName">${escape(name(g.id))}</text><text class="tmSectorVotes">${mine[g.id]||0}<tspan> / ${totals[g.id]||0}</tspan></text></g>`;}).join('')}
+        ${segments.map(segment=>{const g=game(segment.id),label=t('sector_label',{g:name(g.id),mine:mine[g.id]||0,total:totals[g.id]||0});return `<g class="tmSector${mine[g.id]?' has-votes':''}" data-tm-action="sector" data-game="${g.id}" data-tm-focus="sector-${g.id}" role="button" tabindex="${locked?-1:0}" aria-disabled="${locked}" aria-label="${escape(label)}"><title>${escape(label)}</title><path class="tmSectorPath" d="${W.path(segment)}" fill="${gameColor(g.id)}"/><text class="tmSectorName">${escape(name(g.id))}</text><text class="tmSectorVotes">${totals[g.id]||0}</text></g>`;}).join('')}
         <circle cx="210" cy="210" r="54" fill="#17191c" stroke="#ece6d8" stroke-width="3"/><text x="210" y="209" text-anchor="middle" class="tmWheelCenter">${voting?10-total:'ORION'}</text><text x="210" y="229" text-anchor="middle" class="tmWheelCenterLabel">${escape(voting?t('votes_left'):'PLAY TOGETHER')}</text><circle cx="210" cy="210" r="204" fill="none" stroke="#f2a33a" stroke-width="4" pointer-events="none"/>
       </svg></div></div><div class="tmWheelHelp"><span>${escape(t('click_vote'))}</span><span>${escape(t('remove_vote'))}</span></div></div>`;
     }
@@ -120,9 +122,9 @@
       for(const sector of segments){
         const group=root.querySelector(`.tmSector[data-game="${CSS.escape(sector.id)}"]`);if(!group)continue;
         group.querySelector('.tmSectorPath').setAttribute('d',W.path(sector));
-        const p=W.point(sector.mid,137),count=W.point(sector.mid,80),angle=sector.mid>180?sector.mid+90:sector.mid-90;
-        const label=group.querySelector('.tmSectorName');label.setAttribute('transform',`translate(${p[0]} ${p[1]}) rotate(${angle})`);
-        const votes=group.querySelector('.tmSectorVotes');votes.setAttribute('x',count[0]);votes.setAttribute('y',count[1]);
+        const p=W.point(sector.mid,137),count=W.point(sector.mid,86),angle=sector.mid>180?sector.mid+90:sector.mid-90;
+        const label=group.querySelector('.tmSectorName');label.setAttribute('visibility',W.visibleLabel(sector,name(sector.id))?'visible':'hidden');label.setAttribute('transform',`translate(${p[0]} ${p[1]}) rotate(${angle})`);
+        const votes=group.querySelector('.tmSectorVotes');votes.setAttribute('visibility',sector.end-sector.start>=15?'visible':'hidden');votes.setAttribute('x',count[0]);votes.setAttribute('y',count[1]);
       }
     }
     function animateWheel(){

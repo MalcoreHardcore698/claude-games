@@ -200,7 +200,7 @@ a{color:inherit}
 .box:hover{transform:translateY(-3px);border-color:var(--rc);box-shadow:0 10px 40px color-mix(in srgb,var(--rc) 20%,transparent)}
 .box .rar{position:absolute;right:12px;top:12px;z-index:2}
 .box.legendary{border-color:color-mix(in srgb,var(--rc) 45%,transparent)}
-.cover{position:relative;aspect-ratio:16/5;overflow:hidden;width:100%}
+.cover{position:relative;aspect-ratio:16/9;overflow:hidden;width:100%}
 .label{padding:14px 15px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
 .label h2{margin:0;font:800 19px/1.2 var(--display);letter-spacing:-.01em;overflow-wrap:anywhere}
 .label p{margin:0;color:var(--muted);font-size:14px}
@@ -379,7 +379,7 @@ select option:disabled{color:#555}
 <script src="tamada.js"></script>
 <link rel="stylesheet" href="orion-layout.css">
 <link rel="stylesheet" href="orion-ui.css">
-<script src="orion-ui.js" defer></script>
+<script src="orion-ui.js" defer></script><script src="orion-navigation.js" defer></script>
 </head>
 <body data-orion-page="portal">
 <div class="siteHeaderGlass" aria-hidden="true"></div>
@@ -510,7 +510,7 @@ select option:disabled{color:#555}
 
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-<script src="orion-milestones.js"></script>
+<script src="ration-content.js"></script><script src="catan-content.js"></script><script src="casino-core.js"></script><script src="casino-wallet.js"></script><script src="casino-content.js"></script><script src="orion-game-tags.js"></script><script src="orion-milestones.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -526,7 +526,7 @@ const obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:null;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ================= i18n ================= */
-const D={choose_game:['Игра','Game'],balance_chips:['Баланс фишек','Chip balance'],
+const D={...OrionRationContent.labels,...OrionCatanContent.labels,...OrionCasinoContent.labels,...OrionGameTags.labels,choose_game:['Игра','Game'],balance_chips:['Баланс фишек','Chip balance'],
 home:['Главная','Home'],events:['Турниры','Tournaments'],chips:['фишки','chips'],edit:['Изменить профиль','Edit profile'],refill:['Пополнить +1000','Top up +1000'],
 my_bets:['Мои ставки','My bets'],my_bets_n:['Ставки · {n}','Bets · {n}'],lobby:['Лобби','Lobby'],
 lobby_d:['Лобби одно на весь сайт: все игры берут игроков отсюда. Создайте его и назовите друзьям код или войдите по коду друга.','One lobby for the whole site: every game takes its players from here. Create one and share the code, or join a friend’s.'],
@@ -582,7 +582,7 @@ const RAR={
  legendary:{t:['легендарная','legendary'],T:['Легендарная','Legendary'],i:'fa-crown'}
 };
 const rc=r=>`var(--r-${r})`;
-const EVENTS=[...OrionMilestones.events,
+const EVENTS=[...OrionRationContent.events,...OrionCatanContent.events,...OrionCasinoContent.events,...OrionMilestones.events,
  {id:'svo.escape',g:'svo',kind:'yes',base:2.0,t:['{n} сбежит','{n} escapes']},
  {id:'svo.escape_car',g:'svo',kind:'yes',base:3.0,t:['{n} уедет на «Жигулях»','{n} leaves in the Lada']},
  {id:'svo.escape_bus',g:'svo',kind:'yes',base:3.5,t:['{n} уедет на попутке','{n} takes the paid ride']},
@@ -624,7 +624,7 @@ const EVENTS=[...OrionMilestones.events,
  {id:'runes.rich',g:'runes',kind:'group',base:2.6,t:['Добыча больше 300 золота','The haul tops 300 gold']}
 ];
 const EV=Object.fromEntries(EVENTS.map(e=>[e.id,e]));
-const GAMES=[
+const GAMES=[OrionRationContent.game,OrionCatanContent.game,OrionCasinoContent.game,
  {id:'svo',file:'escape-from-commissariat.html',name:['Escape from SVO','Escape from SVO'],d:'g_svo_d',tags:['t_3d','t_horror','t_coop8'],cover:'svo',r:'legendary',icon:'fa-person-running'},
  {id:'gw',file:'guess-who.html',name:['Угадай героя','Guess the Hero'],d:'g_gw_d',tags:['t_board','t_two','t_online'],cover:'gw',r:'rare',icon:'fa-user-secret'},
  {id:'quiz',file:'quiz.html',name:['Викторина','Quiz Night'],d:'g_quiz_d',tags:['t_quiz','t_8','t_teams'],cover:'quizc',r:'epic',icon:'fa-circle-question'},
@@ -635,8 +635,9 @@ const GAMES=[
  {id:'carcassonne',file:'carcassonne.html',name:['Каркассон','Carcassonne'],d:'g_carcassonne_d',tags:['t_strategy','t_tiles','t_8'],cover:'landsc',r:'epic',icon:'fa-chess-rook'},
  {id:'runes',file:'runes.html',name:['Руны удачи','Reels & Runes'],d:'g_runes_d',tags:['t_slots','t_solo','t_rpg'],cover:'runesc',r:'legendary',icon:'fa-dice-d20'}
 ];
+OrionGameTags.apply(GAMES);
 const GM=Object.fromEntries(GAMES.map(g=>[g.id,g]));
-const ACH=[...OrionMilestones.achievements,
+const ACH=[...OrionRationContent.achievements,...OrionCatanContent.achievements,...OrionCasinoContent.achievements,...OrionMilestones.achievements,
  {id:'carcassonne_first',g:'carcassonne',r:'common',i:'fa-chess-rook',t:['Первый тайл','First tile'],d:['Завершите партию в Каркассоне.','Finish a Carcassonne game.']},
  {id:'carcassonne_win',g:'carcassonne',r:'epic',i:'fa-crown',t:['Властитель земель','Lord of the lands'],d:['Победите в Каркассоне.','Win Carcassonne.']},
  {id:'carcassonne_hundred',g:'carcassonne',r:'rare',i:'fa-landmark',t:['Процветание','Prosperity'],d:['Наберите 100 очков за одну партию.','Score 100 points in one game.']},
@@ -970,7 +971,7 @@ function onGStart(d){const gid=str(d.gid),game=str(d.game);if(!gid||!GM[game])re
   for(const b of prof.bets)if(b.st==='open'&&b.game===game&&!b.gid&&(!b.sub||players.includes(b.sub)))b.gid=gid;saveProf();renderHome();}
 function onGev(d){
   const gid=str(d.gid),game=str(d.game),ev=str(d.ev),sub=str(d.sub);if(!gid||!GM[game])return;
-  if(sub===LB.label){ownEvent(ev,obj(d.x));const ge=(prof.games||[]).find(g=>g.gid===gid);if(ge){if(['svo.escape','gw.win','quiz.win','runes.castle','codewords.win','chess.win','battleship.win','carcassonne.win'].includes(ev))ge.res='win';saveProf();}}
+  if(sub===LB.label){ownEvent(ev,obj(d.x));const ge=(prof.games||[]).find(g=>g.gid===gid);if(ge){if(['svo.escape','gw.win','quiz.win','runes.castle','codewords.win','chess.win','battleship.win','carcassonne.win','casino.win','catan.win'].includes(ev))ge.res='win';saveProf();}}
   const s=sessions[gid]||(sessions[gid]={game,players:[],first:{},ended:false,seen:performance.now()});if(s.ended)return;
   if(sub&&!s.players.includes(sub))s.players.push(sub);
   let firstSub=null;if(EVENTS.some(e=>e.kind==='first'&&e.on===ev)){if(s.first[ev]===undefined){s.first[ev]=sub;firstSub=sub;}}
@@ -1118,12 +1119,12 @@ $('#logo').onclick=()=>{if(!curGame)show('vHome');};
 $('#navHome').onclick=()=>{if(curGame)closeGame(true);show('vHome');};$('#navEvents').onclick=()=>{if(curGame)closeGame(true);show('vEvents');};
 $('#bShelf').onclick=()=>show('vShelf');
 $('#bTamada').onclick=()=>startTamada();
-const GAME_ART={carcassonne:'carcassonne-menu',chess:'chess-menu',battleship:'battleship-menu',tetris:'tetris-menu',codewords:'codewords-menu',svo:'svo-cover',gw:'guess-hero-menu',quiz:'quiz-menu',runes:'runes-menu'};
+const GAME_ART={ration:'ration-menu',catan:'catan-menu',casino:'casino-menu',carcassonne:'carcassonne-menu',chess:'chess-menu',battleship:'battleship-menu',tetris:'tetris-menu',codewords:'codewords-menu',svo:'svo-cover',gw:'guess-hero-menu',quiz:'quiz-menu',runes:'runes-menu'};
 function coverHTML(g){return `<img class="gameCoverArt" src="assets/${GAME_ART[g]||'runes-menu'}.webp" alt="" decoding="async" draggable="false"><span class="coverShade"></span>`;}
 function renderShelf(){const grid=$('#shelfGrid');grid.innerHTML='';
   for(const g of GAMES){const b=document.createElement('button');b.type='button';b.className='box '+g.r;b.style.setProperty('--rc',rc(g.r));
-    b.innerHTML=`<div class="cover ${g.cover}" aria-hidden="true">${coverHTML(g.id)}</div>${rarBadge(g.r)}<div class="label"><div class="tags">${g.tags.map(t=>`<i>${esc(T(t))}</i>`).join('')}</div><h2></h2></div>`;
-    b.querySelector('h2').textContent=gname(g.id);b.onclick=()=>openGame(g.id);grid.appendChild(b);}}
+    b.innerHTML=`<div class="cover ${g.cover}" aria-hidden="true">${coverHTML(g.id)}</div>${rarBadge(g.r)}<div class="label"><div class="tags">${g.tags.map(t=>`<i data-tag-kind="${OrionGameTags.kind(t)}" title="${esc(T('tag_'+OrionGameTags.kind(t)))}">${esc(T(t))}</i>`).join('')}</div><h2></h2><p></p><span class="play"><i class="fa-solid fa-play"></i>${esc(T('play'))}</span></div>`;
+    b.querySelector('h2').textContent=gname(g.id);b.querySelector('p').textContent=T(g.d);b.onclick=()=>openGame(g.id);grid.appendChild(b);}}
 function whereText(p,label){const ig=label&&inGame(label);const w=str(p.w);const base=w==='home'?T('at_home'):w==='shelf'?T('at_shelf'):w==='tamada'?T('at_tamada'):w==='events'?T('at_events'):GM[w]?T('at_game',{g:gname(w)}):'';return ig?base+' · '+T('in_game'):base;}
 function whereIcon(p){const w=str(p.w);return w==='home'?'fa-house':w==='shelf'?'fa-gamepad':w==='tamada'?'fa-champagne-glasses':GM[w]?GM[w].icon:'fa-circle';}
 function renderHome(){
@@ -1181,7 +1182,7 @@ function renderPop(){
     const info=document.createElement('button');info.type='button';info.className='info';const b=document.createElement('b');b.textContent=(clean(m.p.n)||'—')+(m.me?T('you'):'')+(m.label===LB.hubLabel?' ★':'');
     const sm=document.createElement('small');sm.innerHTML=`<i class="fa-solid ${whereIcon(m.p)}${ig?' ig':''}"></i>`;sm.appendChild(document.createTextNode(whereText(m.p,m.label)));info.append(b,sm);info.onclick=()=>viewMember(m.label);
     const ch=document.createElement('span');ch.className='ch';ch.textContent=fmtN(num(m.p.c));
-    const tp=document.createElement('span');tp.className='tp';tp.title=T('ach');tp.innerHTML='<i class="fa-solid fa-gem"></i>'+fmtN(achPts((Array.isArray(m.p.ac)?m.p.ac:[]).map(x=>str(x))));ch.prepend(tp,document.createTextNode(' '));
+    const tp=document.createElement('span');tp.className='tp';tp.title=T('ach');tp.innerHTML=fmtN(achPts((Array.isArray(m.p.ac)?m.p.ac:[]).map(x=>str(x))))+'<i class="fa-solid fa-gem"></i>';const coins=document.createElement('span');coins.className='memberChips';coins.innerHTML=fmtN(num(m.p.c))+'<i class="fa-solid fa-coins"></i>';ch.replaceChildren(coins,tp);
     li.append(a,info,ch);ul.appendChild(li);}
 }
 $('#bBetAny').onclick=()=>openBet(curGame||'svo',null);
@@ -1214,20 +1215,32 @@ const frame=$('#frame');const frameWin=()=>frame.contentWindow;
 function openGame(id){if(!GM[id]||tamadaSession?.locked())return;if(tamadaSession?.isHost()&&tamadaSession.control?.phase==='session')tamadaSession.end();closePop();if(!curGame)gameReturn=viewFor(where);curGame=id;GP=null;where=id;$('#frameWrap').hidden=false;$('#fab').hidden=false;if(window.OrionLoader)OrionLoader.loadFrame(frame,{url:GM[id].file,title:gname(id)});else frame.src=GM[id].file;document.body.style.overflow='hidden';renderChip();setTimeout(()=>{try{frame.focus();}catch(e){}},300);}
 function closeGame(keepView){curGame=null;GP=null;if(window.OrionLoader)OrionLoader.cancelFrame();frame.src='about:blank';$('#frameWrap').hidden=true;$('#fab').hidden=true;closePop();document.body.style.overflow='';if(!keepView){navReturning=true;show(gameReturn,true);navReturning=false;if(gameReturn==='vTamada')renderTam();}}
 function peersForGame(){return members().map(m=>({label:m.label,name:clean(m.p.n),chips:num(m.p.c),w:str(m.p.w),ig:inGame(m.label)?1:0,gp:m.me?null:(m.p.gk===str(m.p.w)?obj(m.p.gp):null)}));}
-function hello(){const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'hello',me:LB.label,name:prof.name,lang:cfg.lang,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');}
+function hello(){const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'hello',me:LB.label,name:prof.name,lang:cfg.lang,chips:prof.chips,casinoHistory:curGame==='casino'?(prof.casinoLedger||[]).slice(0,6).map(e=>e.round):[],inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');}
 setInterval(()=>{if(!curGame)return;const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'peers',me:LB.label,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');},100);
-function ownEvent(ev,x){if(ev==='carcassonne.score100')unlock('carcassonne_hundred');if(['chess.fin','battleship.fin','carcassonne.fin'].includes(ev)){const game=ev.split('.')[0];unlock(game+'_first');if(x&&x.win)unlock(game+'_win');}const a=EV_ACH[ev]||OrionMilestones.achievementEvents[ev];if(a)unlock(a);if(ev==='tetris.fin'){unlock('t_first');if(x&&x.lines>=20)unlock('t_twenty');}if(ev==='codewords.win')unlock('cw_win');
+function ownEvent(ev,x){if(ev==='carcassonne.score100')unlock('carcassonne_hundred');if(['chess.fin','battleship.fin','carcassonne.fin','catan.fin'].includes(ev)){const game=ev.split('.')[0];unlock(game+'_first');if(x&&x.win)unlock(game+'_win');}const a=EV_ACH[ev]||OrionMilestones.achievementEvents[ev]||OrionCasinoContent.achievementEvents[ev]||OrionCatanContent.achievementEvents[ev]||OrionRationContent.achievementEvents[ev];if(a)unlock(a);if(ev==='tetris.fin'){unlock('t_first');if(x&&x.lines>=20)unlock('t_twenty');}if(ev==='codewords.win')unlock('cw_win');
   if(ev==='runes.castle'&&x){const k=str(x.adv,12);const id={knight:'r_knight',rogue:'r_rogue',mage:'r_mage'}[k];if(id){unlock(id);if(!Array.isArray(prof.runesDone))prof.runesDone=[];if(!prof.runesDone.includes(k))prof.runesDone.push(k);saveProf();if(prof.runesDone.length>=3)unlock('r_all');}}
   if(ev==='runes.fin'&&x&&num(x.gold)>=500)unlock('r_gold');
   if(ev==='quiz.fin'&&x){unlock('q_first');if(x.win){if(x.mode==='ffa')unlock('q_win');if(x.mode==='teams')unlock('q_team');if(x.mode==='coop')unlock(x.solo?'q_solo':'q_bot');}if(x.perfect)unlock('q_perfect');}
   if(ev==='gw.fin'&&x){const st=x.win?bump('gwst'):(prof.cnt.gwst=0);if(st>=3)unlock('gw_streak3');saveProf();}
   if(ev==='gw.fin'&&x){unlock('gw_first');if(x.win){unlock('gw_win');unlock(x.bot?'gw_bot':'gw_online');if(num(x.myQ,99)<=5)unlock('gw_fast');
     const th=str(x.theme,12);if(th&&!prof.gwThemes.includes(th)){prof.gwThemes.push(th);saveProf();}if(prof.gwThemes.length>=5)unlock('gw_themes');}}}
+function settleCasinoRound(request){
+  if(curGame!=='casino'||!prof)return;
+  const settled=OrionCasinoWallet.settle(prof,request,()=>{const n=new Uint32Array(1);crypto.getRandomValues(n);return n[0]/4294967296;});
+  if(settled.ok&&!settled.replayed){
+    saveProf();const r=settled.round,gid='casino-'+r.id,out=OrionCasinoContent.milestones(r,settled.stats);
+    emit('gstart',{game:'casino',gid,players:[LB.label]});
+    for(const ev of out.events)emit('gev',{game:'casino',gid,ev,sub:LB.label,x:{machine:r.machine,stake:r.cost,payout:r.payout,net:r.net}});
+    emit('gend',{game:'casino',gid,sum:{players:[LB.label],g:out.groups}});checkWealth();saveProf();renderHome();
+  }
+  const w=frameWin();if(w)w.postMessage({svo:1,type:'casinoResult',id:request?.id,...settled,balance:prof.chips},'*');
+}
 addEventListener('message',e=>{
   if(!curGame||e.source!==frameWin())return;const m=e.data;if(!m||m.svo!==1)return;
   switch(m.type){
+    case 'casinoRound':settleCasinoRound(m.request);break;
     case 'ready':hello();setTimeout(flushAccept,150);break;
-    case 'gp':GP=obj(m.d);break;
+    case 'gp':{const previous=GP;GP=obj(m.d);if(GP?.host===1&&(previous?.host!==1||GP.table&&GP.table!==previous?.table)&&inLobby())emit('inv',{id:rnd(),game:curGame,table:GP.table||null});break;}
     case 'emit':emit('g',{game:curGame,m:m.d},m.to?str(m.to):null);break;
     case 'event':emit('gev',{game:curGame,gid:str(m.gid),ev:str(m.ev),sub:str(m.sub)||LB.label,x:obj(m.x)});break;
     case 'start':emit('gstart',{game:curGame,gid:str(m.gid),players:Array.isArray(m.players)?m.players.map(x=>str(x)).slice(0,8):[]});break;

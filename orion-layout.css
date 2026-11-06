@@ -3,7 +3,7 @@ html{scrollbar-gutter:stable;overflow-y:auto}
 /* Keep the viewport as the scroll container: body overflow must not switch it. */
 html:has(body[data-orion-page="portal"] #vTamada:not([hidden])),html:has(body[data-orion-page="portal"] #frameWrap:not([hidden])){overflow-y:hidden}
 @keyframes orionArrival{from{opacity:0;translate:0 7px}}
-body[data-orion-page] main:not([hidden]),body[data-orion-game] section:not([hidden]),.ach,.box,.mcard,.tmMode,.partyPanel,.wordCard{animation:orionArrival .26s cubic-bezier(.2,.7,.2,1) backwards}
+body[data-orion-page] main:not([hidden]),body[data-orion-game] :is(#sMenu,#sLobby,#sNet,#sTable,#sPlay,#sGame,#sResult,#sCampaigns,#sModes):not([hidden]),.ach,.box,.mcard,.tmMode{animation:orionArrival .26s cubic-bezier(.2,.7,.2,1) backwards}
 .ach:nth-child(5n+2),.box:nth-child(3n+2),.mcard:nth-child(3n+2),.wordCard:nth-child(5n+2){animation-delay:25ms}
 .ach:nth-child(5n+3),.box:nth-child(3n),.mcard:nth-child(3n),.wordCard:nth-child(5n+3){animation-delay:50ms}
 .ach:nth-child(5n+4),.wordCard:nth-child(5n+4){animation-delay:70ms}.ach:nth-child(5n),.wordCard:nth-child(5n){animation-delay:90ms}
@@ -66,3 +66,5 @@ body[data-orion-game="svo"] .gamePageHead .seg button[aria-pressed="true"]{backg
 @media(max-height:720px){body[data-orion-page="portal"]{--page-top:28px;--header-height:68px}body[data-orion-page="portal"] .app:has(#vTamada:not([hidden])){padding-bottom:18px}.siteHeaderGlass{height:96px}body[data-orion-game="guess"] .guessMenuCopy{gap:18px}body[data-orion-game="guess"] .guessMenuCopy h1{font-size:68px}body[data-orion-game="guess"] .guessMenuCopy .lede{font-size:17px}body[data-orion-game="quiz"] .hero h1{font-size:64px}body[data-orion-game="quiz"] .hero p.lede{font-size:15px;margin-block:14px 20px}body[data-orion-game="quiz"] .hero .btns .btn{font-size:14px;padding:13px 17px}}
 @media(max-width:1100px){body[data-orion-game="guess"] .guessMenuCopy{width:48%;padding-left:20px}body[data-orion-game="guess"] .guessMenuCopy .lede{font-size:17px}body[data-orion-game="quiz"] .hero>div:first-child{width:51%;padding-left:20px}.gamePageHead #topTitle{font-size:18px}.gameHeadTitle{letter-spacing:.1em;font-size:10px}}
 @media(prefers-reduced-motion:reduce){.gameCoverArt{transition:none}}
+
+body[data-orion-game] button{translate:none!important}

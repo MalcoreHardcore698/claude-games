@@ -53,6 +53,20 @@
     {
       "key": "carcassonne-menu",
       "prompt": "Use case: stylized-concept. Asset type: final full-screen menu illustration and library cover for an existing fantasy-styled browser game collection. Landscape 3:2, 1536x1024. Rich, very colorful hand-painted storybook game key art with tactile detailed materials, ornate warm brass, vivid jewel colors, magical light and volumetric illumination. Main illustrated group fills the RIGHT 60 percent, left 40 percent quieter atmospheric negative space for menu copy. Strong readable objects at thumbnail size. No UI, no borders, no lettering, no logos, no watermark. A magnificent CARCASSONNE-inspired medieval landscape assembling itself from thick SQUARE LANDSCAPE TILES on a magical table: terracotta-roofed walled cities, winding golden roads, emerald fields, a tiny abbey with bell tower, a bright turquoise river with bridges, lush forest and distant blue mountains. Tiny red, blue, amber and violet wooden meeple figures placed on the tiles. Several square tiles hover into place with glowing edges, giving a strong tile-laying game identity. Lush fairytale European countryside in golden-hour light, jewel-like saturated colors, no lettering or people."
+    },
+    {
+      "key": "casino-menu",
+      "prompt": "Lavish cinematic casino arcade key art: golden three-reel fruit slot machine, European roulette wheel, luminous prize wheel, violet/red/turquoise/gold neon and marquee bulbs, chips and coins, dark left third for menu copy, main subjects on right, full bleed, no people or playing cards, no readable words or logos. Built-in image generation."
+    },
+    {
+      "key": "catan-menu",
+      "method": "built-in image generation",
+      "prompt": "Cozy painterly promotional key art, low eye-level view from a trading pier: merchant sailboat, timber, clay bricks, wool, wheat, ore, colorful wooden settlements and dice in foreground; warm harbor village and mountains behind, teal sea and lavender sunset, open left third. No aerial island, hex grid, gameplay screen, text or logos. Matches ornate colorful storybook style of existing ORION covers."
+    },
+    {
+      "key": "ration-menu",
+      "method": "built-in image generation",
+      "prompt": "Retro zombie extraction shooter cover: survivors carrying food toward a warm fortified commune, misty ruined city, teal shadows and amber light, empty dark left third, no text or interface."
     }
   ]
 }
