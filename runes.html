@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<script src="screen-guard.js" defer></script>
+<script src="screen-guard.js?v=202611061204" defer></script>
 <meta charset="utf-8">
 <style data-orion-critical>
 html.orion-pending body{visibility:hidden!important}
@@ -15,7 +15,7 @@ html.orion-pending:not(.orion-mounted)::after{content:"";position:fixed;left:50%
 document.documentElement.classList.add('orion-pending');
 setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.remove('orion-pending');},12000);
 </script>
-<script src="orion-loader.js" defer></script>
+<script src="orion-loader.js?v=202611061204" defer></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Руны удачи</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -339,13 +339,13 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
 
 .cell.affected{position:relative;box-shadow:inset 0 0 0 2px var(--cell-fx),inset 0 8px 16px color-mix(in srgb,var(--cell-fx) 20%,transparent)}.cellEffects{position:absolute;top:3px;left:50%;translate:-50% 0;display:flex;gap:4px;align-items:center;padding:2px 5px;background:#17121fcc;border-radius:4px;font-size:clamp(6px,.7vw,9px);line-height:1;z-index:2;pointer-events:none}.cell.affected>i{translate:0 3px}
 </style>
-<link rel="stylesheet" href="runes-menu.css">
-<script src="orion-carousel.js"></script>
-<script src="rune-effects.js"></script>
-<link rel="stylesheet" href="orion-layout.css">
-<script src="orion-navigation.js" defer></script>
-<link rel="stylesheet" href="orion-ui.css">
-<script src="orion-ui.js" defer></script><link rel="stylesheet" href="orion-info.css"><script src="orion-info.js" defer></script>
+<link rel="stylesheet" href="runes-menu.css?v=202611061204">
+<script src="orion-carousel.js?v=202611061204"></script>
+<script src="rune-effects.js?v=202611061204"></script>
+<link rel="stylesheet" href="orion-layout.css?v=202611061204">
+<script src="orion-navigation.js?v=202611061204" defer></script>
+<link rel="stylesheet" href="orion-ui.css?v=202611061204">
+<script src="orion-ui.js?v=202611061204" defer></script><link rel="stylesheet" href="orion-info.css?v=202611061204"><script src="orion-info.js?v=202611061204" defer></script>
 </head>
 <body data-orion-game="runes">
 <img class="gameBackdrop" src="assets/runes-menu.webp" alt="" decoding="async" fetchpriority="high" draggable="false"><div class="gameBackdropShade" aria-hidden="true"></div>

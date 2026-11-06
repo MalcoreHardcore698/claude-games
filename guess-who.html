@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<script src="screen-guard.js" defer></script>
+<script src="screen-guard.js?v=202611061204" defer></script>
 <meta charset="utf-8">
 <style data-orion-critical>
 html.orion-pending body{visibility:hidden!important}
@@ -30,7 +30,7 @@ html.orion-pending:not(.orion-mounted)::after{content:"";position:fixed;left:50%
 document.documentElement.classList.add('orion-pending');
 setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.remove('orion-pending');},12000);
 </script>
-<script src="orion-loader.js" defer></script>
+<script src="orion-loader.js?v=202611061204" defer></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Угадай героя</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -168,11 +168,11 @@ input[type=text]{font:500 17px var(--body);color:var(--paper);background:var(--w
 
 .netLayout{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.95fr);gap:22px;align-items:start}#netList{position:sticky;top:82px}#netCount{font:600 12px var(--mono);color:var(--acc)}
 </style>
-<link rel="stylesheet" href="orion-layout.css">
-<script src="guess-questions.js"></script>
-<script src="orion-navigation.js" defer></script>
-<link rel="stylesheet" href="orion-ui.css">
-<script src="orion-ui.js" defer></script><link rel="stylesheet" href="orion-info.css"><script src="orion-info.js" defer></script><script src="guess-info.js" defer></script>
+<link rel="stylesheet" href="orion-layout.css?v=202611061204">
+<script src="guess-questions.js?v=202611061204"></script>
+<script src="orion-navigation.js?v=202611061204" defer></script>
+<link rel="stylesheet" href="orion-ui.css?v=202611061204">
+<script src="orion-ui.js?v=202611061204" defer></script><link rel="stylesheet" href="orion-info.css?v=202611061204"><script src="orion-info.js?v=202611061204" defer></script><script src="guess-info.js?v=202611061204" defer></script>
 </head>
 <body data-orion-game="guess">
 <img class="gameBackdrop" src="assets/guess-hero-menu.webp" alt="" decoding="async" fetchpriority="high" draggable="false"><div class="gameBackdropShade" aria-hidden="true"></div>
