@@ -20,7 +20,7 @@ function block(b){
  if(b.lead!=null)return`<p class="oiLead">${inline(b.lead)}</p>`;
  if(b.p!=null)return`<p class="oiP">${inline(b.p)}</p>`;
  if(b.h!=null)return`<h3 class="oiH">${inline(b.h)}</h3>`;
- if(b.note!=null){const tone=b.tone||'tip';return`<aside class="oiNote ${tone}">${svg(tone==='warn'?'warn':tone==='info'?'info':'tip','oiNoteIcon')}<div>${b.title?`<b class="oiNoteTitle">${inline(b.title)}</b>`:''}${inline(b.note)}</div></aside>`;}
+ if(b.note!=null){const tone=b.tone||'tip';return`<aside class="oiNote oiTone-${tone}">${svg(tone==='warn'?'warn':tone==='info'?'info':'tip','oiNoteIcon')}<div>${b.title?`<b class="oiNoteTitle">${inline(b.title)}</b>`:''}${inline(b.note)}</div></aside>`;}
  if(b.steps)return`<ol class="oiSteps">${b.steps.map((s,i)=>`<li><span class="oiStepN">${i+1}</span><div><b class="oiStepT">${inline(s.t)}</b>${s.d?`<p>${inline(s.d)}</p>`:''}</div></li>`).join('')}</ol>`;
  if(b.list)return`<ul class="oiList">${b.list.map(x=>`<li>${inline(x)}</li>`).join('')}</ul>`;
  if(b.keys)return`<dl class="oiKeys">${b.keys.map(k=>`<div><dt>${(Array.isArray(k.k)?k.k:[k.k]).map(x=>`<kbd>${esc(x)}</kbd>`).join('<span class="oiPlus">/</span>')}</dt><dd>${inline(k.d)}</dd></div>`).join('')}</dl>`;

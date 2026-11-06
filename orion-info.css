@@ -75,7 +75,7 @@ html.oiOpen{overflow:hidden}
 
 /* Callouts */
 .oiNote{display:flex;gap:12px;padding:13px 15px;border-radius:12px;border:1px solid color-mix(in srgb,var(--oi-accent) 35%,transparent);background:color-mix(in srgb,var(--oi-accent) 9%,transparent);font-size:14px;color:color-mix(in srgb,var(--oi-paper) 86%,var(--oi-muted))}
-.oiNote.warn{--oi-accent:var(--lose,#e0604f)}.oiNote.info{--oi-accent:var(--blue,#70abed)}
+.oiNote.oiTone-warn{--oi-accent:var(--lose,#e0604f)}.oiNote.oiTone-info{--oi-accent:var(--blue,#70abed)}
 .oiNote .oiNoteTitle{display:block;margin-bottom:2px}.oiNoteIcon{flex:none;width:18px;height:18px;margin-top:2px;color:var(--oi-accent)}
 
 /* Tables */
