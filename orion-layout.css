@@ -1,5 +1,7 @@
 /* Shared page rhythm, fixed portal header and borderless game artwork. */
-html{scrollbar-gutter:stable}
+html{scrollbar-gutter:stable;overflow-y:auto}
+/* Keep the viewport as the scroll container: body overflow must not switch it. */
+html:has(body[data-orion-page="portal"] #vTamada:not([hidden])),html:has(body[data-orion-page="portal"] #frameWrap:not([hidden])){overflow-y:hidden}
 @keyframes orionArrival{from{opacity:0;translate:0 7px}}
 body[data-orion-page] main:not([hidden]),body[data-orion-game] section:not([hidden]),.ach,.box,.mcard,.tmMode,.partyPanel,.wordCard{animation:orionArrival .26s cubic-bezier(.2,.7,.2,1) backwards}
 .ach:nth-child(5n+2),.box:nth-child(3n+2),.mcard:nth-child(3n+2),.wordCard:nth-child(5n+2){animation-delay:25ms}

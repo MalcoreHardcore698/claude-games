@@ -1093,11 +1093,11 @@ function show(id,forced=false){if(!forced&&tamadaSession?.locked()&&id!=='vTamad
   $('#navHome').setAttribute('aria-current',id==='vHome'?'page':'false');$('#navEvents').setAttribute('aria-current',id==='vEvents'?'page':'false');if(id==='vHome'){achSig='';panSig='';renderHome();requestAnimationFrame(segAll);}if(id==='vShelf')renderShelf();window.scrollTo(0,0);}
 document.querySelectorAll('[data-back]').forEach(b=>b.onclick=goBackPortal);
 $('#logo').onclick=()=>{if(!curGame)show('vHome');};
-$('#navHome').onclick=()=>{if(curGame)closeGame();else show('vHome');};$('#navEvents').onclick=()=>{if(curGame)closeGame(true);show('vEvents');};
+$('#navHome').onclick=()=>{if(curGame)closeGame(true);show('vHome');};$('#navEvents').onclick=()=>{if(curGame)closeGame(true);show('vEvents');};
 $('#bShelf').onclick=()=>show('vShelf');
 $('#bTamada').onclick=()=>startTamada();
-const GAME_ART={tetris:'tetris-cover.svg',codewords:'codewords-cover.svg',svo:'svo-cover',gw:'guess-hero-menu',quiz:'quiz-menu',runes:'runes-menu'};
-function coverHTML(g){return `<img class="gameCoverArt" src="assets/${(GAME_ART[g]||'runes-menu')+(['tetris','codewords'].includes(g)?'':'.webp')}" alt="" decoding="async" draggable="false"><span class="coverShade"></span>`;}
+const GAME_ART={tetris:'tetris-menu',codewords:'codewords-menu',svo:'svo-cover',gw:'guess-hero-menu',quiz:'quiz-menu',runes:'runes-menu'};
+function coverHTML(g){return `<img class="gameCoverArt" src="assets/${GAME_ART[g]||'runes-menu'}.webp" alt="" decoding="async" draggable="false"><span class="coverShade"></span>`;}
 function renderShelf(){const grid=$('#shelfGrid');grid.innerHTML='';
   for(const g of GAMES){const b=document.createElement('button');b.type='button';b.className='box '+g.r;b.style.setProperty('--rc',rc(g.r));
     b.innerHTML=`<div class="cover ${g.cover}" aria-hidden="true">${coverHTML(g.id)}</div>${rarBadge(g.r)}<div class="label"><div class="tags">${g.tags.map(t=>`<i>${esc(T(t))}</i>`).join('')}</div><h2></h2><p></p><span class="play"><i class="fa-solid fa-play"></i>${esc(T('play'))}</span></div>`;
