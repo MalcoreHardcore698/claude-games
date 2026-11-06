@@ -10,13 +10,13 @@ class Party{
   });
   this.post('ready');setInterval(()=>this.presence(),700);addEventListener('pagehide',()=>this.leave(false));
  }
- post(type,args={}){if(this.embedded)parent.postMessage({svo:1,type,...args},'*');}
+ post(type,args={}){if(type==='end'&&args.gid===this.milestones?.id&&args.sum){args={...args,sum:{...args.sum,g:[...new Set([...(args.sum.g||[]),...this.milestones.groups])]}};}if(this.embedded)parent.postMessage({svo:1,type,...args},'*');}
  send(to,d){this.post('emit',{to,d});}
  isHost(){return !!this.server&&this.host===this.me;}
  presence(){this.post('gp',{d:{n:this.name,host:this.isHost()&&this.server.phase==='lobby'?1:0,cnt:this.state?.players?.length||0,busy:!!this.state,gid:this.state?.phase!=='lobby'?this.state?.id:null}});}
  create(mode,solo=false){this.leave(false);this.solo=solo;this.host=this.me;this.seq=0;this.server=this.ctx.create(this.me,this.name,mode,solo);this.server.id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);this.server.host=this.me;this.publish();this.presence();}
  join(id){if(this.state)return;this.host=id;this.solo=false;this.send(id,{a:'join',name:this.name});this.ctx.notice?.('Подключаемся…');}
- publish(){if(!this.isHost())return;this.server.seq=++this.seq;const s=this.server;const view=label=>copy(this.ctx.view?this.ctx.view(s,label):s);this.state=view(this.me);this.ctx.changed(this.state);
+ publish(){if(!this.isHost())return;this.server.seq=++this.seq;const s=this.server;this.milestones=window.OrionMilestones?.observe(this.ctx.game,s);if(this.milestones)for(const e of this.milestones.events)this.post('event',{gid:s.id,ev:e.id,sub:e.sub,x:e.x||{}});const view=label=>copy(this.ctx.view?this.ctx.view(s,label):s);this.state=view(this.me);this.ctx.changed(this.state);
   if(!this.solo)for(const p of s.players)if(p.l!==this.me)this.send(p.l,{a:'state',s:view(p.l)});this.presence();
   if(s.phase==='over'&&!s.reported){s.reported=true;this.ctx.finished?.(s);}
  }

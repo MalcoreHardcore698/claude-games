@@ -15,7 +15,7 @@ function action(s,id,a,now=Date.now()){if(!a||typeof a!=='object')return false;
  if(a.type==='undo'&&s.solo&&s.history.length){const count=g.turn()===color?Math.min(2,s.history.length):1;s.history.splice(-count);s.fen=game(s).fen();s.lastMove=null;s.lastAt=now;s.nextAt=now+650;return true;}
  if(a.type!=='move'||g.turn()!==color||s.seats[g.turn()]!==id)return false;
  let move;try{move=g.move({from:String(a.from),to:String(a.to),promotion:['q','r','b','n'].includes(a.promotion)?a.promotion:'q'});}catch(_){return false;}if(!move)return false;
- s.history.push(move.san);s.fen=g.fen();s.lastMove={from:move.from,to:move.to,san:move.san};s.drawOffer=null;if(s.settings.minutes)s.clocks[color]+=s.settings.increment*1000;s.lastAt=now;s.nextAt=now+650;
+ s.history.push(move.san);s.fen=g.fen();s.lastMove={from:move.from,to:move.to,san:move.san,captured:move.captured||null,piece:move.piece,color:move.color};s.drawOffer=null;if(s.settings.minutes)s.clocks[color]+=s.settings.increment*1000;s.lastAt=now;s.nextAt=now+650;
  if(g.isCheckmate())finish(s,id,'checkmate');else if(g.isStalemate())finish(s,null,'stalemate');else if(g.isThreefoldRepetition())finish(s,null,'repetition');else if(g.isInsufficientMaterial())finish(s,null,'material');else if(g.isDraw())finish(s,null,'fifty');return true;
 }
 function evaluate(g){let total=0;for(const row of g.board())for(const p of row)if(p){const x=p.square.charCodeAt(0)-97,y=+p.square[1]-1,center=3.5-(Math.abs(x-3.5)+Math.abs(y-3.5))/2,advance=p.color==='w'?y:7-y;let v=value[p.type]+(p.type==='p'?advance*8:0)+(['n','b'].includes(p.type)?center*12:0);total+=(p.color==='w'?1:-1)*v;}return total*(g.turn()==='w'?1:-1);}

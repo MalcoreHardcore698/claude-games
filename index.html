@@ -378,6 +378,8 @@ select option:disabled{color:#555}
 <script src="orion-wheel.js"></script>
 <script src="tamada.js"></script>
 <link rel="stylesheet" href="orion-layout.css">
+<link rel="stylesheet" href="orion-ui.css">
+<script src="orion-ui.js" defer></script>
 </head>
 <body data-orion-page="portal">
 <div class="siteHeaderGlass" aria-hidden="true"></div>
@@ -469,15 +471,15 @@ select option:disabled{color:#555}
 </div></div>
 
 <div class="modal" id="mBet" hidden><div class="mbox">
-  <div class="row" style="justify-content:space-between"><h2><i class="fa-solid fa-coins" style="color:var(--amber)"></i> <span data-t="bet_title"></span></h2><span class="payout" id="betBal"></span></div>
-  <div class="tabs" id="betGames"></div>
+  <div class="betHeader"><h2><i class="fa-solid fa-coins" style="color:var(--amber)"></i> <span data-t="bet_title"></span></h2></div>
+  <label for="betGame"><span data-t="choose_game"></span><select id="betGame"></select></label>
   <label for="betWho"><span data-t="bet_on"></span><select id="betWho"></select></label>
   <div class="evs sf" id="betEvs"></div>
   <div class="stake"><label for="betAmt"><span data-t="stake"></span><input type="number" id="betAmt" min="10" step="10" value="100"></label>
-    <div class="row"><button class="btn ghost sm" type="button" data-amt="50">50</button><button class="btn ghost sm" type="button" data-amt="100">100</button><button class="btn ghost sm" type="button" data-amt="250">250</button><button class="btn ghost sm" type="button" data-amt="all"><i class="fa-solid fa-fire"></i><span data-t="all_in"></span></button></div></div>
+    <div class="row stakePresets"><button class="btn ghost sm" type="button" data-amt="50">50</button><button class="btn ghost sm" type="button" data-amt="100">100</button><button class="btn ghost sm" type="button" data-amt="250">250</button><button class="btn ghost sm" type="button" data-amt="all"><i class="fa-solid fa-fire"></i><span data-t="all_in"></span></button></div></div>
   <p class="payout" id="betPay"></p>
   <p class="note" id="betNote"></p>
-  <div class="row"><button class="btn" id="betGo" type="button"><i class="fa-solid fa-check"></i><span data-t="place"></span></button><button class="btn ghost" id="betClose" type="button" data-t="close"></button></div>
+  <div class="modalFooter betFooter"><div class="modalBalance"><svg class="chipStack" viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M4 20v5c0 4 22 4 22 0v-5M4 15v5c0 4 22 4 22 0v-5M10 10v5c0 4 22 4 22 0v-5" stroke="currentColor" stroke-width="2.5"/><ellipse cx="15" cy="15" rx="11" ry="4" fill="currentColor"/><ellipse cx="21" cy="9" rx="11" ry="4" fill="currentColor"/></svg><div><b id="betBal"></b><small data-t="balance_chips"></small></div></div><button class="btn" id="betGo" type="button"><i class="fa-solid fa-check"></i><span data-t="place"></span></button><button class="btn ghost" id="betClose" type="button" data-t="close"></button></div>
 </div></div>
 
 <div class="modal" id="mView" hidden><div class="mbox">
@@ -508,6 +510,7 @@ select option:disabled{color:#555}
 
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script src="orion-milestones.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -523,7 +526,7 @@ const obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:null;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ================= i18n ================= */
-const D={
+const D={choose_game:['Игра','Game'],balance_chips:['Баланс фишек','Chip balance'],
 home:['Главная','Home'],events:['Турниры','Tournaments'],chips:['фишки','chips'],edit:['Изменить профиль','Edit profile'],refill:['Пополнить +1000','Top up +1000'],
 my_bets:['Мои ставки','My bets'],my_bets_n:['Ставки · {n}','Bets · {n}'],lobby:['Лобби','Lobby'],
 lobby_d:['Лобби одно на весь сайт: все игры берут игроков отсюда. Создайте его и назовите друзьям код или войдите по коду друга.','One lobby for the whole site: every game takes its players from here. Create one and share the code, or join a friend’s.'],
@@ -579,7 +582,7 @@ const RAR={
  legendary:{t:['легендарная','legendary'],T:['Легендарная','Legendary'],i:'fa-crown'}
 };
 const rc=r=>`var(--r-${r})`;
-const EVENTS=[
+const EVENTS=[...OrionMilestones.events,
  {id:'svo.escape',g:'svo',kind:'yes',base:2.0,t:['{n} сбежит','{n} escapes']},
  {id:'svo.escape_car',g:'svo',kind:'yes',base:3.0,t:['{n} уедет на «Жигулях»','{n} leaves in the Lada']},
  {id:'svo.escape_bus',g:'svo',kind:'yes',base:3.5,t:['{n} уедет на попутке','{n} takes the paid ride']},
@@ -633,7 +636,7 @@ const GAMES=[
  {id:'runes',file:'runes.html',name:['Руны удачи','Reels & Runes'],d:'g_runes_d',tags:['t_slots','t_solo','t_rpg'],cover:'runesc',r:'legendary',icon:'fa-dice-d20'}
 ];
 const GM=Object.fromEntries(GAMES.map(g=>[g.id,g]));
-const ACH=[
+const ACH=[...OrionMilestones.achievements,
  {id:'carcassonne_first',g:'carcassonne',r:'common',i:'fa-chess-rook',t:['Первый тайл','First tile'],d:['Завершите партию в Каркассоне.','Finish a Carcassonne game.']},
  {id:'carcassonne_win',g:'carcassonne',r:'epic',i:'fa-crown',t:['Властитель земель','Lord of the lands'],d:['Победите в Каркассоне.','Win Carcassonne.']},
  {id:'carcassonne_hundred',g:'carcassonne',r:'rare',i:'fa-landmark',t:['Процветание','Prosperity'],d:['Наберите 100 очков за одну партию.','Score 100 points in one game.']},
@@ -1000,8 +1003,7 @@ setInterval(()=>{ // games everyone walked away from: refund
 let BET={game:'svo',who:null,ev:null};
 function openBet(game,who){
   BET.game=GM[game]?game:(curGame||'svo');BET.ev=null;
-  const tabs=$('#betGames');tabs.innerHTML='';
-  for(const g of GAMES){const b=document.createElement('button');b.type='button';b.innerHTML=`<i class="fa-solid ${g.icon}"></i>`+esc(gname(g.id));b.setAttribute('aria-pressed',g.id===BET.game);b.onclick=()=>openBet(g.id,BET.who);tabs.appendChild(b);}
+  const gameSelect=$('#betGame');gameSelect.innerHTML=GAMES.map(g=>`<option value="${g.id}">${esc(gname(g.id))}</option>`).join('');gameSelect.value=BET.game;
   const sel=$('#betWho');sel.innerHTML='';const ms=members();
   const og=document.createElement('option');og.value='';og.textContent=T('group');sel.appendChild(og);
   for(const m of ms){const o=document.createElement('option');o.value=m.label;o.textContent=(m.me?prof.name:clean(m.p.n)||'—')+(m.me?T('you'):'')+(inGame(m.label)?' · '+T('in_game'):'');sel.appendChild(o);}
@@ -1019,7 +1021,7 @@ function renderBetEvs(){
   updatePay();
 }
 function updatePay(){
-  $('#betBal').textContent=T('balance',{n:fmtN(prof.chips)});
+  $('#betBal').textContent=fmtN(prof.chips);
   const amt=Math.floor(num(+$('#betAmt').value,0));const n=$('#betNote');n.classList.remove('err');n.textContent='';
   const otherTarget=BET.who&&BET.who!==LB.label;let block=false;
   if(!BET.ev){$('#betPay').textContent=T('pick_ev');block=true;}
@@ -1031,6 +1033,7 @@ function updatePay(){
   else if(amt>prof.chips){n.textContent=T('low');n.classList.add('err');block=true;}
   $('#betGo').disabled=block;
 }
+$('#betGame').onchange=e=>{BET.game=e.target.value;BET.ev=null;renderBetEvs();};
 $('#betWho').onchange=e=>{BET.who=e.target.value||null;BET.ev=null;renderBetEvs();};
 $('#betAmt').oninput=updatePay;
 document.querySelectorAll('[data-amt]').forEach(b=>b.onclick=()=>{$('#betAmt').value=b.dataset.amt==='all'?prof.chips:b.dataset.amt;updatePay();});
@@ -1214,7 +1217,7 @@ function closeGame(keepView){curGame=null;GP=null;if(window.OrionLoader)OrionLoa
 function peersForGame(){return members().map(m=>({label:m.label,name:clean(m.p.n),chips:num(m.p.c),w:str(m.p.w),ig:inGame(m.label)?1:0,gp:m.me?null:(m.p.gk===str(m.p.w)?obj(m.p.gp):null)}));}
 function hello(){const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'hello',me:LB.label,name:prof.name,lang:cfg.lang,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');}
 setInterval(()=>{if(!curGame)return;const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'peers',me:LB.label,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');},100);
-function ownEvent(ev,x){if(ev==='carcassonne.score100')unlock('carcassonne_hundred');if(['chess.fin','battleship.fin','carcassonne.fin'].includes(ev)){const game=ev.split('.')[0];unlock(game+'_first');if(x&&x.win)unlock(game+'_win');}const a=EV_ACH[ev];if(a)unlock(a);if(ev==='tetris.fin'){unlock('t_first');if(x&&x.lines>=20)unlock('t_twenty');}if(ev==='codewords.win')unlock('cw_win');
+function ownEvent(ev,x){if(ev==='carcassonne.score100')unlock('carcassonne_hundred');if(['chess.fin','battleship.fin','carcassonne.fin'].includes(ev)){const game=ev.split('.')[0];unlock(game+'_first');if(x&&x.win)unlock(game+'_win');}const a=EV_ACH[ev]||OrionMilestones.achievementEvents[ev];if(a)unlock(a);if(ev==='tetris.fin'){unlock('t_first');if(x&&x.lines>=20)unlock('t_twenty');}if(ev==='codewords.win')unlock('cw_win');
   if(ev==='runes.castle'&&x){const k=str(x.adv,12);const id={knight:'r_knight',rogue:'r_rogue',mage:'r_mage'}[k];if(id){unlock(id);if(!Array.isArray(prof.runesDone))prof.runesDone=[];if(!prof.runesDone.includes(k))prof.runesDone.push(k);saveProf();if(prof.runesDone.length>=3)unlock('r_all');}}
   if(ev==='runes.fin'&&x&&num(x.gold)>=500)unlock('r_gold');
   if(ev==='quiz.fin'&&x){unlock('q_first');if(x.win){if(x.mode==='ffa')unlock('q_win');if(x.mode==='teams')unlock('q_team');if(x.mode==='coop')unlock(x.solo?'q_solo':'q_bot');}if(x.perfect)unlock('q_perfect');}
@@ -1245,28 +1248,8 @@ addEventListener('message',e=>{
 addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#pop').hidden){closePop();return;}for(const id of ['mBet','mView','mBets','mAch'])if(!$('#'+id).hidden){hideM($('#'+id));return;}if(!$('#mProfile').hidden&&prof)hideM($('#mProfile'));}});
 
 /* ================= lang + boot ================= */
-const customSelects=new Map();let openSelect=null;
-function syncSelect(sel){const c=customSelects.get(sel);if(!c)return;const o=sel.selectedOptions[0];c.button.firstElementChild.textContent=o?o.textContent:'';c.button.disabled=sel.disabled;
-  c.button.setAttribute('aria-label',(sel.id==='achGame'?T('ach'):T('bet_on'))+': '+(o?o.textContent:''));}
-function closeSelect(focus=false){if(!openSelect)return;const c=openSelect;openSelect=null;c.button.setAttribute('aria-expanded','false');c.button.removeAttribute('aria-activedescendant');const menu=c.menu;menu.classList.add('closing');menu.removeAttribute('id');menu.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));setTimeout(()=>menu.remove(),130);if(focus)c.button.focus();}
-function showSelect(c){closeSelect();syncSelect(c.sel);if(c.sel.disabled)return;
-  const menu=document.createElement('div');menu.className='selectMenu';menu.id=c.sel.id+'-options';menu.setAttribute('role','listbox');menu.setAttribute('aria-label',c.button.getAttribute('aria-label'));c.menu=menu;
-  const opts=[...c.sel.options];c.active=Math.max(0,c.sel.selectedIndex);c.items=opts.map((o,i)=>{const el=document.createElement('div');el.id=menu.id+'-'+i;el.className='selectOption';el.setAttribute('role','option');el.setAttribute('aria-selected',o.selected);el.setAttribute('aria-disabled',o.disabled);el.innerHTML='<span></span><i class="fa-solid fa-check" aria-hidden="true"></i>';el.firstElementChild.textContent=o.textContent;
-    el.onpointermove=()=>{if(!o.disabled)activateSelect(c,i);};el.onpointerdown=e=>e.preventDefault();el.onclick=()=>chooseSelect(c,i);menu.appendChild(el);return el;});
-  document.body.appendChild(menu);const r=c.button.getBoundingClientRect();const w=Math.min(innerWidth-16,Math.max(180,r.width));menu.style.width=w+'px';menu.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+'px';
-  const below=innerHeight-r.bottom-14,above=r.top-14;const up=below<160&&above>below;menu.style.maxHeight=Math.min(300,Math.max(60,up?above:below))+'px';menu.style.top=(up?Math.max(8,r.top-menu.offsetHeight-6):r.bottom+6)+'px';menu.style.transformOrigin=up?'bottom':'top';
-  openSelect=c;c.button.setAttribute('aria-expanded','true');activateSelect(c,c.active);}
-function activateSelect(c,i){c.active=i;c.items.forEach((el,n)=>el.classList.toggle('active',n===i));const el=c.items[i];if(el){c.button.setAttribute('aria-activedescendant',el.id);el.scrollIntoView({block:'nearest'});}}
-function chooseSelect(c,i){if(c.sel.options[i].disabled)return;c.sel.selectedIndex=i;c.sel.dispatchEvent(new Event('change',{bubbles:true}));syncSelect(c.sel);closeSelect(true);}
-document.querySelectorAll('select').forEach(sel=>{const host=document.createElement('span');host.className='cselect';const button=document.createElement('button');button.type='button';button.className='selectTrigger';button.setAttribute('role','combobox');button.setAttribute('aria-haspopup','listbox');button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls',sel.id+'-options');button.innerHTML='<span></span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i>';host.appendChild(button);sel.after(host);sel.classList.add('selectNative');sel.tabIndex=-1;sel.setAttribute('aria-hidden','true');
-  const c={sel,button,menu:null,active:0,items:[]};customSelects.set(sel,c);button.onclick=e=>{e.preventDefault();openSelect===c?closeSelect():showSelect(c);};sel.addEventListener('change',()=>syncSelect(sel));new MutationObserver(()=>{syncSelect(sel);if(openSelect===c)closeSelect();}).observe(sel,{subtree:true,childList:true,characterData:true,attributes:true});
-  let typed='',typedAt=0;button.onkeydown=e=>{if(['ArrowDown','ArrowUp','Home','End','Enter',' '].includes(e.key)){e.preventDefault();if(openSelect!==c){showSelect(c);return;}if(e.key==='Enter'||e.key===' '){chooseSelect(c,c.active);return;}
-      const enabled=[...sel.options].map((o,i)=>o.disabled?-1:i).filter(i=>i>=0);let n=enabled.indexOf(c.active);n=e.key==='Home'?0:e.key==='End'?enabled.length-1:(n+(e.key==='ArrowUp'?-1:1)+enabled.length)%enabled.length;if(enabled.length)activateSelect(c,enabled[n]);}
-    else if(e.key==='Escape'&&openSelect===c){e.preventDefault();e.stopPropagation();closeSelect(true);}else if(e.key==='Tab')closeSelect();
-    else if(e.key.length===1&&!e.ctrlKey&&!e.metaKey){e.preventDefault();if(Date.now()-typedAt>700)typed='';typed+=e.key.toLowerCase();typedAt=Date.now();if(openSelect!==c)showSelect(c);const i=[...sel.options].findIndex(o=>!o.disabled&&o.textContent.toLowerCase().startsWith(typed));if(i>=0)activateSelect(c,i);}};
-  syncSelect(sel);});
-document.addEventListener('pointerdown',e=>{if(openSelect&&!openSelect.menu.contains(e.target)&&!openSelect.button.contains(e.target))closeSelect();});
-addEventListener('resize',()=>closeSelect());document.addEventListener('scroll',e=>{if(openSelect&&!openSelect.menu.contains(e.target))closeSelect();},true);
+function syncSelect(sel){window.OrionUI?.selects.enhance(sel);}
+function closeSelect(focus=false){window.OrionUI?.selects.close(focus);}
 function applyLang(){
   document.documentElement.lang=cfg.lang;document.title='ORION';document.querySelectorAll('[data-tt]').forEach(el=>el.dataset.tip=T(el.dataset.tt));
   document.querySelectorAll('[data-t]').forEach(el=>el.textContent=T(el.dataset.t));
