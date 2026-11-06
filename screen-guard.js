@@ -5,6 +5,7 @@
   const style = document.createElement('style');
   style.textContent = `
     *,*::before,*::after{-webkit-user-select:none;user-select:none}
+    *:focus,*:focus-visible{outline:none!important}
     ::selection{background:transparent;color:inherit}
     #screenGuard[hidden]{display:none!important}
     #screenGuard{position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;
