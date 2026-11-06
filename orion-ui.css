@@ -22,17 +22,17 @@ body[data-orion-game]{--oh:78px}
 body[data-orion-game] .gamePageHead.oBar{position:fixed;z-index:30;top:0;left:50%;translate:-50% 0;width:min(var(--game-max,1320px),calc(100% - 32px));height:var(--oh);min-height:0;margin:0;padding:0;display:flex;align-items:center;gap:12px;flex-wrap:nowrap;background:none;border:0;box-shadow:none;color:var(--paper,#ece6d8);font:400 14px/1.4 var(--game-body,var(--body,system-ui))}
 body[data-orion-game] .gamePageHead.oBar::before{content:'';position:absolute;top:0;left:50%;translate:-50% 0;width:100vw;height:calc(var(--oh) + 32px);z-index:-1;pointer-events:none;background:linear-gradient(180deg,color-mix(in srgb,var(--bg,#0e0f11) 93%,transparent),color-mix(in srgb,var(--bg,#0e0f11) 73%,transparent) 55%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);mask-image:linear-gradient(180deg,#000 0 62%,transparent 100%);-webkit-mask-image:linear-gradient(180deg,#000 0 62%,transparent 100%)}
 .oBar :is(.oBack,.oIb,.oChip,.oSeg,.oSeg>button){box-sizing:border-box;margin:0;translate:none!important;box-shadow:none;text-transform:none;text-decoration:none;filter:none}
-.oBar .oBack{flex:none;display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px 0 12px;border:1px solid var(--line,#ece6d81f);border-radius:10px;background:transparent;color:var(--muted,#8d9095);font:600 12px/1 var(--ui-mono,var(--mono,'IBM Plex Mono',ui-monospace,monospace));letter-spacing:.06em;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
-.oBar .oBack:hover{color:var(--paper,#ece6d8);border-color:color-mix(in srgb,var(--paper,#ece6d8) 35%,transparent);background:transparent}
-.oBar .oBack svg{width:15px;height:15px;flex:none}
+.oBar .oBack{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:34px;padding:0 11px;border:1px solid var(--line,#ece6d81f);border-radius:8px;background:transparent;color:var(--paper,#ece6d8);font:600 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:normal;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.oBar .oBack:hover{color:var(--paper,#ece6d8);border-color:color-mix(in srgb,var(--paper,#ece6d8) 30%,transparent);background:color-mix(in srgb,var(--paper,#ece6d8) 5%,transparent)}
+.oBar .oBack svg{width:13px;height:13px;flex:none}
 .oBar .oTitle{display:flex;align-items:center;gap:10px;min-width:0;margin-left:6px;color:var(--paper,#ece6d8)}
 .oBar .oTitleIcon{width:18px;height:18px;flex:none;color:var(--accent,var(--amber,#f2a33a))}
-.oBar .oTitleText{font:600 12px/1.2 var(--ui-mono,var(--mono,'IBM Plex Mono',ui-monospace,monospace));letter-spacing:.15em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oBar .oTitleText{font:600 12px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.15em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .oBar .oContext{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted,#8d9095);font:500 12px var(--game-body,var(--body,system-ui));border-left:1px solid var(--line,#ece6d81f);padding-left:11px}
 .oBar .oContext:empty{display:none}
 .oBar .oGrow{flex:1;min-width:8px}
 .oBar .oActions{display:flex;align-items:center;gap:12px;flex:none}
-.oBar .oChip{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;border:1px solid var(--line,#ece6d81f);border-radius:999px;background:transparent;color:var(--paper,#ece6d8);font:600 12px/1 var(--ui-mono,var(--mono,'IBM Plex Mono',ui-monospace,monospace));letter-spacing:.06em;cursor:pointer;white-space:nowrap;transition:border-color .15s}
+.oBar .oChip{display:inline-flex;align-items:center;gap:8px;height:auto;min-height:0;padding:7px 14px;border:1px solid var(--line,#ece6d81f);border-radius:999px;background:transparent;color:var(--paper,#ece6d8);font:600 12px/normal 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.06em;cursor:pointer;white-space:nowrap;transition:border-color .15s}
 .oBar .oChip:hover{border-color:color-mix(in srgb,var(--paper,#ece6d8) 35%,transparent);background:transparent}
 .oBar .oChip svg{width:15px;height:15px;flex:none}
 .oBar .oDot{width:8px;height:8px;border-radius:50%;background:var(--muted,#8d9095);flex:none}
@@ -40,10 +40,10 @@ body[data-orion-game] .gamePageHead.oBar::before{content:'';position:absolute;to
 .oBar .oIb{position:relative!important;inset:auto!important;width:38px;height:38px;min-width:38px;min-height:38px;padding:0;display:grid;place-items:center;border:1px solid var(--line,#ece6d81f);border-radius:10px;background:transparent;color:var(--muted,#8d9095);font-size:15px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
 .oBar .oIb:hover{color:var(--paper,#ece6d8);border-color:color-mix(in srgb,var(--paper,#ece6d8) 35%,transparent);background:transparent}
 .oBar .oIb svg{width:17px;height:17px}
-.oBar .oSeg{position:relative;display:flex;align-items:stretch;height:34px;padding:0;gap:0;border:1px solid var(--line,#ece6d81f);border-radius:999px;overflow:hidden;background:transparent}
+.oBar .oSeg{position:relative;display:flex;align-items:stretch;height:auto;padding:0;gap:0;border:1px solid var(--line,#ece6d81f);border-radius:999px;overflow:hidden;background:transparent}
 .oBar .oSeg>.thumb{display:none!important}
 .oBar .oSeg>.oThumb{position:absolute;top:0;bottom:0;left:0;width:0;border-radius:999px;background:var(--paper,#ece6d8);pointer-events:none;transition:left .3s cubic-bezier(.3,1.25,.5,1),width .3s cubic-bezier(.3,1.25,.5,1),opacity .2s}
-.oBar .oSeg>button{position:relative;z-index:1;min-width:0;min-height:0;height:auto;padding:0 14px;border:0;border-radius:0;background:transparent!important;color:var(--muted,#8d9095);font:600 12px/1 var(--ui-mono,var(--mono,'IBM Plex Mono',ui-monospace,monospace));letter-spacing:.08em;cursor:pointer;transition:color .2s}
+.oBar .oSeg>button{position:relative;z-index:1;min-width:0;min-height:0;height:auto;padding:7px 14px;border:0;border-radius:0;background:transparent!important;color:var(--muted,#8d9095);font:600 12px/normal 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;cursor:pointer;transition:color .2s}
 .oBar .oSeg>button[aria-pressed="true"]{color:var(--bg,#0e0f11)}
 .oBar .oSeg>button:hover:not([aria-pressed="true"]){color:var(--paper,#ece6d8)}
 .oBar :is(.oBack,.oIb,.oChip,.oSeg>button):focus-visible{outline:2px solid var(--accent,var(--amber,#f2a33a))!important;outline-offset:2px}
