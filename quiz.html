@@ -49,10 +49,6 @@ setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.
 }
 [hidden]{display:none!important}
 *{box-sizing:border-box}
-*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
-::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
-::-webkit-scrollbar-thumb:hover{background-color:rgba(255,210,63,.6)}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}
 body{font:400 16px/1.45 var(--body);min-height:100vh;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   background:radial-gradient(ellipse 60% 50% at 50% -5%,rgba(255,210,63,.16),transparent 70%),radial-gradient(ellipse 40% 60% at 0% 100%,rgba(255,79,139,.14),transparent 70%),radial-gradient(ellipse 40% 60% at 100% 100%,rgba(62,224,197,.12),transparent 70%),var(--bg);background-attachment:fixed}
@@ -241,10 +237,10 @@ input:focus{border-color:var(--gold);outline:none}
 #sTable>.grid2{align-items:start;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr)}#tableRosterPanel{position:sticky;top:82px;min-width:0}.tableRosterTitle{display:flex;justify-content:space-between;gap:12px;align-items:center}.tableRosterTitle>b{font:700 12px var(--body);color:var(--gold)}#tableRosterPanel .teams{grid-template-columns:1fr;gap:14px}#invitePanel{display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:16px}#invitePanel .plist{margin:0}#tblPlayers .plist{margin:0}.tableRosterTitle+.teams{margin:0}
 </style>
 <link rel="stylesheet" href="orion-layout.css">
-<script src="quiz-extra.js"></script>
+<script src="quiz-fandoms.js"></script><script src="quiz-extra.js"></script>
 <script src="orion-navigation.js" defer></script>
 <link rel="stylesheet" href="orion-ui.css">
-<script src="orion-ui.js" defer></script>
+<script src="orion-ui.js" defer></script><link rel="stylesheet" href="orion-info.css"><script src="orion-info.js" defer></script><script src="quiz-info.js" defer></script>
 </head>
 <body data-orion-game="quiz">
 <img class="gameBackdrop" src="assets/quiz-menu.webp" alt="" decoding="async" fetchpriority="high" draggable="false"><div class="gameBackdropShade" aria-hidden="true"></div>
@@ -418,9 +414,10 @@ evd_odd:['{n} ищет лишнюю картинку — три раза под�
 rh_how:['Жмите пробел или кнопку, когда шарик в жёлтом кольце','Press Space or the button when the ball is in the yellow ring'],tap:['Бей!','Hit!'],
 rh_hits:['Попаданий: {h} из {n}','Hits: {h} of {n}'],odd_round:['Раунд {i} из 3','Round {i} of 3'],
 cat_geo:['География','Geography'],cat_hist:['История','History'],cat_sci:['Наука','Science'],cat_screen:['Кино и сериалы','Film & TV'],cat_games:['Игры','Games'],
-cat_nature:['Природа','Nature'],cat_food:['Еда','Food'],cat_sport:['Спорт','Sport'],cat_misc:['Всякое','Mixed bag']
+cat_nature:['Природа','Nature'],cat_food:['Еда','Food'],cat_sport:['Спорт','Sport'],cat_misc:['Всякое','Mixed bag'],
+cat_twilight:['Сумерки','Twilight'],cat_potter:['Гарри Поттер','Harry Potter'],cat_genshin:['Genshin Impact','Genshin Impact'],cat_winx:['Винкс','Winx Club'],cat_rick:['Рик и Морти','Rick and Morty'],cat_overwatch:['Overwatch','Overwatch']
 };
-const CATI={geo:'fa-earth-europe',hist:'fa-landmark',sci:'fa-flask',screen:'fa-film',games:'fa-gamepad',nature:'fa-paw',food:'fa-burger',sport:'fa-futbol',misc:'fa-shuffle'};
+const CATI={geo:'fa-earth-europe',hist:'fa-landmark',sci:'fa-flask',screen:'fa-film',games:'fa-gamepad',nature:'fa-paw',food:'fa-burger',sport:'fa-futbol',misc:'fa-shuffle',twilight:'fa-moon',potter:'fa-hat-wizard',genshin:'fa-wind',winx:'fa-wand-magic-sparkles',rick:'fa-flask-vial',overwatch:'fa-crosshairs'};
 let cfg={lang:(navigator.language||'').toLowerCase().startsWith('ru')?'ru':'en'};try{Object.assign(cfg,JSON.parse(localStorage.getItem('svo-cfg')||'{}'));}catch(e){}
 const L=()=>cfg.lang==='en'?1:0;
 const T=(k,v)=>{let s=D[k]?D[k][L()]:k;if(v)for(const n in v)s=s.split('{'+n+'}').join(String(v[n]));return s;};
@@ -593,7 +590,7 @@ const BANK=[
 ['misc','Где изобрели бумагу?','Where was paper invented?',['Китай|China','Египет|Egypt','Индия|India','Греция|Greece']],
 ['misc','Как называется страх пауков?','What is the fear of spiders called?',['Арахнофобия|Arachnophobia','Клаустрофобия|Claustrophobia','Акрофобия|Acrophobia','Агорафобия|Agoraphobia']]
 ];
-BANK.push(...window.OrionQuizExtra);
+BANK.push(...window.OrionQuizExtra,...(window.OrionQuizFandoms||[]));
 const ansText=(s)=>{const p=String(s).split('|');return p[Math.min(L(),p.length-1)];};
 const qText=id=>BANK[id][1+L()];
 
@@ -624,7 +621,7 @@ const QDUR=15000,REVEAL=4800,READY=3000,EV_INTRO=2800,EV_RES=3400;
 const WHEEL=[{k:'plus',c:'#2fd17a',i:'fa-plus'},{k:'x2',c:'#ff4f8b',i:'fa-angles-up'},{k:'shield',c:'#3ee0c5',i:'fa-shield-halved'},{k:'skip',c:'#ff5a5f',i:'fa-ban'},
   {k:'minus',c:'#8a5cff',i:'fa-minus'},{k:'steal',c:'#ffb627',i:'fa-hand-holding-dollar'},{k:'none',c:'#5b5486',i:'fa-face-meh'},{k:'jackpot',c:'#ffd23f',i:'fa-crown'}];
 const SYMS=[{i:'fa-star',c:'#ffb627'},{i:'fa-heart',c:'#ff4f8b'},{i:'fa-moon',c:'#3ee0c5'},{i:'fa-bolt',c:'#3d8bff'},{i:'fa-leaf',c:'#2fd17a'},{i:'fa-gem',c:'#a66bff'}];
-const CATS=['geo','hist','sci','screen','games','nature','food','sport','misc'];
+const CATS=['geo','hist','sci','screen','games','nature','food','sport','misc','twilight','potter','genshin','winx','rick','overwatch'];
 const EVTYPES=['wheel','memory','math','sprint','reflex','rhythm','odd'];
 const EVICON={wheel:'fa-dharmachakra',memory:'fa-brain',math:'fa-calculator',sprint:'fa-stopwatch',reflex:'fa-gauge-high',rhythm:'fa-drum',odd:'fa-eye'};
 const FREQS=['rare','normal','often','always'],DIFFS=['easy','normal','hard','grow'];

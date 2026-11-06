@@ -1,0 +1,91 @@
+/* Shared game guide dialog. Every color comes from the host game's tokens, so light (CATAN)
+   and dark games share one layout and typographic scale. */
+.oiRoot{--oi-paper:var(--paper,#ece6d8);--oi-muted:var(--muted,#8d9095);--oi-line:var(--line,#ece6d81f);--oi-accent:var(--accent,var(--amber,#f2a33a));--oi-bg:var(--bg,#0e0f11);--oi-box:color-mix(in srgb,var(--oi-bg) 95%,var(--oi-paper));--oi-raise:color-mix(in srgb,var(--oi-paper) 5%,transparent);--oi-display:var(--game-display,var(--display,system-ui));--oi-body:var(--game-body,var(--body,system-ui));--oi-mono:var(--ui-mono,var(--mono,'IBM Plex Mono',ui-monospace,monospace));position:fixed;inset:0;z-index:4000;display:grid;place-items:center;padding:24px 16px;color:var(--oi-paper);font:400 15px/1.6 var(--oi-body);letter-spacing:0;text-transform:none}
+.oiRoot[hidden]{display:none!important}
+html.oiOpen{overflow:hidden}
+.oiScrim{position:absolute;inset:0;background:color-mix(in srgb,var(--oi-bg) 62%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:oiFade .2s ease}
+.oiBox{position:relative;width:min(860px,100%);max-height:min(800px,calc(100dvh - 48px));display:flex;flex-direction:column;background:var(--oi-box);border:1px solid var(--oi-line);border-radius:20px;box-shadow:0 30px 80px #0007;overflow:hidden;animation:oiIn .24s cubic-bezier(.2,.8,.2,1)}
+.oiRoot.closing .oiBox{animation:oiOut .16s ease-in forwards}.oiRoot.closing .oiScrim{animation:oiFade .16s ease-in reverse forwards}
+@keyframes oiIn{from{opacity:0;transform:translateY(10px) scale(.985)}}@keyframes oiOut{to{opacity:0;transform:translateY(6px) scale(.99)}}@keyframes oiFade{from{opacity:0}}
+
+/* Header: kicker, title, lead and quick facts */
+.oiHead{display:block;height:auto;margin:0;gap:0;position:relative;padding:28px 32px 18px;background:radial-gradient(120% 140% at 0 0,color-mix(in srgb,var(--oi-accent) 14%,transparent),transparent 60%);flex:none}
+.oiKicker{margin:0 0 8px;font:600 11px/1.3 var(--oi-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--oi-accent)}
+.oiTitle{margin:0;padding-right:44px;font:700 clamp(24px,3.2vw,32px)/1.15 var(--oi-display);letter-spacing:-.01em;color:var(--oi-paper)}
+.oiHeadLead{margin:10px 0 0;max-width:62ch;font-size:15px;line-height:1.6;color:color-mix(in srgb,var(--oi-paper) 78%,var(--oi-muted))}
+.oiFacts{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0;padding:0;list-style:none}
+.oiFacts li{display:flex;align-items:baseline;gap:7px;padding:6px 12px;border:1px solid var(--oi-line);border-radius:999px;background:var(--oi-raise)}
+.oiFacts b{font:700 14px/1 var(--oi-display);color:var(--oi-paper)}.oiFacts span{font:500 11px/1.2 var(--oi-mono);letter-spacing:.04em;color:var(--oi-muted)}
+.oiRoot .oiClose{position:absolute;top:18px;right:18px;width:36px;height:36px;min-width:0;min-height:0;margin:0;padding:0;display:grid;place-items:center;border:1px solid var(--oi-line);border-radius:10px;background:transparent;color:var(--oi-muted);cursor:pointer;translate:none!important;box-shadow:none;transition:color .15s,border-color .15s,background .15s}
+.oiRoot .oiClose:hover{color:var(--oi-paper);background:var(--oi-raise);border-color:color-mix(in srgb,var(--oi-paper) 30%,transparent)}.oiClose svg{width:17px;height:17px}
+
+/* Tabs with a sliding underline */
+.oiTabs{position:relative;display:flex;gap:4px;padding:0 24px;border-bottom:1px solid var(--oi-line);overflow-x:auto;scrollbar-width:none;flex:none}
+.oiTabs::-webkit-scrollbar{display:none}.oiTabs[hidden]{display:none}
+.oiRoot .oiTabs button{display:inline-flex;align-items:center;gap:7px;flex:none;min-height:0;margin:0;padding:13px 12px 14px;border:0;border-radius:0;background:transparent;color:var(--oi-muted);font:600 13px/1 var(--oi-body);letter-spacing:0;text-transform:none;white-space:nowrap;cursor:pointer;translate:none!important;box-shadow:none;transition:color .15s}
+.oiRoot .oiTabs button:hover{color:var(--oi-paper);background:transparent}.oiRoot .oiTabs button[aria-selected="true"]{color:var(--oi-paper)}
+.oiTabIcon{font-size:15px;line-height:1}
+.oiInk{position:absolute;bottom:-1px;left:0;height:2px;width:0;border-radius:2px;background:var(--oi-accent);transition:left .28s cubic-bezier(.3,1.2,.5,1),width .28s cubic-bezier(.3,1.2,.5,1)}
+
+/* Body */
+.oiBody{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:24px 32px 32px;outline:none}
+.oiPanel{display:flex;flex-direction:column;gap:16px;animation:oiFade .22s ease}
+.oiPanel>*{margin:0}
+.oiLead{font:500 17px/1.6 var(--oi-body);color:var(--oi-paper);max-width:64ch}
+.oiP{color:color-mix(in srgb,var(--oi-paper) 80%,var(--oi-muted));max-width:70ch}
+.oiH{margin-top:8px!important;font:600 11px/1.3 var(--oi-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--oi-muted)}
+.oiRoot b{color:var(--oi-paper);font-weight:700}
+.oiRoot kbd{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border:1px solid color-mix(in srgb,var(--oi-paper) 22%,transparent);border-bottom-width:2px;border-radius:6px;background:var(--oi-raise);color:var(--oi-paper);font:600 11px/1 var(--oi-mono);vertical-align:1px;white-space:nowrap}
+
+/* Numbered steps joined by a rail */
+.oiSteps{list-style:none;padding:0;display:flex;flex-direction:column;gap:0}
+.oiSteps li{position:relative;display:grid;grid-template-columns:32px 1fr;gap:14px;padding-bottom:16px}
+.oiSteps li:not(:last-child)::before{content:'';position:absolute;left:15px;top:34px;bottom:2px;width:2px;border-radius:2px;background:var(--oi-line)}
+.oiStepN{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:color-mix(in srgb,var(--oi-accent) 16%,transparent);border:1px solid color-mix(in srgb,var(--oi-accent) 45%,transparent);color:var(--oi-accent);font:700 13px/1 var(--oi-mono)}
+.oiSteps .oiStepT{display:block;padding-top:5px;font-size:15px}.oiSteps p{margin:4px 0 0;color:color-mix(in srgb,var(--oi-paper) 76%,var(--oi-muted));font-size:14px}
+
+.oiList{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.oiList li{position:relative;padding-left:20px;color:color-mix(in srgb,var(--oi-paper) 82%,var(--oi-muted))}
+.oiList li::before{content:'';position:absolute;left:3px;top:.62em;width:7px;height:7px;border-radius:2px;rotate:45deg;background:var(--oi-accent);opacity:.85}
+
+/* Keyboard map */
+.oiKeys{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin:0}
+.oiKeys>div{display:flex;align-items:center;gap:12px;padding:9px 12px;border:1px solid var(--oi-line);border-radius:11px;background:var(--oi-raise)}
+.oiKeys dt{display:flex;align-items:center;gap:4px;flex:none;min-width:84px}.oiKeys dd{margin:0;font-size:14px;color:color-mix(in srgb,var(--oi-paper) 82%,var(--oi-muted))}
+.oiPlus{font:600 10px var(--oi-mono);color:var(--oi-muted)}
+
+/* Cards */
+.oiCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.oiCards.compact{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.oiCard{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--oi-line);border-radius:14px;background:var(--oi-raise)}
+.oiCardIcon{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:color-mix(in srgb,var(--oi-accent) 13%,transparent);font-size:20px;line-height:1}
+.oiCard .oiCardT{display:block;font-size:14px;line-height:1.35}.oiCard p{margin:4px 0 0;font-size:13px;line-height:1.55;color:color-mix(in srgb,var(--oi-paper) 74%,var(--oi-muted))}
+.oiMeta{display:inline-block;margin-top:4px;font:600 11px/1.3 var(--oi-mono);letter-spacing:.03em;color:var(--oi-accent)}
+
+/* Accordions */
+.oiAccs{display:flex;flex-direction:column;gap:8px}
+.oiAcc{border:1px solid var(--oi-line);border-radius:13px;background:var(--oi-raise);overflow:hidden;transition:border-color .15s}
+.oiAcc[open]{border-color:color-mix(in srgb,var(--oi-accent) 40%,var(--oi-line))}
+.oiAcc>summary{display:flex;align-items:center;gap:11px;padding:13px 15px;cursor:pointer;list-style:none;font-weight:700;color:var(--oi-paper)}
+.oiAcc>summary::-webkit-details-marker{display:none}.oiAcc>summary:hover{background:color-mix(in srgb,var(--oi-paper) 4%,transparent)}
+.oiAcc>summary:focus-visible{outline:2px solid var(--oi-accent);outline-offset:-2px;border-radius:13px}
+.oiAccIcon{font-size:18px;line-height:1;flex:none}.oiAccT{flex:1;min-width:0}.oiAcc>summary .oiMeta{margin:0}
+.oiChev{flex:none;width:16px;height:16px;color:var(--oi-muted);transition:rotate .2s}.oiAcc[open] .oiChev{rotate:180deg;color:var(--oi-accent)}
+.oiAccBody{padding:0 15px 15px 15px;display:flex;flex-direction:column;gap:12px;animation:oiFade .2s ease}.oiAccBody>*{margin:0}
+
+/* Callouts */
+.oiNote{display:flex;gap:12px;padding:13px 15px;border-radius:12px;border:1px solid color-mix(in srgb,var(--oi-accent) 35%,transparent);background:color-mix(in srgb,var(--oi-accent) 9%,transparent);font-size:14px;color:color-mix(in srgb,var(--oi-paper) 86%,var(--oi-muted))}
+.oiNote.warn{--oi-accent:var(--lose,#e0604f)}.oiNote.info{--oi-accent:var(--blue,#70abed)}
+.oiNote .oiNoteTitle{display:block;margin-bottom:2px}.oiNoteIcon{flex:none;width:18px;height:18px;margin-top:2px;color:var(--oi-accent)}
+
+/* Tables */
+.oiTableWrap{overflow-x:auto;border:1px solid var(--oi-line);border-radius:13px}
+.oiTable{width:100%;border-collapse:collapse;font-size:14px}
+.oiTable th{padding:10px 14px;text-align:left;font:600 11px/1.3 var(--oi-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--oi-muted);background:var(--oi-raise);border-bottom:1px solid var(--oi-line)}
+.oiTable td{padding:10px 14px;border-bottom:1px solid var(--oi-line);color:color-mix(in srgb,var(--oi-paper) 84%,var(--oi-muted));font-variant-numeric:tabular-nums}
+.oiTable tr:last-child td{border-bottom:0}.oiTable td.oiFirst{color:var(--oi-paper);font-weight:600}
+.oiTable td svg{width:22px;height:22px;vertical-align:middle;margin-right:8px}
+.oiHtml>*:first-child{margin-top:0}
+
+@media(max-width:640px){.oiRoot{padding:0;place-items:end stretch}.oiBox{width:100%;max-height:92dvh;border-radius:18px 18px 0 0}.oiHead{padding:22px 18px 14px}.oiTabs{padding:0 10px}.oiBody{padding:18px 18px 28px}.oiKeys{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.oiBox,.oiScrim,.oiPanel,.oiAccBody{animation:none!important}.oiInk,.oiChev{transition:none}}

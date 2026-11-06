@@ -42,3 +42,16 @@
 /* Reserve room for the vote actions and roster without scrolling the mode. */
 .tmIncluded>div{gap:4px}.tmSettings .tmInclude{min-height:32px;height:34px;padding-block:3px}.tmSettings .tmIncludeArt{height:25px;width:38px}.tmSettings .tmRoster{flex-shrink:0}.tmSettings .tmPlayers{gap:4px}.tmSettings .tmPlayer{padding-block:4px}.tmSettings .tmSessionActions{position:relative;flex-shrink:0}
 @media(max-height:760px){.tmSettings .tmInclude{height:30px;min-height:30px}.tmSettings .tmIncludeArt{height:22px;width:34px}.tmSettings .tmIncluded>p{display:none}}
+/* Settings column: only the game list scrolls; roster, vote tools and actions keep their natural height,
+   so status lines never slide under neighbouring blocks. */
+.tmSettings{overflow:hidden}
+.tmSettings>*{flex:none;min-height:auto}
+.tmSettings>.tmIncluded{flex:1 1 auto;min-height:96px}
+.tmIncluded>div{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:4px;margin-right:-4px}
+.tmIncluded>p{display:block!important;margin:0;flex:none}
+.tmRoster,.tmRoster .tmPlayers{min-height:auto}
+.tmReadyStatus,.tmFootnote{overflow-wrap:anywhere}
+.tmSessionActions{margin-top:0}
+.tmSectorName{font:600 11px var(--body);pointer-events:none}
+.tmSectorVotes{pointer-events:none}
+.tmInclude .tmIncludeName,.tmIncludeName>span{text-align:left}

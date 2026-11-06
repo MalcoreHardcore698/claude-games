@@ -122,10 +122,19 @@
       for(const sector of segments){
         const group=root.querySelector(`.tmSector[data-game="${CSS.escape(sector.id)}"]`);if(!group)continue;
         group.querySelector('.tmSectorPath').setAttribute('d',W.path(sector));
-        const p=W.point(sector.mid,137),count=W.point(sector.mid,86),angle=sector.mid>180?sector.mid+90:sector.mid-90;
-        const label=group.querySelector('.tmSectorName');label.setAttribute('visibility',W.visibleLabel(sector,name(sector.id))?'visible':'hidden');label.setAttribute('transform',`translate(${p[0]} ${p[1]}) rotate(${angle})`);
+        /* Names run along the radius from just inside the rim towards the vote count, and are shortened to fit that band. */
+        const flip=sector.mid>180,p=W.point(sector.mid,190),count=W.point(sector.mid,86),angle=flip?sector.mid+90:sector.mid-90;
+        const label=group.querySelector('.tmSectorName');label.style.textAnchor=flip?'start':'end';label.style.dominantBaseline='central';label.setAttribute('transform',`translate(${p[0]} ${p[1]}) rotate(${angle})`);
+        fitLabel(label,name(sector.id),W.labelRoom(sector));
         const votes=group.querySelector('.tmSectorVotes');votes.setAttribute('visibility',sector.end-sector.start>=15?'visible':'hidden');votes.setAttribute('x',count[0]);votes.setAttribute('y',count[1]);
       }
+    }
+    function fitLabel(label,full,room){
+      if(room.width<14){label.setAttribute('visibility','hidden');return;}label.setAttribute('visibility','visible');
+      const key=full+'|'+Math.round(room.length);if(label.dataset.fit===key)return;label.dataset.fit=key;label.textContent=full;
+      if(typeof label.getComputedTextLength!=='function')return;let text=full;
+      while(text.length>1&&label.getComputedTextLength()>room.length){text=text.slice(0,-1).trimEnd();label.textContent=text+'…';}
+      if(text.length<=2)label.setAttribute('visibility','hidden');
     }
     function animateWheel(){
       if(!state||state.mode!=='wheel'||menu)return;

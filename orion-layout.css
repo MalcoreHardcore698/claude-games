@@ -25,23 +25,13 @@ body[data-orion-page="portal"]:has(#vTamada:not([hidden])) .app{height:100dvh;pa
 body[data-orion-game]:has(#sMenu[hidden])>.gameBackdrop,body[data-orion-game]:has(#sMenu[hidden])>.gameBackdropShade{display:none}
 body[data-orion-game]{--game-max:1320px}
 body[data-orion-game]>.wrap{position:relative;z-index:1;max-width:1320px;gap:0}
-body[data-orion-game]>.wrap::before{content:'';height:52px;flex:none}
-body[data-orion-game] .gamePageHead{display:flex;align-items:center;gap:12px;min-height:36px;height:36px;flex:none;margin-bottom:16px;position:fixed;top:14px;left:50%;translate:-50% 0;width:min(var(--game-max),calc(100% - 32px));z-index:10}
-.gamePageHead::before{content:'';position:absolute;top:-14px;left:50%;translate:-50% 0;width:100vw;height:90px;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#100e17a6,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);mask-image:linear-gradient(180deg,#000 0 50%,transparent 100%);-webkit-mask-image:linear-gradient(180deg,#000 0 50%,transparent 100%)}
-.gameHeadTitle{display:inline-flex;align-items:center;gap:10px;text-decoration:none;background:none;border:0;padding:0;color:inherit;font:600 11px/1.2 ui-monospace,monospace;letter-spacing:.15em;text-transform:uppercase;white-space:nowrap}
-.gameHeadTitle>i{font-size:15px;color:var(--muted,var(--frost,#aaa))}.gameHeadTitle:hover{color:var(--brass2,var(--gold,var(--acc,var(--sodium,#edc575))))}
-.gamePageHead .sp{flex:1}.gamePageHead .ib,.gamePageHead .infoBtn{width:36px;height:36px;display:grid;place-items:center;padding:0;border-radius:9px;border:1px solid var(--line,#e8e2d233);color:inherit;background:#11101444;cursor:pointer;position:static;flex:none;font-size:14px}
-.gamePageHead .seg{height:32px;align-items:stretch;flex:none;position:relative;display:flex;border:1px solid var(--line,#e8e2d233);border-radius:999px;overflow:hidden;background:#11101444}
-.gamePageHead .seg button{font:600 10px/1 ui-monospace,monospace;padding:0 13px;border:0;cursor:pointer;position:relative;background:none;color:var(--muted,var(--frost,#aaa));letter-spacing:.04em}
-.gamePageHead .seg button[aria-pressed="true"]{color:#16121b}
+body[data-orion-game]>.wrap::before{content:'';display:block;height:calc(var(--oh,78px) - 8px);flex:none}
 body[data-orion-game="runes"] .wrap:has(.runeMenuScreen:not([hidden])){padding-block:14px 22px}
 body[data-orion-game="runes"] .runeHome{border:0;border-radius:0;background:none;overflow:visible;isolation:auto}
 body[data-orion-game="runes"] .runeHome::after{display:none}
 body[data-orion-game="runes"] .homeCopy{padding-left:clamp(20px,3vw,42px)}
 body[data-orion-game="runes"] .wrap:has(#sPlay:not([hidden])){gap:0;max-width:1440px}
 body[data-orion-game="runes"]:has(#sPlay:not([hidden])){--game-max:1440px}
-body[data-orion-game="runes"] .wrap:has(#sPlay:not([hidden]))>.top{height:32px;min-height:32px;top:10px}
-body[data-orion-game="runes"] .wrap:has(#sPlay:not([hidden]))::before{height:48px}
 body[data-orion-game="runes"] .carouselTrack .mcard .pic{background:#17121e}
 body[data-orion-game="runes"] .carouselTrack .mcard .pic::before,body[data-orion-game="runes"] .carouselTrack .mcard .pic::after{display:none}
 .runeCardArt{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
@@ -51,7 +41,6 @@ body[data-orion-game="guess"] .guessMenu{display:flex;align-items:center;min-hei
 body[data-orion-game="guess"] .guessMenuCopy{width:45%;max-width:570px;padding-left:clamp(20px,3vw,42px);gap:24px}
 body[data-orion-game="guess"] .guessMenuCopy h1{font-size:clamp(58px,7.2vw,96px)}
 body[data-orion-game="guess"] .guessMenuCopy .lede{font-size:19px;line-height:1.45;max-width:33ch}
-body[data-orion-game="guess"] .gamePageHead .seg button[aria-pressed="true"]{background:var(--paper)}
 body[data-orion-game="quiz"] .wrap:has(#sMenu:not([hidden])){height:100dvh;padding-block:14px 24px}
 body[data-orion-game="quiz"] #sMenu{flex:1;min-height:0;display:flex}
 body[data-orion-game="quiz"] .hero{display:flex;align-items:center;flex:1;min-height:0}
@@ -61,10 +50,10 @@ body[data-orion-game="quiz"] .hero h1{font-size:clamp(44px,6.4vw,88px)}
 body[data-orion-game="quiz"] .hero p.lede{font-size:17px;max-width:36ch;line-height:1.5;margin-block:18px 26px;color:#c8bfdc}
 body[data-orion-game="quiz"] .hero .eyebrow{font-size:10px;margin-bottom:18px}
 body[data-orion-game="quiz"] .gameBackdropShade{background:linear-gradient(90deg,#110c25ef 0%,#160d2ad6 30%,#160d2a44 57%,transparent 80%),linear-gradient(0deg,#110c2577,transparent 30%)}
-body[data-orion-game="svo"] #menu>.gamePageHead{position:absolute;top:14px;left:24px;right:24px;translate:none;width:auto;height:36px;margin-bottom:16px;color:var(--paper)}
-body[data-orion-game="svo"] .gamePageHead .seg button[aria-pressed="true"]{background:var(--paper)}
 @media(max-height:720px){body[data-orion-page="portal"]{--page-top:28px;--header-height:68px}body[data-orion-page="portal"] .app:has(#vTamada:not([hidden])){padding-bottom:18px}.siteHeaderGlass{height:96px}body[data-orion-game="guess"] .guessMenuCopy{gap:18px}body[data-orion-game="guess"] .guessMenuCopy h1{font-size:68px}body[data-orion-game="guess"] .guessMenuCopy .lede{font-size:17px}body[data-orion-game="quiz"] .hero h1{font-size:64px}body[data-orion-game="quiz"] .hero p.lede{font-size:15px;margin-block:14px 20px}body[data-orion-game="quiz"] .hero .btns .btn{font-size:14px;padding:13px 17px}}
-@media(max-width:1100px){body[data-orion-game="guess"] .guessMenuCopy{width:48%;padding-left:20px}body[data-orion-game="guess"] .guessMenuCopy .lede{font-size:17px}body[data-orion-game="quiz"] .hero>div:first-child{width:51%;padding-left:20px}.gamePageHead #topTitle{font-size:18px}.gameHeadTitle{letter-spacing:.1em;font-size:10px}}
+@media(max-width:1100px){body[data-orion-game="guess"] .guessMenuCopy{width:48%;padding-left:20px}body[data-orion-game="guess"] .guessMenuCopy .lede{font-size:17px}body[data-orion-game="quiz"] .hero>div:first-child{width:51%;padding-left:20px}}
 @media(prefers-reduced-motion:reduce){.gameCoverArt{transition:none}}
 
 body[data-orion-game] button{translate:none!important}
+/* Accent tokens for pages that predate the shared names, so header and scrollbars pick the game's color. */
+body[data-orion-game="quiz"]{--accent:var(--gold)}body[data-orion-game="runes"]{--accent:var(--brass);--paper:var(--ink)}body[data-orion-game="svo"]{--accent:var(--sodium)}body[data-orion-game="guess"]{--accent:var(--acc)}

@@ -36,9 +36,6 @@ setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.
 }
 [hidden]{display:none!important}
 *{box-sizing:border-box}
-::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(217,164,65,.25);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
-@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:rgba(217,164,65,.3) transparent}}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
 body{font:400 15px/1.4 var(--body);min-height:100vh;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(217,164,65,.09),transparent 70%),var(--bg)}
@@ -348,7 +345,7 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
 <link rel="stylesheet" href="orion-layout.css">
 <script src="orion-navigation.js" defer></script>
 <link rel="stylesheet" href="orion-ui.css">
-<script src="orion-ui.js" defer></script>
+<script src="orion-ui.js" defer></script><link rel="stylesheet" href="orion-info.css"><script src="orion-info.js" defer></script>
 </head>
 <body data-orion-game="runes">
 <img class="gameBackdrop" src="assets/runes-menu.webp" alt="" decoding="async" fetchpriority="high" draggable="false"><div class="gameBackdropShade" aria-hidden="true"></div>
@@ -1250,19 +1247,14 @@ $('#bAgain').onclick=()=>{show('sMenu');renderMenu();};
 $('#bMenu').onclick=()=>{show('sMenu');renderMenu();};
 
 /* ================= info ================= */
-function openInfo(){
-  const leg=(set,keys,pre)=>`<div class="leg">${keys.map(k=>`<span><i class="fa-solid ${set[k].i}" style="color:${set[k].c}"></i>${esc(T(pre+k))}</span>`).join('')}</div>`;
-  $('#infoBox').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><h2>${esc(T('title'))}</h2><button class="ib" type="button" id="infoX" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div>
-    <h3>${esc(T('h_how'))}</h3><p>${esc(T('info_how'))}</p>
-    <h3>${esc(T('h_sym'))}</h3>${leg(SYM,SYMK,'sym_')}
-    <h3>${esc(T('h_lines'))}</h3><p>${esc(T('info_lines'))}</p>
-    <h3>${esc(T('h_esym'))}</h3>${leg(ESYM,ESYMK,'es_')}
-    <h3>${esc(T('h_syn'))}</h3><p>${esc(T('info_runes'))}</p>
-    <div class="synl">${SYN.map(s=>`<div><b><i class="fa-solid ${s.i}"></i> ${esc(tr(s.n))}</b> <span class="g">${s.need._distinct?'5 ≠':Object.entries(s.need).map(([r,n])=>RUNES[r].g.repeat(n)).join(' + ')}</span><br>${esc(tr(s.d))}${s.at?`<br><span style="color:var(--brass2)">${esc(synPositionText(s))}</span>`:''}</div>`).join('')}</div>
-    <h3>${esc(L()?'Cell effects':'Эффекты ячеек')}</h3><div class="synl">${Object.values(RuneFX.types).map(f=>`<div><b style="color:${f.c}"><i class="fa-solid ${f.i}"></i> ${esc(tr(f.n))}</b><br>${esc(tr(f.d))}</div>`).join('')}</div>
-    <h3>${esc(T('h_spins'))}</h3><p>${esc(T('info_spins'))}</p>
-    <h3>${esc(T('h_modes'))}</h3><p>${esc(T('info_modes'))}</p>`;
-  $('#mInfo').hidden=false;$('#infoX').onclick=closeInfo;$('#infoX').focus();}
+/* The guide uses the shared ORION dialog; legends and synergies come straight from game data. */
+window.OrionInfoSpec=()=>{const icon=(set,k)=>`<i class="fa-solid ${set[k].i}" style="color:${set[k].c}"></i>`;const legend=(set,keys,pre)=>({cards:keys.map(k=>({iconHtml:icon(set,k),t:T(pre+k)})),compact:true});
+  return{kicker:L()?'Guide · reels and runes':'Справка · барабаны и руны',title:T('title'),onClose:autoNext,tabs:[
+   {id:'how',icon:'🎰',label:T('h_how'),blocks:[{lead:T('info_how')},{h:T('h_spins')},{p:T('info_spins')},{h:T('h_modes')},{p:T('info_modes')}]},
+   {id:'symbols',icon:'⚔️',label:L()?'Symbols':'Символы',blocks:[{h:T('h_sym')},legend(SYM,SYMK,'sym_'),{h:T('h_lines')},{note:T('info_lines'),tone:'tip'},{h:T('h_esym')},legend(ESYM,ESYMK,'es_')]},
+   {id:'synergy',icon:'✨',label:T('h_syn'),blocks:[{p:T('info_runes')},{acc:SYN.map(s=>({iconHtml:`<i class="fa-solid ${s.i}"></i>`,t:tr(s.n),meta:s.need._distinct?'5 ≠':Object.entries(s.need).map(([r,n])=>RUNES[r].g.repeat(n)).join(' + '),blocks:[{p:tr(s.d)},...(s.at?[{note:synPositionText(s),tone:'info'}]:[])]}))}]},
+   {id:'cells',icon:'🔮',label:L()?'Cell effects':'Эффекты ячеек',blocks:[{cards:Object.values(RuneFX.types).map(f=>({iconHtml:`<i class="fa-solid ${f.i}" style="color:${f.c}"></i>`,t:tr(f.n),d:tr(f.d)}))}]}]};};
+function openInfo(){if(!window.OrionInfo?.open())$('#mInfo').hidden=false;}
 function closeInfo(){$('#mInfo').hidden=true;$('#bInfo').focus();autoNext();}
 $('#bInfo').onclick=()=>{openInfo();};$('#mInfo').onclick=e=>{if(e.target.id==='mInfo')closeInfo();};
 

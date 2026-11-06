@@ -254,7 +254,7 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
 <link rel="stylesheet" href="orion-layout.css">
 <script src="orion-navigation.js" defer></script>
 <link rel="stylesheet" href="orion-ui.css">
-<script src="orion-ui.js" defer></script>
+<script src="orion-ui.js" defer></script><link rel="stylesheet" href="orion-info.css"><script src="orion-info.js" defer></script>
 </head>
 <body data-orion-game="svo">
 <canvas id="c" aria-label="Game world"></canvas>
@@ -596,6 +596,15 @@ kiosks:[['ПРОДУКТЫ 24','ТАБАК · ПРЕССА','ШАУРМА','ЦВ
 const HELP_KB=[['W A S D','W A S D','идти','move'],['Мышь','Mouse','смотреть','look'],['Shift','Shift','бег','sprint'],['C','C','пригнуться','crouch'],['F','F','фонарь','flashlight'],
  ['E','E','обыскать (удерживать), войти, купить','search (hold), enter, buy'],['Колесо · 1–5','Wheel · 1–5','выбрать слот инвентаря','choose an inventory slot'],['ЛКМ · R','LMB · R','использовать предмет','use the item'],
  ['Q','Q','выкинуть предмет','drop the item'],['M','M','карта','map'],['G','G','дать другу $100','give a friend $100'],['Esc','Esc','пауза','pause']];
+/* Guide in the shared ORION dialog (orion-info.js); keys come from HELP_KB above. */
+window.OrionInfoSpec=()=>{const en=LI()===1,L=(ru,e)=>en?e:ru;return{kicker:L('Справка · побег из города','Guide · escape the city'),title:'Escape from SVO',lead:T('info_rules'),facts:[{v:'1–8',l:L('игроков','players')},{v:'🌙',l:L('день и ночь','day and night')}],tabs:[
+ {id:'goal',icon:'🛂',label:L('Цель','Goal'),blocks:[{steps:[
+  {t:L('Найдите загранпаспорт','Find your passport'),d:L('Без него из города не уехать.','You cannot leave without it.')},
+  {t:L('Выберите способ уехать','Choose a way out'),d:L('На «Жигулях», если найдёте ключи, или на платной попутке.','In the Lada if you find the keys, or on a paid ride.')},
+  {t:L('Переждите день','Wait out the day'),d:L('Днём на улицах опасно — прячьтесь у друзей, в подвалах и ночлежках.','Daytime streets are dangerous — hide at friends’ flats, basements and shelters.')}]},
+  {note:L('Ищите закладки и лут, сдавайте их барыгам и откупайтесь от военкомов.','Find stashes and loot, sell them to dealers and bribe the officers.'),tone:'tip'}]},
+ {id:'coop',icon:'🤝',label:L('Кооператив','Co-op'),blocks:[{cards:[{icon:'🫂',t:L('Помогайте','Help'),d:L('Делитесь деньгами и укрытием с друзьями.','Share money and shelter with friends.')},{icon:'📞',t:L('Или мешайте','Or betray'),d:L('Доносы на других игроков тоже часть игры.','Snitching on other players is part of the game.')}]},{keys:[{k:['G'],d:HELP_KB.find(r=>r[0]==='G')[2+LI()]}]}]},
+ {id:'keys',icon:'⌨️',label:T('help_kb'),blocks:[{keys:HELP_KB.map(r=>({k:r[LI()].split(' · '),d:r[2+LI()]}))}]}]};};
 const cfg={vol:80,sens:100,lang:(navigator.language||'').toLowerCase().startsWith('ru')?'ru':'en'};
 try{Object.assign(cfg,JSON.parse(localStorage.getItem('svo-cfg')||'{}'));}catch(e){}
 const LI=()=>cfg.lang==='en'?1:0;

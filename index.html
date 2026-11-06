@@ -50,11 +50,6 @@ setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.
 }
 [hidden]{display:none!important}
 *{box-sizing:border-box}
-::-webkit-scrollbar{width:8px;height:8px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(236,230,216,.16);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
-::-webkit-scrollbar-thumb:hover{background-color:rgba(242,163,58,.55)}
-::-webkit-scrollbar-corner{background:transparent}
 @supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:rgba(236,230,216,.2) transparent}}
 .sf{--fd:34px}
 .sf.ft{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--fd));mask-image:linear-gradient(to bottom,transparent 0,#000 var(--fd))}
@@ -278,6 +273,7 @@ a{color:inherit}
 #pop{position:fixed;z-index:70;width:min(420px,calc(100vw - 32px));max-height:calc(100vh - 100px);overflow:auto;background:var(--shelf);border:1px solid rgba(236,230,216,.2);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 80px rgba(0,0,0,.65)}
 #pop.atChip{top:66px;right:max(16px,calc((100vw - 1180px)/2))}
 #pop.atFab{left:52px;top:50%;transform:translateY(-50%)}
+#pop.atGame{transform-origin:top right;max-height:calc(100vh - 110px)}
 .code{font:800 40px/1 var(--display);color:var(--amber);letter-spacing:.06em}
 .members{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .members li{display:flex;align-items:center;gap:10px;padding:9px;border-radius:10px;background:var(--shelf2);min-width:0}
@@ -1167,7 +1163,8 @@ $('#vClose').onclick=()=>{hideM($('#mView'));};
 
 /* ================= lobby popover ================= */
 let popSig='';
-function openPop(){const p=$('#pop');p.classList.toggle('atFab',!!curGame);p.classList.toggle('atChip',!curGame);showM(p);popSig='';renderPop();
+let gamePopAt=null,gameHeader=false;
+function openPop(){const p=$('#pop');const atGame=!!curGame&&gameHeader&&!!gamePopAt;p.classList.toggle('atGame',atGame);p.classList.toggle('atFab',!!curGame&&!atGame);p.classList.toggle('atChip',!curGame);if(atGame){p.style.top=Math.round(gamePopAt.top+10)+'px';p.style.right=Math.max(16,Math.round(innerWidth-gamePopAt.right))+'px';}else{p.style.top='';p.style.right='';}showM(p);popSig='';renderPop();
   $('#lNote').textContent=typeof window.Peer==='function'?'':T('net_lib');$('#lNote').classList.toggle('err',typeof window.Peer!=='function');}
 function closePop(){hideM($('#pop'));}
 function togglePop(){const p=$('#pop');if(p.hidden||p.classList.contains('closing'))openPop();else closePop();}
@@ -1212,11 +1209,11 @@ $('#bEdit').onclick=()=>openProfile(false);
 
 /* ================= games in a frame ================= */
 const frame=$('#frame');const frameWin=()=>frame.contentWindow;
-function openGame(id){if(!GM[id]||tamadaSession?.locked())return;if(tamadaSession?.isHost()&&tamadaSession.control?.phase==='session')tamadaSession.end();closePop();if(!curGame)gameReturn=viewFor(where);curGame=id;GP=null;where=id;$('#frameWrap').hidden=false;$('#fab').hidden=false;if(window.OrionLoader)OrionLoader.loadFrame(frame,{url:GM[id].file,title:gname(id)});else frame.src=GM[id].file;document.body.style.overflow='hidden';renderChip();setTimeout(()=>{try{frame.focus();}catch(e){}},300);}
+function openGame(id){if(!GM[id]||tamadaSession?.locked())return;if(tamadaSession?.isHost()&&tamadaSession.control?.phase==='session')tamadaSession.end();closePop();if(!curGame)gameReturn=viewFor(where);curGame=id;GP=null;where=id;$('#frameWrap').hidden=false;gameHeader=false;gamePopAt=null;$('#fab').hidden=false;if(window.OrionLoader)OrionLoader.loadFrame(frame,{url:GM[id].file,title:gname(id)});else frame.src=GM[id].file;document.body.style.overflow='hidden';renderChip();setTimeout(()=>{try{frame.focus();}catch(e){}},300);}
 function closeGame(keepView){curGame=null;GP=null;if(window.OrionLoader)OrionLoader.cancelFrame();frame.src='about:blank';$('#frameWrap').hidden=true;$('#fab').hidden=true;closePop();document.body.style.overflow='';if(!keepView){navReturning=true;show(gameReturn,true);navReturning=false;if(gameReturn==='vTamada')renderTam();}}
 function peersForGame(){return members().map(m=>({label:m.label,name:clean(m.p.n),chips:num(m.p.c),w:str(m.p.w),ig:inGame(m.label)?1:0,gp:m.me?null:(m.p.gk===str(m.p.w)?obj(m.p.gp):null)}));}
-function hello(){const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'hello',me:LB.label,name:prof.name,lang:cfg.lang,chips:prof.chips,casinoHistory:curGame==='casino'?(prof.casinoLedger||[]).slice(0,6).map(e=>e.round):[],inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');}
-setInterval(()=>{if(!curGame)return;const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'peers',me:LB.label,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');},100);
+function hello(){const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'hello',me:LB.label,name:prof.name,lang:cfg.lang,chips:prof.chips,casinoHistory:curGame==='casino'?(prof.casinoLedger||[]).slice(0,6).map(e=>e.round):[],inLobby:inLobby()&&LB.connected,code:LB.code,hub:LB.hubLabel,peers:peersForGame()},'*');}
+setInterval(()=>{if(!curGame)return;const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'peers',me:LB.label,inLobby:inLobby()&&LB.connected,code:LB.code,hub:LB.hubLabel,peers:peersForGame()},'*');},100);
 function ownEvent(ev,x){if(ev==='carcassonne.score100')unlock('carcassonne_hundred');if(['chess.fin','battleship.fin','carcassonne.fin','catan.fin'].includes(ev)){const game=ev.split('.')[0];unlock(game+'_first');if(x&&x.win)unlock(game+'_win');}const a=EV_ACH[ev]||OrionMilestones.achievementEvents[ev]||OrionCasinoContent.achievementEvents[ev]||OrionCatanContent.achievementEvents[ev]||OrionRationContent.achievementEvents[ev];if(a)unlock(a);if(ev==='tetris.fin'){unlock('t_first');if(x&&x.lines>=20)unlock('t_twenty');}if(ev==='codewords.win')unlock('cw_win');
   if(ev==='runes.castle'&&x){const k=str(x.adv,12);const id={knight:'r_knight',rogue:'r_rogue',mage:'r_mage'}[k];if(id){unlock(id);if(!Array.isArray(prof.runesDone))prof.runesDone=[];if(!prof.runesDone.includes(k))prof.runesDone.push(k);saveProf();if(prof.runesDone.length>=3)unlock('r_all');}}
   if(ev==='runes.fin'&&x&&num(x.gold)>=500)unlock('r_gold');
@@ -1252,7 +1249,9 @@ addEventListener('message',e=>{
       const w=frameWin();if(w)w.postMessage({svo:1,type:'stake',id:str(m.id),ok},'*');break;}
     case 'payout':{const amt=Math.max(0,Math.min(1e6,Math.floor(num(m.amt))));const st=Math.max(0,Math.floor(num(m.stake)));if(!amt)break;const from=prof.chips;prof.chips+=amt;saveProf();
       notify({icon:amt>st?'fa-sack-dollar':'fa-coins',color:amt>st?'var(--win)':'var(--amber)',title:T('payout_t'),text:gname(curGame),chips:{from,to:prof.chips},ttl:6000});if(amt>st)boom(amt>=1000);if(amt>=1000)unlock('r_rich');checkWealth();renderHome();break;}
-    case 'lobby':openPop();break;
+    case 'lobby':{const r=obj(m.rect);gamePopAt=r?{top:num(r.bottom),right:num(r.right)}:null;togglePop();break;}
+    case 'lobbyDismiss':if(!$('#pop').hidden)closePop();break;
+    case 'header':gameHeader=!!m.visible;$('#fab').hidden=!curGame||gameHeader;break;
     case 'exit':closeGame();break;
     case 'lang':if(m.lang==='ru'||m.lang==='en'){cfg.lang=m.lang;applyLang();}break;
   }
