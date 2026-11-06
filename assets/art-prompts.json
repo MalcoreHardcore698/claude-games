@@ -1,0 +1,38 @@
+{
+  "method": "built-in image generation",
+  "style_reference": "runes-menu.webp",
+  "prompts": [
+    {
+      "key": "campaign-knight",
+      "prompt": "Use case: stylized-concept. Asset type: finished illustration for an existing fantasy browser game, without lettering or UI. The attached image is a STYLE REFERENCE ONLY: match its rich hand-painted storybook game key art, carved wood, magical light, readable silhouettes and tactile materials. Create a NEW scene, not an edit of the slot machine. Portrait 2:3 composition, centered main subject filling a vertical card, rich detail with a clear focal point. No text, no numbers, no logos, no watermarks, no borders or frames. A valiant armored knight with a turquoise rune on his sword, standing on a moss-covered stone bridge in a deep emerald forest. Ahead is a looming BLACK CASTLE with warm lit windows above dark pines. Fireflies, mist and a small troll silhouette under the bridge, adventurous rather than frightening. Emerald, dark teal and warm brass."
+    },
+    {
+      "key": "campaign-rogue",
+      "prompt": "Use case: stylized-concept. Asset type: finished illustration for an existing fantasy browser game, without lettering or UI. The attached image is a STYLE REFERENCE ONLY: match its rich hand-painted storybook game key art, carved wood, magical light, readable silhouettes and tactile materials. Create a NEW scene, not an edit of the slot machine. Portrait 2:3 composition, centered main subject filling a vertical card, rich detail with a clear focal point. No text, no numbers, no logos, no watermarks, no borders or frames. A nimble hooded rogue with an amber rune dagger and a purse of gold, overlooking a magnificent GOLDEN PALACE across desert dunes. Ancient sandstone arches, a weathered sphinx, a few coins catching the sunlight. Warm amber, dusty burgundy, turquoise accents, mysterious desert adventure."
+    },
+    {
+      "key": "campaign-mage",
+      "prompt": "Use case: stylized-concept. Asset type: finished illustration for an existing fantasy browser game, without lettering or UI. The attached image is a STYLE REFERENCE ONLY: match its rich hand-painted storybook game key art, carved wood, magical light, readable silhouettes and tactile materials. Create a NEW scene, not an edit of the slot machine. Portrait 2:3 composition, centered main subject filling a vertical card, rich detail with a clear focal point. No text, no numbers, no logos, no watermarks, no borders or frames. A graceful silver-haired sorceress in a dark blue cloak, holding a luminous ice rune, approaching an ICE CITADEL perched on snowy mountains. Blue crystal towers, swirling snow and a pale violet sky. Clear blue, icy cyan and deep indigo, small warm gold accents. Majestic wintry fantasy, no lettering."
+    },
+    {
+      "key": "mode-time",
+      "prompt": "Use case: stylized-concept. Asset type: finished illustration for an existing fantasy browser game, without lettering or UI. The attached image is a STYLE REFERENCE ONLY: match its rich hand-painted storybook game key art, carved wood, magical light, readable silhouettes and tactile materials. Create a NEW scene, not an edit of the slot machine. Portrait 2:3 composition, centered main subject filling a vertical card, rich detail with a clear focal point. No text, no numbers, no logos, no watermarks, no borders or frames. An ornate BRASS HOURGLASS glowing amber, surrounded by spinning rune stones and sparks in a vaulted wizard's library. Sand is visibly falling, curved clockwork gears and clock hands behind it with no clock numerals. Dynamic sweep of light conveys a race against time. Gold, dark plum, turquoise."
+    },
+    {
+      "key": "mode-endless",
+      "prompt": "Use case: stylized-concept. Asset type: finished illustration for an existing fantasy browser game, without lettering or UI. The attached image is a STYLE REFERENCE ONLY: match its rich hand-painted storybook game key art, carved wood, magical light, readable silhouettes and tactile materials. Create a NEW scene, not an edit of the slot machine. Portrait 2:3 composition, centered main subject filling a vertical card, rich detail with a clear focal point. No text, no numbers, no logos, no watermarks, no borders or frames. An ENDLESS SPIRAL STAIRWAY of ancient stone passing through multiple glowing turquoise magical portals, stretching into an immense twilight sky. Floating rune stones mark the path; distant castles and tiny heroic traveler emphasize depth. Dark violet and teal, shafts of golden light. Visually infinite journey."
+    },
+    {
+      "key": "mode-weekly",
+      "prompt": "Use case: stylized-concept. Asset type: finished illustration for an existing fantasy browser game, without lettering or UI. The attached image is a STYLE REFERENCE ONLY: match its rich hand-painted storybook game key art, carved wood, magical light, readable silhouettes and tactile materials. Create a NEW scene, not an edit of the slot machine. Portrait 2:3 composition, centered main subject filling a vertical card, rich detail with a clear focal point. No text, no numbers, no logos, no watermarks, no borders or frames. A CELESTIAL ADVENTURE MAP and unfurled parchment scroll floating above a brass astrolabe on a wizard's desk, seven bright stars connected in a sweeping constellation, rune stones and an enchanted wax seal. Deep midnight blue, violet and luminous gold. Special rotating weekly challenge atmosphere, no letters or calendar numbers."
+    },
+    {
+      "key": "quiz-menu",
+      "prompt": "Use case: stylized-concept. Asset type: full-viewport menu background illustration and game-library cover for a lively quiz game. Landscape 3:2. A glamorous whimsical game-show stage with a large vintage brass MICROPHONE and a colorful wheel of fortune, glowing answer tiles bearing only simple star, moon, lightning and heart shapes, warm theater spotlights, purple velvet and amber bulbs. Main illustrated group on the RIGHT 60 percent; LEFT 40 percent is quiet dark violet atmospheric negative space for overlaid menu text. Sophisticated hand-painted game key art, tactile objects, inviting party energy, strong readable silhouettes. No text, no letters, no numbers, no people, no logos, no watermarks, no UI or borders."
+    },
+    {
+      "key": "svo-cover",
+      "prompt": "Use case: stylized-concept. Asset type: cinematic game-library cover for an existing stealth survival browser game set in a snowy post-Soviet apartment district at night. Landscape 3:2. A lonely wet asphalt street lined with five-story concrete apartment blocks, scattered warm lit windows, falling snow, an old dark sedan waiting under an amber streetlight, a worn backpack and passport-shaped closed booklet on the foreground snowy railing, distant blue-red lights behind fog. Moody atmospheric 3D horror-adventure promotional illustration, polished painterly realism, strong perspective, blue-black shadows and warm amber. No text on the booklet or anywhere, no letters, no numbers, no flags, no insignia, no logos, no weapons, no violence, no UI, no borders."
+    }
+  ]
+}

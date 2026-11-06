@@ -251,8 +251,9 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
 }
 @media (prefers-reduced-motion:reduce){#grain{animation:none}.toast{animation:none}}
 </style>
+<link rel="stylesheet" href="orion-layout.css">
 </head>
-<body>
+<body data-orion-game="svo">
 <canvas id="c" aria-label="Game world"></canvas>
 <div id="shade"></div>
 <div id="grain"></div>
@@ -291,9 +292,12 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
 </div>
 
 <section id="menu" class="screen">
-  <button class="infoBtn" id="infoBtn" type="button" aria-label="Info">i</button>
+  <div class="gamePageHead">
+    <a class="gameHeadTitle" id="hubLink" href="index.html" hidden><i class="fa-solid fa-person-running" aria-hidden="true"></i><span>Escape from SVO</span></a>
+    <span class="sp"></span><button class="infoBtn" id="infoBtn" type="button" aria-label="Info"><i class="fa-solid fa-circle-info" aria-hidden="true"></i></button>
+    <div class="seg" role="group" aria-label="Language"><button id="gameLangRu" type="button">RU</button><button id="gameLangEn" type="button">EN</button></div>
+  </div>
   <div class="twrap">
-    <a class="hub" id="hubLink" href="index.html" hidden data-t="all_games"></a>
     <p class="eyebrow" data-t="eyebrow"></p>
     <h1><span class="h-small">Escape from</span><span class="h-big">SVO</span></h1>
     <nav class="mlist" aria-label="Main menu">
@@ -600,6 +604,7 @@ function applyLang(){
   document.querySelectorAll('[data-t]').forEach(el=>{el.textContent=T(el.dataset.t);});
   document.querySelectorAll('[data-tph]').forEach(el=>{el.placeholder=T(el.dataset.tph);});
   $('#langRu').setAttribute('aria-pressed',cfg.lang==='ru');$('#langEn').setAttribute('aria-pressed',cfg.lang==='en');
+  $('#gameLangRu').setAttribute('aria-pressed',cfg.lang==='ru');$('#gameLangEn').setAttribute('aria-pressed',cfg.lang==='en');
   const fill=(id,rows)=>{const dl=$(id);dl.innerHTML='';for(const r of rows){const dt=document.createElement('dt');const k=document.createElement('kbd');k.textContent=r[LI()];dt.appendChild(k);const dd=document.createElement('dd');dd.textContent=r[2+LI()];dl.appendChild(dt);dl.appendChild(dd);}};
   fill('#helpKb',HELP_KB);
   $('#menuBtn').textContent=T('to_menu');$('#menuBtn').dataset.confirm='';
@@ -1943,6 +1948,7 @@ $('#vol').addEventListener('input',e=>{cfg.vol=+e.target.value;$('#volV').textCo
 $('#vol').addEventListener('change',()=>{initAudio();sfx.pick();});
 $('#sens').addEventListener('input',e=>{cfg.sens=+e.target.value;$('#sensV').textContent=(cfg.sens/100).toFixed(1)+'×';saveCfg();});
 $('#langRu').addEventListener('click',()=>{cfg.lang='ru';saveCfg();applyLang();shellPost('lang',{lang:'ru'});});$('#langEn').addEventListener('click',()=>{cfg.lang='en';saveCfg();applyLang();shellPost('lang',{lang:'en'});});
+$('#gameLangRu').addEventListener('click',()=>$('#langRu').click());$('#gameLangEn').addEventListener('click',()=>$('#langEn').click());
 $('#lobStart').addEventListener('click',()=>{initAudio();hostStartCoop();});
 $('#lobLeave').addEventListener('click',teardownToMenu);
 $('#resumeBtn').addEventListener('click',resume);

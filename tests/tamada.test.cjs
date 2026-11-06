@@ -4,6 +4,7 @@ const { readFileSync } = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const C = require('../tamada-core.js');
+const W = require('../orion-wheel.js');
 const games = [
   { id:'a', r:'rare', tags:['online','two'], icon:'fa-dice', cover:'gw' },
   { id:'b', r:'legendary', tags:['solo','rpg'], icon:'fa-dice', cover:'runesc' },
@@ -88,21 +89,28 @@ test('only included games can be revealed, and results cannot be re-voted during
 
 function lobby() {
   let leader='host';
+  let holdGuest=false;const queued=[];
   const apis={},roots={},snapshots={},launches=[],timers=new Map();let timerId=0;
   const people=()=>['host','guest'].map(label=>({label,p:{n:label,tm:snapshots[label]}}));
-  const context={window:{OrionTamadaCore:C},document:{activeElement:null},CSS:{escape:s=>s},
+  const context={window:{OrionTamadaCore:C,OrionWheel:W},document:{activeElement:null},CSS:{escape:s=>s},
     setTimeout:fn=>{const id=++timerId;timers.set(id,fn);return id;},clearTimeout:id=>timers.delete(id)};
   vm.createContext(context);vm.runInContext(readFileSync(path.join(__dirname,'../tamada.js'),'utf8'),context);
   for(const label of ['host','guest']) {
     let click;
-    const root={innerHTML:'',contains:e=>!!e?.isButton,querySelector:()=>null,addEventListener:(type,fn)=>{if(type==='click')click=fn;}};
-    roots[label]={click:(action,data={})=>{const button={isButton:true,disabled:false,dataset:{tmAction:action,...data}};click({target:{closest:()=>button}});}};
+    const handlers={};
+    const root={innerHTML:'',contains:e=>!!e?.isButton,querySelector:()=>null,addEventListener:(type,fn)=>{handlers[type]=fn;if(type==='click')click=fn;}};
+    const target=(action,data={})=>({isButton:true,disabled:false,dataset:{tmAction:action,...data}});
+    roots[label]={
+      html:()=>root.innerHTML,
+      click:(action,data={},event={})=>{const button=target(action,data);click({target:{closest:()=>button},...event});},
+      gesture:(type,game,event={})=>{const button=target('sector',{game});handlers[type]({target:{closest:()=>button},preventDefault(){},...event});},
+    };
     apis[label]=context.window.createOrionTamada({root,games,me:()=>label,host:()=>leader,members:people,
       name:id=>id,tag:id=>id,color:()=> '#f2a33a',cover:()=>'',lang:()=> 'en',id:()=> 'session',visible:()=>true,
-      emit:data=>{for(const api of Object.values(apis))api.receive(label,JSON.parse(JSON.stringify(data)));},
+      emit:data=>{for(const [recipient,api] of Object.entries(apis)){const message=JSON.parse(JSON.stringify(data));if(holdGuest&&recipient==='guest'&&data.a==='state')queued.push(()=>api.receive(label,message));else api.receive(label,message);}},
       changed:s=>snapshots[label]=s,join:()=>{},invite:()=>{},notice:()=>{},started:()=>{},launch:id=>launches.push([label,id])});
   }
-  return {apis,roots,snapshots,launches,timers,setLeader:x=>leader=x};
+  return {apis,roots,snapshots,launches,timers,setLeader:x=>leader=x,holdGuest:x=>holdGuest=x,flushGuest:()=>{while(queued.length)queued.shift()();}};
 }
 
 test('two clients share allocations, readiness, winner and explicit game launch', () => {
@@ -135,4 +143,43 @@ test('a newly elected lobby host can continue an existing session', () => {
   setLeader('guest');apis.guest.tick();
   assert.equal(snapshots.guest.host,'guest');
   roots.guest.click('advance');assert.equal(snapshots.guest.phase,'spin');
+});
+
+test('sector clicks, Shift-click, right-click and keyboard allocate the same synchronized ballot', () => {
+  const {roots,snapshots}=lobby();roots.host.click('mode',{mode:'wheel'});
+  assert.ok(roots.host.html().includes('data-tm-action="sector"'));
+  assert.ok(!roots.host.html().includes('tmVoteRows'));
+  roots.host.click('sector',{game:'a'});roots.host.click('sector',{game:'a'});
+  roots.host.click('sector',{game:'a'},{shiftKey:true});
+  assert.equal(snapshots.host.ballots.host.a,1);
+  roots.host.gesture('contextmenu','a');assert.equal(snapshots.host.ballots.host.a,0);
+  roots.host.gesture('keydown','b',{key:'Enter'});assert.equal(snapshots.guest.ballots.host.b,1);
+  roots.host.gesture('keydown','b',{key:'Delete'});assert.equal(snapshots.guest.ballots.host.b,0);
+  for(let i=0;i<10;i++)roots.host.click('sector',{game:'c'});
+  const seq=snapshots.host.seq;roots.host.click('sector',{game:'a'});
+  assert.equal(snapshots.host.seq,seq);assert.equal(C.sum(snapshots.host.ballots.host),10);
+  roots.host.click('ready');roots.host.click('sector',{game:'c'},{shiftKey:true});
+  assert.equal(snapshots.host.ballots.host.c,10);
+  roots.host.click('ready');roots.host.click('reset');assert.equal(C.sum(snapshots.host.ballots.host),0);
+});
+
+test('wheel interpolation remains continuous during a rapid second vote and ends at the actual weighted sectors', () => {
+  const initial=C.sectors({a:1,b:1,c:1}),first=C.sectors({a:8,b:1,c:1}),next=C.sectors({a:8,b:5,c:1});
+  const visible=W.interpolate(initial,first,.4);
+  assert.deepEqual(W.interpolate(visible,next,0).map(s=>[s.start,s.end]),visible.map(s=>[s.start,s.end]));
+  const final=W.interpolate(visible,next,1);
+  final.forEach((s,i)=>{assert.ok(Math.abs(s.start-next[i].start)<1e-9);assert.ok(Math.abs(s.end-next[i].end)<1e-9);assert.ok(Number.isFinite(s.mid));});
+  assert.ok(!W.path(C.sectors({a:1})[0]).includes('NaN'));
+  assert.equal((W.path(C.sectors({a:1})[0]).match(/A199 199/g)||[]).length,2);
+});
+
+test('rapid guest clicks are accumulated by the host even while acknowledgements are delayed', () => {
+  const x=lobby();x.roots.host.click('mode',{mode:'wheel'});x.holdGuest(true);
+  for(let i=0;i<10;i++)x.roots.guest.click('sector',{game:'a'});
+  assert.equal(x.snapshots.host.ballots.guest.a,10);
+  assert.equal(C.sum(x.snapshots.guest.ballots.guest||{}),0);
+  x.roots.guest.click('sector',{game:'a'});assert.equal(x.snapshots.host.ballots.guest.a,10);
+  x.holdGuest(false);x.flushGuest();
+  assert.equal(x.snapshots.guest.ballots.guest.a,10);
+  x.roots.guest.click('ready');assert.equal(x.snapshots.host.ready.guest,true);
 });

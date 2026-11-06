@@ -10,13 +10,6 @@ html.orion-pending:not(.orion-mounted)::after{content:"";position:fixed;left:50%
 @keyframes orion-boot{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){html.orion-pending::after{animation:none!important}}
 
-/* Smaller numbered position badges, inset from the rune edge. */
-.runePositions{bottom:8px;left:5px;right:5px;gap:2px;justify-content:center;align-items:center}
-.positionBadge{box-sizing:border-box;flex:0 0 12px;width:12px;height:12px;font-size:7px;line-height:1;border-width:1px}
-.ring .runePositions{bottom:7px;left:4px;right:4px;gap:1px}
-.ring .positionBadge{flex-basis:12px;width:12px;height:12px;font-size:7px}
-.ring .positionBadge:first-child,.ring .positionBadge:last-child{transform:none}
-.rn{padding-bottom:10px}.ring .sk .rn{padding-bottom:12px}
 </style>
 <script data-orion-boot>
 document.documentElement.classList.add('orion-pending');
@@ -334,14 +327,28 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
 .sceneLoot{position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:12;width:min(440px,calc(100% - 40px));max-height:calc(100% - 28px);padding:12px 16px;background:rgba(15,12,20,.96);border:1px solid var(--brass);border-radius:14px;box-shadow:0 12px 38px #0009;display:flex;flex-direction:column;gap:8px;animation:mp .25s ease-out}
 .sceneLoot h2{margin:0;font:700 23px/1 var(--display);color:var(--brass2)}.sceneLoot .lootRewards{min-height:0;overflow:auto;gap:7px;font-size:13px}.sceneLoot .lootRewards p{margin:2px 0}.sceneLoot .lootReward b{font-size:17px}.sceneLoot .tipPositions{font-size:11px;gap:3px;margin-top:3px;padding-top:3px}.sceneLoot .btn{flex:none;align-self:stretch;min-height:32px}
 
+/* Position medallions sit safely inside each rune, including narrow bag cells. */
+.rn{container-type:inline-size;padding-bottom:16px}
+.runePositions{--badge-size:clamp(10px,26cqw,14px);bottom:4px;left:4px;right:4px;gap:1px;align-items:center}
+.positionBadge{flex:none;width:var(--badge-size);height:var(--badge-size);font:600 clamp(7px,17cqw,9px)/1 var(--mono);border-color:#ffffffbd;text-shadow:none}
+.ring .runePositions{--badge-size:14px;bottom:6px;left:4px;right:4px;gap:1px}
+.ring .positionBadge{width:var(--badge-size);height:var(--badge-size);font-size:9px}
+.ring .positionBadge:first-child,.ring .positionBadge:last-child{transform:translateY(-6px)}
+.ring .sk .rn{font-size:25px;padding-bottom:20px}
+.inv{grid-template-rows:repeat(7,minmax(36px,1fr));overflow-y:auto;overscroll-behavior:contain}
+.inv .rn{font-size:clamp(13px,2.6dvh,22px);padding-bottom:15px}
+@media(max-width:1100px){.inv .runePositions{--badge-size:clamp(8px,23cqw,12px)}}
+.socketPos{font:600 16px/1 var(--mono)}
 </style>
 <link rel="stylesheet" href="runes-menu.css">
 <script src="orion-carousel.js"></script>
+<link rel="stylesheet" href="orion-layout.css">
 </head>
-<body>
+<body data-orion-game="runes">
+<img class="gameBackdrop" src="assets/runes-menu.webp" alt="" decoding="async" fetchpriority="high" draggable="false"><div class="gameBackdropShade" aria-hidden="true"></div>
 <div class="wrap">
-  <div class="top">
-    <a class="back" id="hubLink" href="index.html" hidden><i class="fa-solid fa-arrow-left"></i><span data-t="all_games"></span></a>
+  <div class="top gamePageHead">
+    <a class="back gameHeadTitle" id="hubLink" href="index.html" hidden><i class="fa-solid fa-dice-d20" aria-hidden="true"></i><span data-t="title"></span></a>
     <span class="ttl" id="topTitle"></span>
     <span class="sp"></span>
     <button class="ib" id="bInfo" type="button" aria-label="Info"><i class="fa-solid fa-circle-info"></i></button>
@@ -349,7 +356,6 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
   </div>
 
   <section id="sMenu" class="runeMenuScreen runeHome">
-    <img class="homeArt" src="assets/runes-menu.png" alt="" decoding="async" fetchpriority="high" draggable="false">
     <div class="homeCopy">
       <p class="eyebrow"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><span data-t="home_eyebrow"></span></p>
       <h1 id="title"></h1>
@@ -583,8 +589,7 @@ const RUNE_POSITIONS={
 for(const [k,positions] of Object.entries(RUNE_POSITIONS))RUNES[k].positions=positions;
 const runePosition=(k,i)=>k&&RUNES[k].positions.find(p=>p.slot===i+1);
 const canPlace=(k,a,i)=>!k||a==='inv'||!!runePosition(k,i);
-const ROMAN=['I','II','III','IV','V','VI'];
-function positionMarks(k,slot){const positions=RUNES[k].positions;return `<span class="runePositions" aria-hidden="true">${Array.from({length:3},(_,i)=>{const p=positions[i];return `<span class="positionBadge${p?' exists':''}${p&&(!slot||p.slot===slot)?' active':''}">${p?String(p.slot):''}</span>`;}).join('')}</span>`;}
+function positionMarks(k,slot){const positions=RUNES[k].positions;return `<span class="runePositions" aria-hidden="true">${Array.from({length:3},(_,i)=>{const p=positions[i];return `<span class="positionBadge${p?' exists':''}${p&&(!slot||p.slot===slot)?' active':''}">${p?p.slot:''}</span>`;}).join('')}</span>`;}
 function positionDescription(k,slot){return `<div class="tipPositions">${RUNES[k].positions.map(p=>`<div class="${p.slot===slot?'current':''}"><strong>${POS[p.slot-1]}</strong> ${esc(tr(p.d))}</div>`).join('')}</div>`;}
 const BASIC=['raido','jera','teiwaz','algiz','berkana','thurs','gebo','fehu','hagal','uruz'];
 const SYN=[
@@ -1181,12 +1186,12 @@ function renderMenu(){
   buildSeg($('#heroSeg'),HK.map(k=>[k,tr(HEROES[k].n),HEROES[k].i]),heroSel,v=>{heroSel=v;renderMenu();});
   const W=weekly();const claimed=store.wclaim&&store.wclaim[W.wk];
   const md=[{id:'time',cls:'',i:'fa-stopwatch',best:(store.time||{}).best,u:T('kills')},{id:'endless',cls:'e',i:'fa-infinity',best:(store.endless||{}).best,u:T('kills')},{id:'weekly',cls:'w',i:'fa-calendar-week',best:(store.weekly||{}).best,u:T('kills')}];
-  $('#modes').innerHTML=md.map(m=>`<div class="mcard"><div class="pic modepic ${m.cls}"><img src="assets/mode-${m.id}.webp" alt="" draggable="false" loading="lazy"></div><div class="body"><h2>${esc(T('m_'+m.id))}</h2><p>${esc(T('m_'+m.id+'_d'))}</p>
+  $('#modes').innerHTML=md.map(m=>`<div class="mcard"><div class="pic modepic ${m.cls}"><img class="runeCardArt" src="assets/mode-${m.id}.webp" alt="" decoding="async" draggable="false"></div><div class="body"><h2>${esc(T('m_'+m.id))}</h2><p>${esc(T('m_'+m.id+'_d'))}</p>
     ${m.id==='weekly'?`<div class="meta"><span><i class="fa-solid fa-calendar"></i>${esc(T('week',{n:W.wk%100}))}</span><span><i class="fa-solid ${HEROES[W.hk].i}"></i>${esc(tr(HEROES[W.hk].n))}</span><span style="color:${claimed?'var(--muted)':'var(--brass2)'}"><i class="fa-solid fa-coins"></i>${esc(claimed?T('claimed'):T('reward',{n:540}))}</span></div><div class="mods">${W.mods.map(x=>`<span>${esc(tr(x.n))}</span>`).join('')}</div>`:''}
     <div class="meta"><span><i class="fa-solid fa-trophy" style="color:var(--brass)"></i>${esc(T('best',{b:(m.best||0)+' '+m.u}))}</span></div>
     <button class="btn sm go" type="button" data-mode="${m.id}"><i class="fa-solid fa-play"></i>${esc(T('play'))}</button></div></div>`).join('');
   $('#modes').querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>start(b.dataset.mode,b.dataset.mode==='weekly'?W.hk:heroSel,W));
-  $('#advs').innerHTML=HK.map(k=>{const H=HEROES[k];const rec=store[k]||{};return `<div class="mcard"><div class="pic th th-${H.th}"><img src="assets/campaign-${k}.webp" alt="" draggable="false" loading="lazy"></div><div class="body"><h2>${esc(tr(H.camp))}</h2><p>${esc(tr(H.cd))}</p>
+  $('#advs').innerHTML=HK.map(k=>{const H=HEROES[k];const rec=store[k]||{};return `<div class="mcard"><div class="pic th th-${H.th}"><img class="runeCardArt" src="assets/campaign-${k}.webp" alt="" decoding="async" draggable="false"></div><div class="body"><h2>${esc(tr(H.camp))}</h2><p>${esc(tr(H.cd))}</p>
     <div class="meta"><span class="stars">${esc(T('diff'))} ${'<i class="fa-solid fa-star"></i>'.repeat(H.stars)}${'<i class="fa-solid fa-star o"></i>'.repeat(3-H.stars)}</span><span><i class="fa-solid fa-heart" style="color:var(--hp)"></i>${H.hp}</span><span><i class="fa-solid fa-rotate"></i>${H.spins}</span></div>
     <div class="meta"><span>${rec.cleared?`<i class="fa-solid fa-flag-checkered" style="color:var(--buff)"></i>${esc(T('cleared',{n:rec.cleared}))}`:esc(rec.best?T('best',{b:rec.best+'/8'}):T('best_none'))}</span><span style="font-family:var(--rune);color:var(--arc)">${H.start.map(r=>RUNES[r].g).join(' ')} · ${RUNES[H.uRune].g}</span></div>
     <button class="btn sm go" type="button" data-camp="${k}"><i class="fa-solid fa-play"></i>${esc(T('play'))}</button></div></div>`;}).join('');

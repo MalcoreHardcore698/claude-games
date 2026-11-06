@@ -59,6 +59,12 @@
     next.revision++;
     return next;
   }
+  function step(state,player,payload,players,games){
+    if(state.mode!=='wheel'||state.phase!=='vote'||state.ready[player]||payload.revision!==state.revision||!players.includes(player)||!state.enabled.includes(payload.game)||![1,-1].includes(payload.delta))return null;
+    const votes={...(state.ballots[player]||{})};
+    votes[payload.game]=(votes[payload.game]||0)+payload.delta;
+    return vote(state,player,{revision:state.revision,allocation:votes,ready:false},players,games);
+  }
   function canAdvance(state, players) {
     if (state.phase !== 'vote' || !state.enabled.length) return false;
     if (state.mode === 'prize') return true;
@@ -141,6 +147,6 @@
     state.ready = state.ready && typeof state.ready === 'object' ? state.ready : {};
     return state;
   }
-  return { create, candidates, options, allocation, vote, include, canAdvance, totals,
+  return { create, candidates, options, allocation, vote, step, include, canAdvance, totals,
     weightedPick, wheelWeights, sectors, advance, prizeStrip, normalise, sum, budget };
 });
