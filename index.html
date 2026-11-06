@@ -373,6 +373,7 @@ select option:disabled{color:#555}
 
 </style>
 <link rel="stylesheet" href="tamada.css">
+<script src="tamada-session.js"></script>
 <script src="tamada-core.js"></script>
 <script src="orion-wheel.js"></script>
 <script src="tamada.js"></script>
@@ -547,6 +548,7 @@ st_open:['ждёт','pending'],st_won:['+{p}','+{p}'],st_lost:['проигран
 next_game:['на следующую партию','for the next game'],running:['идёт партия','game in progress'],
 tam_vote:['Выберите карту','Pick a card'],tam_note:['Карты перемешаны. Проголосовали: {v} из {n}.','The cards are shuffled. Voted: {v} of {n}.'],tam_end:['Подвести итог','Call it'],
 tam_spin:['Крутим…','Spinning…'],tam_won:['Играем: {g}','We’re playing {g}'],tam_tie:['Ничья — решила рулетка','A tie — the roulette decided'],
+tam_wait_t:['Хост у тамады','The host is with the tamada'],tam_wait_d:['{n} выбирает режим. Как только выбор будет сделан, все участники перейдут к тамаде.','{n} is choosing a mode. Everyone will join the tamada as soon as it is selected.'],
 tam_call_t:['Тамада зовёт','The tamada is calling'],tam_call:['{n} предлагает выбрать игру вслепую','{n} wants to pick a game blind'],
 votes:['{n} голос.','{n} votes'],your_vote:['ваш голос','your vote'],refilled:['Пополнение','Top up'],play:['Играть','Play'],accept:['Принять','Accept'],decline:['Отклонить','Decline'],
 inv_t:['Приглашение в игру','Game invite'],inv:['{n} зовёт в «{g}»','{n} invites you to {g}'],inv_sent:['Приглашение отправлено','Invite sent'],inv_sent_d:['{n} получит уведомление','{n} will get a notification'],
@@ -563,7 +565,7 @@ ach_open:['Открыто {d}','Unlocked {d}'],ach_locked:['Ещё не откр
 s_bets:['ставок','bets'],s_won:['выиграно','won'],s_best:['лучший куш','best win'],s_ach:['достижений','achievements'],
 g_svo_d:['Ночь, спальный район, повестка уже в пути. Найдите паспорт и уезжайте, пока вас не нашли.','Night in a commuter district and a draft summons on its way. Find your passport and get out.'],
 g_gw_d:['Загадайте героя из «Ведьмака», LoL, Dota 2, «Звёздных войн» или «Игры престолов» и угадайте героя соперника.','Pick a hero from The Witcher, LoL, Dota 2, Star Wars or Game of Thrones and guess your opponent’s.'],
-g_quiz_d:['164 вопроса, колесо фортуны и испытания между раундами. Вместе против Профессора, каждый сам за себя или командами.','164 questions, a wheel of fortune and trials between rounds. Together against the Professor, free for all or in teams.'],
+g_quiz_d:['Вопросы из девяти категорий, колесо фортуны и испытания между раундами. Вместе против Профессора, каждый сам за себя или командами.','Questions from nine categories, a wheel of fortune and trials between rounds. Together against the Professor, free for all or in teams.'],
 t_quiz:['викторина','trivia'],t_slots:['автоматы','slots'],t_solo:['одиночная','solo'],t_rpg:['приключение','adventure'],
 g_runes_d:['Игровой автомат-приключение: руны меняют барабаны, барабаны решают исход боя. Ведите героя к замку и ставьте фишки.','A slot-machine adventure: runes reshape the reels and the reels decide each fight. Lead your hero to the castle and put chips on it.'],t_8:['1–8 игроков','1–8 players'],t_teams:['команды','teams'],
 t_3d:['3D','3D'],t_horror:['хоррор','horror'],t_coop8:['кооп до 8','co-op up to 8'],t_board:['настолка','tabletop'],t_two:['1–2 игрока','1–2 players'],t_online:['онлайн','online']
@@ -721,7 +723,7 @@ function ava(name){const h=hash(name),hue=h%360,h2=(hue+140)%360,sides=3+(h>>>9)
   return `<svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="hsl(${hue} 32% 22%)"/><polygon points="${pts}" fill="hsl(${h2} 45% 40%)" stroke="hsl(${h2} 60% 62%)" stroke-width="3"/><circle cx="50" cy="50" r="23" fill="hsl(${hue} 30% 14%)"/><text x="50" y="61" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="28" fill="#ece6d8">${esc(ini)}</text></svg>`;}
 
 /* ================= modal open/close with motion ================= */
-function showM(el){if(!el)return;closeSelect();clearTimeout(el._ct);el.classList.remove('closing');el.hidden=false;document.querySelectorAll('select').forEach(syncSelect);}
+function showM(el){if(!el||tamadaSession?.locked())return;closeSelect();clearTimeout(el._ct);el.classList.remove('closing');el.hidden=false;document.querySelectorAll('select').forEach(syncSelect);}
 function hideM(el){if(!el||el.hidden||el.classList.contains('closing'))return;closeSelect();el.classList.add('closing');el._ct=setTimeout(()=>{el.hidden=true;el.classList.remove('closing');},170);}
 function segThumb(seg){if(!seg)return;let t=seg.querySelector(':scope>.thumb');if(!t){t=document.createElement('i');t.className='thumb';seg.prepend(t);}
   const b=seg.querySelector(':scope>button[aria-pressed="true"]');if(!b||!b.offsetWidth){t.style.opacity=0;return;}t.style.opacity=1;t.style.left=b.offsetLeft+'px';t.style.width=b.offsetWidth+'px';}
@@ -800,7 +802,9 @@ let myLabel='';try{myLabel=sessionStorage.getItem('gs-label')||'';}catch(e){}
 if(!/^u[a-z0-9]{6,12}$/.test(myLabel)){myLabel='u'+Math.random().toString(36).slice(2,10);try{sessionStorage.setItem('gs-label',myLabel);}catch(e){}}
 const LB={label:myLabel,code:'',hub:null,client:null,conn:null,hubConns:new Set(),hubLabel:null,connected:false,closed:true,others:new Map(),lastAll:0,migrating:false,pend:null,t0:Date.now()};
 let where='home',curGame=null,GP=null;
-function myPres(){return {v:1,n:prof?prof.name:'',s:prof?prof.status:'',c:prof?prof.chips:0,w:where,t0:LB.t0,gk:curGame,gp:curGame?GP:null,ac:prof?Object.keys(prof.ach||{}):[],tm:TM};}
+let resumeLobby='';try{resumeLobby=sessionStorage.getItem('gs-lobby')||'';}catch(_){}
+let tamadaSession=null,tamadaUI=null;
+function myPres(){return {v:1,n:prof?prof.name:'',s:prof?prof.status:'',c:prof?prof.chips:0,w:where,t0:LB.t0,gk:curGame,gp:curGame?GP:null,ac:prof?Object.keys(prof.ach||{}):[],tm:TM,tgc:tamadaSession?.control||null};}
 function members(){const out=[{label:LB.label,me:true,p:myPres()}];for(const [k,v] of LB.others)out.push({label:k,me:false,p:v.pres});return out;}
 function inLobby(){return !!LB.code;}
 function deliver(m){try{onEvent(m);}catch(e){console.warn(e);}}
@@ -866,8 +870,8 @@ setInterval(()=>{
 function joinLobby(code,create){
   return new Promise(resolve=>{
     if(typeof window.Peer!=='function'){resolve('lib');return;}
-    leaveLobby(true);LB.code=code;LB.closed=false;LB.t0=Date.now();
-    const done=(ok,err)=>{if(ok){try{sessionStorage.setItem('gs-lobby',code);}catch(e){}resolve('ok');}else{leaveLobby(true);resolve(err||'net');}};
+    leaveLobby(true);resumeLobby=code;LB.code=code;LB.closed=false;LB.t0=Date.now();
+    const done=(ok,err)=>{if(ok){try{sessionStorage.setItem('gs-lobby',code);}catch(e){}resolve('ok');}else{leaveLobby(true);resumeLobby='';resolve(err||'net');}};
     if(create)startHub(done);else connectClient(done);
   });
 }
@@ -875,7 +879,7 @@ function leaveLobby(silent){
   LB.closed=true;for(const c of LB.hubConns){try{c.close();}catch(_){}}LB.hubConns.clear();
   try{LB.conn&&LB.conn.close();}catch(_){}try{LB.client&&LB.client.destroy();}catch(_){}try{LB.hub&&LB.hub.destroy();}catch(_){}
   LB.conn=null;LB.client=null;LB.hub=null;LB.hubLabel=null;LB.connected=false;LB.others.clear();LB.code='';LB.migrating=false;
-  if(!silent){try{sessionStorage.removeItem('gs-lobby');}catch(e){}}
+  if(!silent){resumeLobby='';tamadaSession?.clear();try{sessionStorage.removeItem('gs-lobby');}catch(e){}}
 }
 addEventListener('pagehide',()=>leaveLobby(true));
 
@@ -885,7 +889,8 @@ addEventListener('pagehide',()=>leaveLobby(true));
 function memberName(label){if(label===LB.label)return prof.name;const o=LB.others.get(label);return o&&o.pres.n?clean(o.pres.n):'—';}
 function onEvent(m){
   const k=m.k,d=obj(m.d)||{};
-  if(k==='tam')onTam(m.l,d);
+  if(k==='tamControl')tamadaSession?.receive(m.l,d);
+  else if(k==='tam')onTam(m.l,d);
   else if(k==='bet')onBetBroadcast(d);
   else if(k==='gstart')onGStart(d);
   else if(k==='gev')onGev(d);
@@ -1020,20 +1025,59 @@ $('#bRefill').onclick=()=>{if(prof.chips>=10)return;const from=prof.chips;prof.c
 
 /* ================= tamada ================= */
 let TM=null;
-const tamadaUI=window.createOrionTamada({
-  root:$('#tamadaRoot'),games:GAMES,lang:()=>cfg.lang,me:()=>LB.label,host:()=>LB.hubLabel||LB.label,
+const blockedNavigation=new Map();
+function updateTamadaNavigation(){
+  const locked=!!tamadaSession?.locked();document.body.classList.toggle('tamada-following',locked);
+  if(locked){
+    for(const el of document.querySelectorAll('button,a,input,select,textarea')){
+      if(el.closest('#tamadaRoot,#orionLoad,#screenGuard'))continue;
+      if(!blockedNavigation.has(el))blockedNavigation.set(el,{disabled:el.disabled,tabIndex:el.tabIndex,aria:el.getAttribute('aria-disabled')});
+      if('disabled'in el&&!el.disabled)el.disabled=true;if(el.tabIndex!==-1)el.tabIndex=-1;if(el.getAttribute('aria-disabled')!=='true')el.setAttribute('aria-disabled','true');
+    }
+  }else{
+    blockedNavigation.forEach((old,el)=>{if('disabled'in el)el.disabled=old.disabled;el.tabIndex=old.tabIndex;if(old.aria==null)el.removeAttribute('aria-disabled');else el.setAttribute('aria-disabled',old.aria);});blockedNavigation.clear();
+  }
+  const tamadaDisabled=!!(tamadaSession&&!tamadaSession.canOpen());if($('#bTamada').disabled!==tamadaDisabled)$('#bTamada').disabled=tamadaDisabled;
+  if(tamadaUI)$('#tamadaRoot').inert=!!(LB.code&&!LB.connected);
+}
+function tamadaSessionChanged(control,previous){
+  if(!tamadaUI)return;
+  if(control?.phase==='select'){TM=null;tamadaUI.reset();if(where==='tamada'&&!tamadaSession.isHost())show('vHome',true);}
+  if(tamadaSession.locked()){
+    if(curGame)closeGame(true);closePop();closeSelect();document.querySelectorAll('.modal').forEach(m=>m.hidden=true);
+    if(control?.session!==tamadaUI.getSnapshot()?.id)tamadaUI.reset();
+    show('vTamada',true);tamadaUI.join();
+  }else if(previous?.phase==='session'&&control?.phase!=='session'&&!control?.game&&!tamadaSession.isHost()&&where==='tamada')show('vHome',true);
+  updateTamadaNavigation();
+}
+tamadaSession=new OrionTamadaSession.Session({me:()=>LB.label,host:()=>LB.hubLabel,room:()=>LB.code||resumeLobby,storage:sessionStorage,id:rnd,
+  send:control=>emit('tamControl',control),change:tamadaSessionChanged,
+  notice:()=>notify({icon:'fa-champagne-glasses',title:T('tam_wait_t'),text:T('tam_wait_d',{n:memberName(tamadaSession.owner())}),ttl:7000,key:'tam-select'})});
+tamadaUI=window.createOrionTamada({
+  root:$('#tamadaRoot'),games:GAMES,lang:()=>cfg.lang,me:()=>LB.label,host:()=>LB.hubLabel||tamadaSession.owner()||LB.label,manage:()=>tamadaSession.isHost(),
+  following:()=>tamadaSession.locked(),allowedSession:s=>tamadaSession.active(s),menuOpened:()=>tamadaSession.select(),
   members,name:gname,tag:T,color:rc,cover:coverHTML,id:rnd,visible:()=>where==='tamada',
-  emit:data=>emit('tam',data),changed:state=>{TM=state;if(where==='tamada'&&state.tied?.length>1)unlock('p_tie');},join:joinTamada,launch:openGame,
-  notice:text=>toast(text),started:()=>{unlock('p_tamada');if(bump('tam')>=5)unlock('p_tam5');},
-  invite:(title,text)=>notify({icon:'fa-champagne-glasses',color:'var(--amber)',title,text,ttl:45000,key:'tam',actions:[{label:T('accept'),icon:'fa-check',primary:true,fn:joinTamada},{label:T('decline'),icon:'fa-xmark',fn:()=>{}}]})
+  emit:data=>{if(data.a==='state')tamadaSession.activate(data.state);if(data.a==='launch'&&tamadaSession.isHost())tamadaSession.end(data.game);emit('tam',data);},
+  changed:state=>{TM=state;tamadaSession.remember(state);if(where==='tamada'&&state.tied?.length>1)unlock('p_tie');},join:joinTamada,launch:openGame,
+  notice:text=>toast(text),started:()=>{unlock('p_tamada');if(bump('tam')>=5)unlock('p_tam5');}
 });
-function startTamada(){if(curGame)closeGame(true);closePop();show('vTamada');tamadaUI.open();}
-function joinTamada(){if(curGame)closeGame(true);closePop();show('vTamada');tamadaUI.join();}
-function onTam(from,data){tamadaUI.receive(from,data);}
+let navUpdateQueued=false;new MutationObserver(()=>{if(!navUpdateQueued){navUpdateQueued=true;queueMicrotask(()=>{navUpdateQueued=false;updateTamadaNavigation();});}}).observe(document.body,{childList:true,subtree:true});
+function startTamada(){if(!tamadaSession.canOpen())return;if(curGame)closeGame(true);closePop();show('vTamada',true);tamadaUI.open();}
+function joinTamada(){if(curGame)closeGame(true);closePop();show('vTamada',true);tamadaUI.join();}
+function onTam(from,data){
+  if(data.a==='state'){if(!tamadaSession.active(data.state))return;}
+  else if(!tamadaSession.control?.session||data.id!==tamadaSession.control.session)return;
+  tamadaUI.receive(from,data);
+}
 function renderTam(){tamadaUI.render();}
+function syncTamadaSession(){
+  const leader=members().find(m=>m.label===LB.hubLabel);tamadaSession.observe(leader);
+  if(tamadaSession.isHost()&&tamadaSession.control?.phase==='session'&&!tamadaUI.getSnapshot()&&tamadaSession.snapshot)tamadaUI.adopt(tamadaSession.snapshot);
+  updateTamadaNavigation();
+}
 
 /* ================= views ================= */
-function show(id){for(const v of ['vHome','vShelf','vTamada','vEvents'])$('#'+v).hidden=v!==id;where=id==='vHome'?'home':id==='vShelf'?'shelf':id==='vEvents'?'events':'tamada';
+function show(id,forced=false){if(!forced&&tamadaSession?.locked()&&id!=='vTamada')return;if(!forced&&id==='vTamada'&&!tamadaSession.canOpen()&&!tamadaSession.locked())return;if(where==='tamada'&&id!=='vTamada'&&tamadaSession?.isHost()&&tamadaSession.control?.phase!=='idle')tamadaSession.end();for(const v of ['vHome','vShelf','vTamada','vEvents'])$('#'+v).hidden=v!==id;where=id==='vHome'?'home':id==='vShelf'?'shelf':id==='vEvents'?'events':'tamada';
   $('#navHome').setAttribute('aria-current',id==='vHome'?'page':'false');$('#navEvents').setAttribute('aria-current',id==='vEvents'?'page':'false');if(id==='vHome'){achSig='';panSig='';renderHome();requestAnimationFrame(segAll);}if(id==='vShelf')renderShelf();window.scrollTo(0,0);}
 document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>show('vHome'));
 $('#logo').onclick=()=>{if(!curGame)show('vHome');};
@@ -1134,7 +1178,7 @@ $('#bEdit').onclick=()=>openProfile(false);
 
 /* ================= games in a frame ================= */
 const frame=$('#frame');const frameWin=()=>frame.contentWindow;
-function openGame(id){if(!GM[id])return;closePop();curGame=id;GP=null;where=id;$('#frameWrap').hidden=false;$('#fab').hidden=false;if(window.OrionLoader)OrionLoader.loadFrame(frame,{url:GM[id].file,title:gname(id)});else frame.src=GM[id].file;document.body.style.overflow='hidden';renderChip();setTimeout(()=>{try{frame.focus();}catch(e){}},300);}
+function openGame(id){if(!GM[id]||tamadaSession?.locked())return;if(tamadaSession?.isHost()&&tamadaSession.control?.phase==='session')tamadaSession.end();closePop();curGame=id;GP=null;where=id;$('#frameWrap').hidden=false;$('#fab').hidden=false;if(window.OrionLoader)OrionLoader.loadFrame(frame,{url:GM[id].file,title:gname(id)});else frame.src=GM[id].file;document.body.style.overflow='hidden';renderChip();setTimeout(()=>{try{frame.focus();}catch(e){}},300);}
 function closeGame(keepView){curGame=null;GP=null;if(window.OrionLoader)OrionLoader.cancelFrame();frame.src='about:blank';$('#frameWrap').hidden=true;$('#fab').hidden=true;closePop();document.body.style.overflow='';if(!keepView)show('vHome');}
 function peersForGame(){return members().map(m=>({label:m.label,name:clean(m.p.n),chips:num(m.p.c),w:str(m.p.w),ig:inGame(m.label)?1:0,gp:m.me?null:(m.p.gk===str(m.p.w)?obj(m.p.gp):null)}));}
 function hello(){const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'hello',me:LB.label,name:prof.name,lang:cfg.lang,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');}
@@ -1200,11 +1244,14 @@ function applyLang(){
 }
 $('#lRu').onclick=()=>setLang('ru');$('#lEn').onclick=()=>setLang('en');
 setTimeout(segAll,60);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(segAll);
-setInterval(()=>{renderChip();renderPop();tamadaUI.tick();},500);
+setInterval(()=>{renderChip();renderPop();syncTamadaSession();tamadaUI.tick();},500);
 
 applyLang();show('vHome');if(prof)setTab(pTab);
+if(tamadaSession.control?.phase==='session'){tamadaSessionChanged(tamadaSession.control,null);if(tamadaSession.snapshot)tamadaUI.hydrate(tamadaSession.snapshot);}
+updateTamadaNavigation();
 if(!prof)openProfile(true);
-try{const c=sessionStorage.getItem('gs-lobby');if(c&&/^[a-z0-9]{3,8}$/.test(c)){joinLobby(c,false).then(r=>{if(r==='nf')joinLobby(c,true).then(()=>renderHome());else renderHome();});}}catch(e){}
+function finishLobbyRestore(result){if(result!=='ok'){resumeLobby='';tamadaSession.clear();show('vHome',true);}syncTamadaSession();renderHome();}
+try{const c=sessionStorage.getItem('gs-lobby');if(c&&/^[a-z0-9]{3,8}$/.test(c)){joinLobby(c,false).then(r=>{if(r==='nf')joinLobby(c,true).then(finishLobbyRestore);else finishLobbyRestore(r);});}}catch(e){}
 })();
 </script>
 </body>

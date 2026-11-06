@@ -339,9 +339,12 @@ body #tip{max-width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px)
 .inv .rn{font-size:clamp(13px,2.6dvh,22px);padding-bottom:15px}
 @media(max-width:1100px){.inv .runePositions{--badge-size:clamp(8px,23cqw,12px)}}
 .socketPos{font:600 16px/1 var(--mono)}
+
+.cell.affected{position:relative;box-shadow:inset 0 0 0 2px var(--cell-fx),inset 0 8px 16px color-mix(in srgb,var(--cell-fx) 20%,transparent)}.cellEffects{position:absolute;top:3px;left:50%;translate:-50% 0;display:flex;gap:4px;align-items:center;padding:2px 5px;background:#17121fcc;border-radius:4px;font-size:clamp(6px,.7vw,9px);line-height:1;z-index:2;pointer-events:none}.cell.affected>i{translate:0 3px}
 </style>
 <link rel="stylesheet" href="runes-menu.css">
 <script src="orion-carousel.js"></script>
+<script src="rune-effects.js"></script>
 <link rel="stylesheet" href="orion-layout.css">
 </head>
 <body data-orion-game="runes">
@@ -499,7 +502,8 @@ position_help:['Выберите руну, затем подсвеченное �
 position_selected:['{n}: выберите гнездо {p}. Ещё один клик снимает выбор.','{n}: choose socket {p}. Click again to deselect.'],
 position_invalid:['Эта руна не подходит для выбранного гнезда.','This rune does not fit that socket.'],position:['Позиция {p}','Position {p}'],
 spins_left:['Прокруток осталось: {n}','Spins left: {n}'],not_landed:['Не выпало','Not landed'],landed:['Выпало','Landed'],
-log_player:['Герой','Hero'],log_enemy:['Враг','Foe'],log_system:['Событие','Event'],log_loot:['Добыча','Loot'],log_turn:['Ход {n}','Turn {n}'],
+log_player:['Герой','Hero'],log_enemy:['Враг','Foe'],log_system:['Событие','Event'],log_loot:['Добыча','Loot'],log_cell_effects:['Сработали эффекты ячеек: {names}.','Cell effects activated: {names}.'],
+log_turn:['Ход {n}','Turn {n}'],
 log_spawn:['Бой {n}: {name}. Здоровье {hp}, атака {atk}.','Fight {n}: {name}. Health {hp}, attack {atk}.'],
 log_roll:['Прокрутка героя. Осталось: {n}.','Hero spin. Remaining: {n}.'],log_enemy_roll:['Барабан врага: {name}.','Foe reels: {name}.'],
 log_damage:['Урон: физический {p} + магический {m}; после защиты врага — {d}. Здоровье врага: {hp}.','Damage: physical {p} + magic {m}; after foe defence — {d}. Foe health: {hp}.'],
@@ -612,6 +616,7 @@ const SYN=[
 const SYNERGY_POSITIONS={storm:{teiwaz:[2],thurs:[4]},vow:{algiz:[3],berkana:[6]},vast:{raido:[1],jera:[2]},holy:{cross:[1],algiz:[5]},blizzard:{isa:[3],thurs:[6]},backstab:{sowilo:[1],teiwaz:[4]}};
 for(const s of SYN)s.at=SYNERGY_POSITIONS[s.id]||null;
 function synPositionText(s){return s.at?Object.entries(s.at).map(([k,ps])=>tr(RUNES[k].n)+' '+ps.map(p=>POS[p-1]).join('/')).join(' + '):'';}
+const RuneFX=window.OrionRuneEffects;RuneFX.install(RUNES,RUNE_POSITIONS,SYN,BASIC,RP);
 const BUFFS={
  sharp:{b:1,i:'fa-khanda',n:['Заточка','Whetstone'],d:['Меч +2 урона.','Swords +2 damage.'],t:3},
  blessing:{b:1,i:'fa-hands-praying',n:['Благословение','Blessing'],d:['+1 ячейка в строке.','+1 cell per row.'],t:2},
@@ -720,7 +725,7 @@ const WMODS=[
  {id:'glass',n:['Стеклянная пушка: здоровье −30%, урон +30%','Glass cannon: −30% health, +30% damage'],ap:g=>{g.max=Math.round(g.max*.7);g.hp=g.max;g.wm.glass=1;}},
  {id:'wide',n:['+1 ячейка навсегда','+1 cell for good'],ap:g=>{g.wm.wide=1;}},
  {id:'brutes',n:['Враги крепче на 25%','Foes have +25% health'],ap:g=>{g.wm.brutes=1;}},
- {id:'gift',n:['Две случайные руны на старте','Two random runes to start'],ap:g=>{giveRune(BASIC[R(10)]);giveRune(BASIC[R(10)]);}},
+ {id:'gift',n:['Две случайные руны на старте','Two random runes to start'],ap:g=>{giveRune(BASIC[R(BASIC.length)]);giveRune(BASIC[R(BASIC.length)]);}},
  {id:'tired',n:['На 5 прокруток меньше','5 fewer spins'],ap:g=>{g.spins=Math.max(5,g.spins-5);}}
 ];
 
@@ -756,10 +761,12 @@ function newRun(mode,hk){
   G={mode,hk,H,th:H.th,hp:H.hp,max:H.hp,spins:H.spins,gold:0,depth:0,wins:0,rolls:0,inv:Array(INV_CAP).fill(null),sock:Array(6).fill(null),buffs:[],rolling:false,over:false,
      enemy:null,eBlock:0,eRage:0,first:true,fightHurt:0,gid:SHELL?rid():null,stake:0,events:{},path:null,timeEnd:0,wm:{},lastMult:1,lastGrid:null,logs:[],selectedRune:null,awaitingLoot:false,auto:false,pendingLoot:null};
   H.start.forEach(r=>{const i=G.sock.findIndex((x,i)=>!x&&canPlace(r,'sock',i));if(i>=0)G.sock[i]=r;else giveRune(r);});
+  for(const k of ['jera','raido',...(['knight','rogue','mage'].includes(hk)?{knight:['kenaz','perthro'],rogue:['othala','dagaz'],mage:['ansuz','laguz']}[hk]:['kenaz','laguz'])])giveRune(k);
+  G.spins+=6;
   if(mode==='camp')G.path=campPath(H.th);
   if(mode==='time'){G.spins=40;G.timeEnd=performance.now()+180000;}
-  if(mode==='endless')G.spins=22;
-  if(mode==='weekly'){G.path=weeklyPath();G.spins=20;}
+  if(mode==='endless')G.spins=28;
+  if(mode==='weekly'){G.path=weeklyPath();G.spins=26;}
 }
 function pick(a){return a[R(a.length)];}
 function campPath(th){const P=POOLS[th];const t1=P.t1.slice(),t2=P.t2.slice();const o=[];for(let i=0;i<3;i++)o.push(t1.splice(R(t1.length),1)[0]);o.push(pick(P.mini));for(let i=0;i<3;i++)o.push(t2.splice(R(t2.length),1)[0]);o.push(pick(P.boss));return o;}
@@ -784,18 +791,21 @@ function synSockets(s){
   if(s.need._distinct){const seen=new Set();const out=[];G.sock.forEach((r,i)=>{if(r&&!seen.has(r)){seen.add(r);out.push(i);}});return out;}
   const out=[];for(const [r,n] of Object.entries(s.need)){let k=0;G.sock.forEach((x,i)=>{if(x===r&&k<n&&runePosition(x,i)&&(!s.at||!s.at[r]||s.at[r].includes(i+1))){out.push(i);k++;}});}return out;}
 function cfgNow(){
-  const c=counts();const sy=new Set(activeSyn().map(x=>x.id));const p={rows:0,cols:0,sw:0,sh:0,he:0,bo:0,coinBonus:0,lineAdd:0,crit:0,freeze:0,firstMul:1,winHeal:0};const w={...BASEW};
+  const c=counts();const sy=new Set(activeSyn().map(x=>x.id));const p={rows:0,cols:0,sw:0,sh:0,he:0,bo:0,coinBonus:0,lineAdd:0,crit:0,freeze:0,firstMul:1,winHeal:0,oscillate:0};const recipes=[];const w={...BASEW};
   G.sock.forEach((k,i)=>{const pos=runePosition(k,i);if(!pos)return;const f=c[k]>=3?2:1;
-    for(const [key,v] of Object.entries(pos.effect)){if(key==='weights'){for(const [sym,n] of Object.entries(v))w[sym]+=n*f;}
+    for(const [key,v] of Object.entries(pos.effect)){if(key==='fx'){recipes.push({...v});}
+      else if(key==='weights'){for(const [sym,n] of Object.entries(v))w[sym]+=n*f;}
       else if(key==='firstMul'||key==='freeze')p[key]=Math.max(p[key],v);
       else p[key]+=v*(key==='rows'||key==='cols'?1:f);}});
-  let rows=1+p.rows+(sy.has('vast')?1:0)+(has('haste')?1:0)-(has('fog')?1:0);
-  let cols=3+p.cols+(has('blessing')?1:0)+(G.wm.wide?1:0)-(has('rust')?1:0)-(has('frostbite')?1:0);
+  let rows=1+p.rows+(p.oscillate&&G.rolls%2===0?1:0)+(sy.has('vast')?1:0)+(has('haste')?1:0)-(has('fog')?1:0);
+  let cols=3+p.cols+(p.oscillate&&G.rolls%2===1?1:0)+(has('blessing')?1:0)+(G.wm.wide?1:0)-(has('rust')?1:0)-(has('frostbite')?1:0);
   rows=clamp(rows,1,5);cols=clamp(cols,3,5);
   w.skull=Math.max(2,w.skull);
   if(has('curse'))w.skull+=12;if(has('lucky'))w.star+=4;if(has('greed'))w.coin+=8;if(sy.has('eclipse'))w.skull=0;
+  for(const synergy of activeSyn())for(const f of synergy.effects||[])recipes.push(f);
+  const marks=RuneFX.grid(rows,cols,recipes,G.rolls);
   const H=G.H;const hb=sy.has('harmony')?1:0;
-  return {rows,cols,w,sy,c,
+  return {rows,cols,w,sy,c,marks,combatScale:Math.min(1,Math.sqrt(6/(rows*cols))),
     sw:H.sw+p.sw+(has('sharp')?2:0)+hb,sh:H.sh+p.sh+hb,he:H.he+p.he+hb,bo:H.bo+p.bo+hb,coin:has('greed')?0:Math.round((5+hb)*(1+p.coinBonus)*(G.wm.rich?2:1)),
     lineAdd:p.lineAdd+(has('focus')?1:0),crit:(H.crit||0)+p.crit+(sy.has('storm')?.2:0),freeze:sy.has('blizzard')?.45:p.freeze,firstMul:p.firstMul,winHeal:p.winHeal};
 }
@@ -804,12 +814,15 @@ function power(){if(!G)return 0;const C=cfgNow();return activeSyn().length*1.6+G
 
 /* ================= reels (strip animation) ================= */
 function reelGeom(box,rows){return clamp(Math.floor((box.clientHeight-(box.id==='ereels'?20:28)-(rows+1)*6)/(rows+1.3)),10,180);}
-function cellHTML(set,s,ch,cls='',row=null){const X=set[s];const desc=T((set===SYM?'sym_':'es_')+s);return `<div class="cell ${cls}" ${row==null?'':`data-row="${row}"`} style="height:${ch}px;--fs:${Math.max(9,Math.round(ch*.42))}px" title="${esc(T(row==null?'not_landed':'landed')+': '+desc)}"><i class="fa-solid ${X.i}" style="color:${X.c}"></i></div>`;}
-function finalStrip(set,values,ch,w){return cellHTML(set,pickSym(w,Math.random),ch,'neighbor top')+values.map((s,r)=>cellHTML(set,s,ch,'selected',r)).join('')+cellHTML(set,pickSym(w,Math.random),ch,'neighbor bottom');}
+function cellHTML(set,s,ch,cls='',row=null,column=null){const X=set[s];const desc=T((set===SYM?'sym_':'es_')+s);
+  const effects=set===SYM&&row!=null&&column!=null?(cfgNow().marks?.[row]?.[column]||[]):[];
+  const labels=effects.map(f=>tr(RuneFX.types[f.type].n)).join(', '),primary=effects[0]&&RuneFX.types[effects[0].type];
+  return `<div class="cell ${cls}${effects.length?' affected':''}" ${row==null?'':`data-row="${row}"`} style="height:${ch}px;--fs:${Math.max(9,Math.round(ch*.42))}px;${primary?`--cell-fx:${primary.c}`:''}" title="${esc(T(row==null?'not_landed':'landed')+': '+desc+(labels?' · '+labels:''))}"><i class="fa-solid ${X.i}" style="color:${X.c}"></i>${effects.length?`<span class="cellEffects">${effects.map(f=>`<i class="fa-solid ${RuneFX.types[f.type].i}" style="color:${RuneFX.types[f.type].c}"></i>`).join('')}</span>`:''}</div>`;}
+function finalStrip(set,values,ch,w,column){return cellHTML(set,pickSym(w,Math.random),ch,'neighbor top')+values.map((s,r)=>cellHTML(set,s,ch,'selected',r,column)).join('')+cellHTML(set,pickSym(w,Math.random),ch,'neighbor bottom');}
 function drawReels(box,set,grid,rows,cols,ch){
   const w=set===SYM?cfgNow().w:G.enemy.w;const edge=Math.round(ch*.65),offset=edge-ch;const h=rows*ch+(rows+1)*6+edge*2;let html='';
   const locked=()=>`<div class="rcol locked" aria-hidden="true"><div class="rwin" style="height:${h}px;--edge:${edge}px"><div class="strip" style="transform:translateY(${offset}px)">${Array.from({length:rows+2},(_,i)=>`<div class="cell ${i===0?'neighbor top':i===rows+1?'neighbor bottom':''}" style="height:${ch}px"></div>`).join('')}</div></div></div>`;
-  html+=locked();for(let c=0;c<cols;c++){const values=Array.from({length:rows},(_,r)=>grid?grid[r][c]:pickSym(w,Math.random));html+=`<div class="rcol" data-c="${c}"><div class="rwin" style="height:${h}px;--edge:${edge}px"><div class="strip" style="transform:translateY(${offset}px)">${finalStrip(set,values,ch,w)}</div></div></div>`;}html+=locked();
+  html+=locked();for(let c=0;c<cols;c++){const values=Array.from({length:rows},(_,r)=>grid?grid[r][c]:pickSym(w,Math.random));html+=`<div class="rcol" data-c="${c}"><div class="rwin" style="height:${h}px;--edge:${edge}px"><div class="strip" style="transform:translateY(${offset}px)">${finalStrip(set,values,ch,w,c)}</div></div></div>`;}html+=locked();
   box.innerHTML=html;box._rows=rows;box._cols=cols;box._ch=ch;box._offset=offset;}
 async function spinReels(box,set,w,grid,rows,cols,ch,opt={}){
   if(!(box._rows===rows&&box._cols===cols&&box._ch===ch))drawReels(box,set,null,rows,cols,ch);
@@ -817,7 +830,7 @@ async function spinReels(box,set,w,grid,rows,cols,ch,opt={}){
   await Promise.all(columns.map((col,c)=>new Promise(resolve=>{
     const strip=col.querySelector('.strip');const start=strip.children.length,n=fill+c*2;let html=strip.innerHTML;
     for(let i=0;i<n;i++)html+=cellHTML(set,pickSym(w,Math.random),ch);
-    const final=finalStrip(set,grid.map(row=>row[c]),ch,w);html+=final;strip.innerHTML=html;strip.style.transition='none';strip.style.transform=`translateY(${box._offset}px)`;void strip.offsetHeight;
+    const final=finalStrip(set,grid.map(row=>row[c]),ch,w,c);html+=final;strip.innerHTML=html;strip.style.transition='none';strip.style.transform=`translateY(${box._offset}px)`;void strip.offsetHeight;
     const dist=(start+n)*(ch+6),dur=(base+c*step)*SPEED;strip.classList.add('go');strip.style.transition=`transform ${dur}ms cubic-bezier(.15,.62,.28,1.03)`;strip.style.transform=`translateY(${box._offset-dist}px)`;
     setTimeout(()=>strip.classList.remove('go'),dur*.75);
     setTimeout(()=>{strip.style.transition='none';strip.style.transform=`translateY(${box._offset}px)`;strip.innerHTML=final;if(!opt.silent)snd(380+c*70,.05,'square',.05);resolve();},dur+20);
@@ -866,21 +879,26 @@ function tag(text,cls){const s=document.createElement('span');s.textContent=text
 function cellPop(cell,text,cls){if(!cell)return;cell.classList.remove('sc');void cell.offsetWidth;cell.classList.add('sc');const p=document.createElement('span');p.className='cpop '+(cls||'');p.textContent=text;cell.appendChild(p);setTimeout(()=>p.remove(),820);}
 function popAt(x,y,text,cls){const p=document.createElement('div');p.className='pop '+cls;p.textContent=text;p.style.left=(x-20+R2(24)-12)+'px';p.style.top=(y-20)+'px';$('#scene').appendChild(p);setTimeout(()=>p.remove(),1100);}
 function scoreGrid(grid,C,firstMul){
-  const clumsy=has('clumsy');const LM=[0,0,0,2,3,5];
-  const out={cells:[],lines:[],phys:0,mag:0,block:0,heal:0,gold:0,spins:0,skulls:0,five:false,holy:0};
+  const clumsy=has('clumsy'),LM=[0,0,0,2,3,5];
+  const out={cells:[],lines:[],phys:0,mag:0,block:0,heal:0,gold:0,spins:0,skulls:0,five:false,holy:0,effects:new Set()};
   grid.forEach((row,r)=>{
-    let s0=row.find(s=>s!=='star')||'sword';let len=0;for(const s of row){if(s===s0||(s==='star'&&!clumsy))len++;else break;}
+    const s0=row.find(s=>s!=='star')||'sword';let len=0;for(const s of row){if(s===s0||(s==='star'&&!clumsy))len++;else break;}
     const m=len>=3?(LM[len]+C.lineAdd)*firstMul:1;if(len>=3){out.lines.push({r,len,s:s0,m});if(len===5)out.five=true;}
-    row.forEach((s,c)=>{const inL=len>=3&&c<len;const sym=(s==='star'&&inL)?s0:s;const mm=inL?m:1;let raw=0,kind='';
-      switch(sym){
-        case 'sword':raw=C.sw;kind='phys';break;case 'bolt':raw=C.bo;kind='mag';break;
-        case 'star':raw=C.sy.has('starfall')?4:1;kind='phys';break;
-        case 'shield':out.block+=C.sh*mm;if(C.sy.has('holy'))out.holy+=mm;break;case 'heart':out.heal+=C.he*mm;break;
-        case 'coin':out.gold+=C.coin*mm;if(C.sy.has('midas')){raw=2;kind='phys';}break;
-        case 'clover':out.spins+=mm;break;case 'skull':out.skulls+=mm;break;}
-      let eff=raw*mm;if(sym==='sword'&&inL&&C.sy.has('berserk'))eff*=1.5;
-      if(kind)out.cells.push({r,c,raw,eff,kind,inL});
-      if(kind==='phys')out.phys+=eff;else if(kind==='mag')out.mag+=eff;});
+    row.forEach((s,c)=>{const inL=len>=3&&c<len,sym=s==='star'&&inL?s0:s,mm=inL?m:1;
+      const cell={phys:0,mag:0,block:0,heal:0,gold:0,spins:0,skulls:0,holy:0};
+      if(sym==='sword')cell.phys=C.sw*mm*(inL&&C.sy.has('berserk')?1.5:1);
+      else if(sym==='bolt')cell.mag=C.bo*mm;
+      else if(sym==='star')cell.phys=(C.sy.has('starfall')?4:1)*mm;
+      else if(sym==='shield'){cell.block=C.sh*mm;if(C.sy.has('holy'))cell.holy=mm;}
+      else if(sym==='heart')cell.heal=C.he*mm;
+      else if(sym==='coin'){cell.gold=C.coin*mm;if(C.sy.has('midas'))cell.phys=2*mm;}
+      else if(sym==='clover')cell.spins=mm;
+      else if(sym==='skull')cell.skulls=mm;
+      const effects=C.marks?.[r]?.[c]||[];effects.forEach(f=>out.effects.add(f.type));
+      const result=RuneFX.apply(cell,sym,effects,mm,C.combatScale??1);
+      for(const key of ['phys','mag','block','heal','gold','spins','skulls','holy'])out[key]+=result[key]||0;
+      for(const kind of ['phys','mag'])if(result[kind]>0)out.cells.push({r,c,raw:result[kind]/mm,eff:result[kind],kind,inL});
+    });
   });
   if(C.sy.has('fortune'))out.spins+=out.lines.filter(l=>l.s==='coin').length*2;
   return out;
@@ -923,11 +941,12 @@ async function roll(){
   const C=cfgNow();
   if(C.rows===5&&C.cols===5&&!G.events.full){G.events.full=1;ev('runes.full');}
   if(C.sy.size>=3&&!G.events.combo3){G.events.combo3=1;ev('runes.combo3');}
-  const grid=Array.from({length:C.rows},()=>Array.from({length:C.cols},()=>pickSym(C.w)));
+  const grid=RuneFX.prepare(Array.from({length:C.rows},()=>Array.from({length:C.cols},()=>pickSym(C.w))),C.marks);
   const box=$('#reels');snd(200,.35,'sawtooth',.03);
   await spinReels(box,SYM,C.w,grid,C.rows,C.cols,reelGeom(box,C.rows));G.lastGrid=grid;
   logEvent('player','log_roll',{n:G.spins},grid);
   const o=scoreGrid(grid,C,G.first&&has('courage')?2:1);
+  if(o.effects.size)logEvent('player','log_cell_effects',{names:[...o.effects].map(k=>tr(RuneFX.types[k].n)).join(', ')});
   if(o.five&&!G.events.five){G.events.five=1;ev('runes.jackpot');}
   for(const line of o.lines)logEvent('player','log_line',{r:line.r+1,n:line.len,m:line.m});
   const sources={};for(const cell of o.cells){const k=grid[cell.r][cell.c];sources[k]=(sources[k]||0)+cell.eff;}if(o.cells.length)logEvent('player','log_sources',{parts:Object.entries(sources).map(([k,n])=>T('sym_'+k).split(' — ')[0]+' '+fmt(n)).join(', ')});
@@ -1005,14 +1024,13 @@ function renderAuto(){const b=$('#auto');b.setAttribute('aria-pressed',!!G?.auto
 function setAuto(on){if(!G)return;G.auto=!!on;renderAuto();if(G.auto&&!G.rolling&&!G.awaitingLoot)autoNext();else if(!G.auto)clearTimeout(autoTimer);}
 function autoNext(){clearTimeout(autoTimer);if(G&&G.auto&&!G.over&&!G.awaitingLoot&&!G.rolling&&$('#mLogs').hidden&&$('#mInfo').hidden)autoTimer=setTimeout(()=>{if(G?.auto)roll();},420*SPEED);}
 function rollLoot(E){
-  const H=G.H;const out=[];const r=rnd();
-  const pickRune=()=>rnd()<.14?H.uRune:BASIC[R(BASIC.length)];
+  const H=G.H,out=[],owned=G.inv.concat(G.sock);
+  const pickRune=()=>{if(rnd()<.18)return H.uRune;let pool=BASIC.filter(k=>owned.filter(x=>x===k).length<2);if(!pool.length)pool=BASIC;return pick(pool);};
   const goodB=Object.keys(BUFFS).filter(k=>BUFFS[k].b&&(!BUFFS[k].u||k===H.uBuff));
   const badB=Object.keys(BUFFS).filter(k=>!BUFFS[k].b&&(!BUFFS[k].u||k===H.uDebuff));
-  if(E.boss){out.push({t:'rune',k:pickRune()});out.push({t:'buff',k:pick(goodB)});}
-  else if(r<.56)out.push({t:'rune',k:pickRune()});
-  else if(r<.82)out.push({t:'buff',k:pick(goodB)});
-  else out.push({t:'debuff',k:pick(badB)});
+  out.push({t:'rune',k:pickRune()});
+  if(E.boss){out.push({t:'rune',k:pickRune()});if(E.boss===2)out.push({t:'rune',k:pickRune()});out.push({t:'buff',k:pick(goodB)});}
+  else{if(rnd()<.4)out.push({t:'rune',k:pickRune()});const roll=rnd();if(roll<.26)out.push({t:'buff',k:pick(goodB)});else if(roll>.94)out.push({t:'debuff',k:pick(badB)});}
   return out;
 }
 function giveRune(k){const i=G.inv.indexOf(null);if(i<0){const before=G.spins;G.spins=Math.min(SPIN_MAX,G.spins+2);toast(T('inv_full'));logEvent('loot','log_rune_full',{name:tr(RUNES[k].n),n:G.spins-before});return false;}G.inv[i]=k;logEvent('loot','log_rune',{name:tr(RUNES[k].n)});return true;}
@@ -1029,8 +1047,8 @@ async function winFight(){
   if(!G.events.first){G.events.first=1;ev('runes.first_win');}
   if(E.boss&&G.fightHurt===0)ev('runes.flawless');
   const victoryHeal=cfgNow().winHeal;if(victoryHeal){const h=Math.min(victoryHeal,G.max-G.hp);if(h>0){G.hp+=h;popHero('+'+h,'heal');logEvent('player','log_heal',{n:h,hp:G.hp,max:G.max});}}
-  const gain=G.mode==='time'?2:E.boss===2?0:E.boss?5:3,gold=E.boss?40:10;
-  tickBuffs();const finale=G.path&&G.depth>=G.path.length,loot=finale?[]:rollLoot(E);
+  const gain=G.mode==='time'?2:E.boss===2?0:E.boss?6:4,gold=E.boss?40:10;
+  tickBuffs();const finale=G.path&&G.depth>=G.path.length,loot=rollLoot(E);
   logEvent('loot','log_win',{name:tr(E.n)});renderAll();renderDeck();
   await showLoot(loot,gain,gold);
   const before=G.spins;G.spins=Math.min(SPIN_MAX,G.spins+gain);G.gold+=gold;
@@ -1041,8 +1059,8 @@ async function winFight(){
   if(G.timeEnd&&performance.now()>G.timeEnd){await banner(T('timeup'),900);endRun('time');return;}
   await walk();
 }
-function renderLoot(loot,gain,gold){let html='';
-  for(const l of loot){if(l.t==='rune'){const r=RUNES[l.k];const full=!G.inv.includes(null);const converted=Math.min(2,SPIN_MAX-Math.min(SPIN_MAX,G.spins+gain));html+=`<div class="lootReward"><div class="rn${r.u?' u':''}" style="--rc:${r.c};width:50px;height:50px;flex:none;border-radius:12px">${r.g}${positionMarks(l.k)}</div><div><b>${esc(tr(r.n))}</b>${full?`<p class="note">${esc(T('log_rune_full',{name:tr(r.n),n:converted}))}</p>`:positionDescription(l.k)}</div></div>`;}
+function renderLoot(loot,gain,gold){let html='',free=G.inv.filter(k=>k===null).length,previewSpins=Math.min(SPIN_MAX,G.spins+gain);
+  for(const l of loot){if(l.t==='rune'){const r=RUNES[l.k],full=free===0,converted=full?Math.min(2,SPIN_MAX-previewSpins):0;if(full)previewSpins+=converted;else free--;html+=`<div class="lootReward"><div class="rn${r.u?' u':''}" style="--rc:${r.c};width:50px;height:50px;flex:none;border-radius:12px">${r.g}${positionMarks(l.k)}</div><div><b>${esc(tr(r.n))}</b>${full?`<p class="note">${esc(T('log_rune_full',{name:tr(r.n),n:converted}))}</p>`:positionDescription(l.k)}</div></div>`;}
     else{const B=BUFFS[l.k];html+=`<div><span class="bf ${B.b?'b':'d'}"><i class="fa-solid ${B.i}"></i>${esc(T(B.b?'lb':'ld'))}: ${esc(tr(B.n))}</span><p class="note">${esc(tr(B.d))}</p></div>`;}}
   const actual=Math.min(gain,SPIN_MAX-G.spins);if(actual)html+=`<p style="color:var(--brass2)"><i class="fa-solid fa-rotate"></i> ${esc(T('spins_gain',{n:actual}))}</p>`;
   if(gold)html+=`<p style="color:var(--brass2)"><i class="fa-solid fa-coins"></i> +${gold} ${esc(T('gold'))}</p>`;$('#lootRewards').innerHTML=html;}
@@ -1238,6 +1256,7 @@ function openInfo(){
     <h3>${esc(T('h_esym'))}</h3>${leg(ESYM,ESYMK,'es_')}
     <h3>${esc(T('h_syn'))}</h3><p>${esc(T('info_runes'))}</p>
     <div class="synl">${SYN.map(s=>`<div><b><i class="fa-solid ${s.i}"></i> ${esc(tr(s.n))}</b> <span class="g">${s.need._distinct?'5 ≠':Object.entries(s.need).map(([r,n])=>RUNES[r].g.repeat(n)).join(' + ')}</span><br>${esc(tr(s.d))}${s.at?`<br><span style="color:var(--brass2)">${esc(synPositionText(s))}</span>`:''}</div>`).join('')}</div>
+    <h3>${esc(L()?'Cell effects':'Эффекты ячеек')}</h3><div class="synl">${Object.values(RuneFX.types).map(f=>`<div><b style="color:${f.c}"><i class="fa-solid ${f.i}"></i> ${esc(tr(f.n))}</b><br>${esc(tr(f.d))}</div>`).join('')}</div>
     <h3>${esc(T('h_spins'))}</h3><p>${esc(T('info_spins'))}</p>
     <h3>${esc(T('h_modes'))}</h3><p>${esc(T('info_modes'))}</p>`;
   $('#mInfo').hidden=false;$('#infoX').onclick=closeInfo;$('#infoX').focus();}

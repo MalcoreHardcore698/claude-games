@@ -32,7 +32,7 @@
       return value;
     };
     const host = () => ctx.host() || ctx.me();
-    const isHost = () => host() === ctx.me();
+    const isHost = () => ctx.manage?ctx.manage():host()===ctx.me();
     const people = () => ctx.members();
     const players = () => people().map(p => p.label);
     const game = id => games.find(g => g.id === id);
@@ -56,10 +56,7 @@
         if (!next || from !== host() || next.host !== from || (state && next.seq <= state.seq)) return;
         const fresh = !state || next.id !== state.id;
         state = next; ctx.changed(state);
-        if (fresh) {
-          if (from === ctx.me() || ctx.visible()) { menu = false; ctx.join(); }
-          else if (noticeId !== next.id) { noticeId = next.id; ctx.invite(t('join_title'), t('join_text', { mode:t(next.mode) })); }
-        }
+        if(fresh||(!isHost()&&!ctx.visible())){menu=false;ctx.join();}
         scheduleFinish(); render(true); return;
       }
       if (!state || data.id !== state.id) return;
@@ -84,7 +81,7 @@
     function sync() {
       const leader = people().find(p => p.label === host());
       const snapshot = leader?.p?.tm;
-      if (snapshot && (!state || snapshot.seq > state.seq)) receive(leader.label, { a:'state', state:snapshot });
+      if(snapshot&&(!ctx.allowedSession||ctx.allowedSession(snapshot))&&(!state||snapshot.seq>state.seq)) receive(leader.label, { a:'state', state:snapshot });
       if (state && state.host !== host() && isHost()) publish({ ...state, host:host() });
     }
     function actionButton(action, label, extra = '', disabled = false, ghost = false) {
@@ -172,7 +169,7 @@
         ${phase==='done'?(isHost()?actionButton('launch',t('launch'))+actionButton('again',t('again'),'',false,true):`<p class="tmFootnote">${escape(t('host_launch'))}</p>`):''}</div>`;
     }
     function renderSession(){
-      return `<div class="tmSession"><section class="tmMain"><div class="tmSessionHead"><div><p class="eyebrow">ORION · ${escape(t('title'))}</p><h2>${escape(t(state.mode))}</h2></div>${actionButton('menu',t('menu'),'',false,true)}</div>
+      return `<div class="tmSession"><section class="tmMain"><div class="tmSessionHead"><div><p class="eyebrow">ORION · ${escape(t('title'))}</p><h2>${escape(t(state.mode))}</h2></div>${isHost()?actionButton('menu',t('menu'),'',false,true):''}</div>
         <div class="tmSessionBody tmBody-${state.mode}">${state.mode==='wheel'?wheelMarkup():state.mode==='tiles'?tilesMarkup():prizeMarkup()}</div><div class="tmSessionFooter">${resultMarkup()}</div></section>
         <aside class="tmSettings"><h3 class="tmSettingsTitle"><i class="fa-solid fa-sliders" aria-hidden="true"></i>${escape(t('settings'))}</h3>${includedMarkup()}${voteToolsMarkup()}<div class="tmRoster"><span class="eyebrow">${escape(t('roster'))}</span>${membersMarkup()}</div>${sessionActionsMarkup()}</aside></div>`;
     }
@@ -182,7 +179,8 @@
       if(!force&&sig===signature)return;sig=signature;
       const focus=root.contains(document.activeElement)?document.activeElement?.dataset?.tmFocus:null;
       if(wheelFrame&&typeof cancelAnimationFrame==='function')cancelAnimationFrame(wheelFrame);wheelFrame=0;
-      root.innerHTML=menu||!state?renderMenu():renderSession();
+      if(ctx.following?.())menu=false;
+      root.innerHTML=!state&&ctx.following?.()?`<section class="tmWaiting"><i class="fa-solid fa-satellite-dish"></i><h2>${escape(ctx.lang()==='ru'?'Подключаемся к тамаде':'Joining the tamada')}</h2><p>${escape(ctx.lang()==='ru'?'Восстанавливаем общий режим лобби…':'Restoring the shared lobby session…')}</p></section>`:menu||!state?renderMenu():renderSession();
       if(!menu&&state?.mode==='wheel')animateWheel();
       if(focus)root.querySelector(`[data-tm-focus="${CSS.escape(focus)}"]`)?.focus({preventScroll:true});
     }
@@ -200,7 +198,7 @@
       const button=event.target.closest('[data-tm-action]');if(!button||button.disabled||button.getAttribute?.('aria-disabled')==='true'||!root.contains(button))return;
       const a=button.dataset.tmAction;
       if(a==='mode'){start(button.dataset.mode);return;}
-      if(a==='menu'){menu=true;render(true);return;}if(a==='resume'){menu=false;render(true);return;}
+      if(a==='menu'){if(!isHost())return;ctx.menuOpened?.();menu=true;render(true);return;}if(a==='resume'){menu=false;render(true);return;}
       if(!state)return;
       const send=payload=>ctx.emit({id:state.id,revision:state.revision,...payload});
       if(a==='sector'){adjustSector(button.dataset.game,event.shiftKey?-1:1);return;}
@@ -216,7 +214,11 @@
       else if(a==='launch'){if(isHost())send({a:'launch',game:state.result});}
       else if(a==='again')start(state.mode);
     });
-    return { receive, getSnapshot:()=>state, open(){sync();menu=true;render(true);}, join(){menu=false;render(true);},
+    return {receive,getSnapshot:()=>state,
+      reset(){clearTimeout(finishTimer);state=null;menu=true;sig='';},
+      hydrate(snapshot){receive(snapshot.host,{a:'state',state:snapshot});},
+      adopt(snapshot){if(isHost()){const next=C.normalise(snapshot,games);if(next)publish({...next,host:host()});}},
+      open(){if(!isHost())return;sync();ctx.menuOpened?.();menu=true;render(true);},join(){menu=false;render(true);},
       render:()=>render(true), tick(){sync();render();}, destroy(){clearTimeout(finishTimer);if(wheelFrame&&typeof cancelAnimationFrame==='function')cancelAnimationFrame(wheelFrame);} };
   };
 })();

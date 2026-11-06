@@ -21,6 +21,7 @@ function engine() {
   let now = 0;
   const context = {
     document: { querySelector: element, querySelectorAll: () => [], documentElement: {} },
+    OrionRuneEffects:require('../rune-effects.js'),
     navigator: { language: 'ru' }, localStorage: { getItem: () => null, setItem() {} },
     performance: { now: () => now }, requestAnimationFrame() {}, addEventListener() {},
     setInterval() {}, setTimeout: () => 0, clearTimeout() {}, console,
@@ -39,7 +40,7 @@ function engine() {
     walk=async()=>{walks++;};
     endRun=why=>{ending=why;G.over=true;};
     window.testAPI={newRun,cfgNow,activeSyn,scoreGrid,swap,validSwap,drawReels,reelGeom,
-      winFight,showLoot,giveRune,logEvent,cellHTML,cellAt,positionMarks,RUNES,SYN,SYM,ENEMY,canPlace,
+      winFight,showLoot,giveRune,rollLoot,logEvent,cellHTML,cellAt,positionMarks,RUNES,SYN,SYM,ENEMY,canPlace,
       get G(){return G},get walks(){return walks},get ending(){return ending},
       setLoot:items=>{rollLoot=()=>items;}};
     window.__runes={`);
@@ -130,13 +131,15 @@ test('victory waits for COLLECT before rewards, next enemy and AUTO can proceed'
   api.G.rolling = true;
   api.setLoot([{ t: 'rune', k: 'jera' }]);
   api.G.auto = true;
+  const spins = api.G.spins;
+  const runeCount = api.G.inv.filter(k => k === 'jera').length;
   const fight = api.winFight();
   await Promise.resolve();
   assert.equal(api.G.awaitingLoot, true);
   assert.equal(element('#mLoot').hidden, false);
   assert.equal(api.G.gold, 0);
-  assert.equal(api.G.spins, 18);
-  assert.ok(!api.G.inv.includes('jera'));
+  assert.equal(api.G.spins, spins);
+  assert.equal(api.G.inv.filter(k => k === 'jera').length, runeCount);
   assert.equal(api.walks, 0);
   api.swap('sock', 1, 'sock', 3);
   assert.equal(api.G.sock[3], 'teiwaz');
@@ -146,8 +149,8 @@ test('victory waits for COLLECT before rewards, next enemy and AUTO can proceed'
   assert.equal(api.G.awaitingLoot, false);
   assert.equal(element('#mLoot').hidden, true);
   assert.equal(api.G.gold, 10);
-  assert.equal(api.G.spins, 21);
-  assert.ok(api.G.inv.includes('jera'));
+  assert.equal(api.G.spins, spins + 4);
+  assert.equal(api.G.inv.filter(k => k === 'jera').length, runeCount + 1);
   assert.equal(api.walks, 1);
   assert.equal(element('#lootTake').onclick, null);
 });
@@ -188,4 +191,34 @@ test('full bags record the actual converted spins and never exceed the cap', () 
   assert.equal(api.G.spins, 100);
   assert.equal(api.G.logs.at(-1).key, 'log_rune_full');
   assert.equal(api.G.logs.at(-1).values.n, 1);
+});
+
+test('each hero starts with reel controls and cell effects, and every victory drops a rune', () => {
+  const { api } = engine();
+  for (const hero of ['knight', 'rogue', 'mage']) {
+    api.newRun('camp', hero);
+    assert.equal(api.G.inv.filter(Boolean).length, 4);
+    assert.ok(api.G.inv.includes('jera') && api.G.inv.includes('raido'));
+    for (let i = 0; i < 120; i++) {
+      const loot = api.rollLoot(api.ENEMY.wolf);
+      assert.ok(loot.some(item => item.t === 'rune'));
+      for (const item of loot.filter(x => x.t === 'rune')) assert.ok(api.RUNES[item.k]);
+    }
+    assert.equal(api.rollLoot(api.ENEMY.dragon).filter(x => x.t === 'rune').length, 3);
+  }
+});
+
+test('reel runes reshape the actual grid and marked cells affect actual combat scores', () => {
+  const { api } = engine();
+  api.newRun('camp', 'knight'); api.G.sock.fill(null);
+  api.G.sock[0] = 'dagaz'; api.G.rolls = 0;
+  assert.deepEqual([api.cfgNow().rows, api.cfgNow().cols], [2, 3]);
+  api.G.rolls = 1;
+  assert.deepEqual([api.cfgNow().rows, api.cfgNow().cols], [1, 4]);
+  api.G.sock.fill(null); api.G.sock[0] = 'kenaz';
+  const config = api.cfgNow();
+  const score = api.scoreGrid([['shield', 'heart', 'coin']], config, 1);
+  assert.equal(score.mag, 4.5);
+  assert.ok(score.effects.has('fire'));
+  assert.ok(api.cellHTML(api.SYM,'shield',40,'selected',0,0).includes('cellEffects'));
 });

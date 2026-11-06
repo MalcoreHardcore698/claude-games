@@ -165,8 +165,11 @@ input[type=text]{font:500 17px var(--body);color:var(--paper);background:var(--w
 .btn.bet:hover{background:var(--paper)}
 @media (max-width:860px){.game{grid-template-columns:1fr}.side{position:static}.board{grid-template-columns:repeat(auto-fill,minmax(118px,1fr))}.face b{font-size:14px}}
 @media (prefers-reduced-motion:reduce){.card .in{transition:none}}
+
+.netLayout{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.95fr);gap:22px;align-items:start}#netList{position:sticky;top:82px}#netCount{font:600 12px var(--mono);color:var(--acc)}
 </style>
 <link rel="stylesheet" href="orion-layout.css">
+<script src="guess-questions.js"></script>
 </head>
 <body data-orion-game="guess">
 <img class="gameBackdrop" src="assets/guess-hero-menu.webp" alt="" decoding="async" fetchpriority="high" draggable="false"><div class="gameBackdropShade" aria-hidden="true"></div>
@@ -194,12 +197,12 @@ input[type=text]{font:500 17px var(--body);color:var(--paper);background:var(--w
 
   <!-- ONLINE: players come from the site lobby -->
   <section id="sNet" hidden>
-    <div class="panel" style="max-width:560px">
-      <h2 data-t="vs_friend"></h2>
-      <label for="nick"><span data-t="alias"></span><input type="text" id="nick" maxlength="16" autocomplete="off"></label>
-      <div id="netNeed" style="display:flex;flex-direction:column;gap:12px"><p class="note" id="netNote"></p><div class="row"><button class="btn" id="bNeed" type="button"></button></div></div>
-      <div id="netList" hidden style="display:flex;flex-direction:column;gap:10px"><p class="eyebrow" data-t="lobby_players"></p><ul class="plist" id="plist"></ul><p class="note" id="invNote"></p></div>
-      <div class="row"><button class="btn ghost" id="bNetBack" type="button" data-t="back"></button></div>
+    <div class="netLayout">
+      <div class="panel"><h2 data-t="vs_friend"></h2><label for="nick"><span data-t="alias"></span><input type="text" id="nick" maxlength="16" autocomplete="off"></label>
+        <div id="netNeed" style="display:flex;flex-direction:column;gap:12px"><p class="note" id="netNote"></p><div class="row"><button class="btn" id="bNeed" type="button"></button></div></div>
+        <div class="row"><button class="btn ghost" id="bNetBack" type="button" data-t="back"></button></div>
+      </div>
+      <aside class="panel" id="netList" hidden><div style="display:flex;justify-content:space-between;gap:12px"><p class="eyebrow" data-t="lobby_players"></p><b id="netCount"></b></div><ul class="plist" id="plist"></ul><p class="note" id="invNote"></p></aside>
     </div>
   </section>
 
@@ -335,6 +338,7 @@ const THEMES=[
   ['Джоффри','Joffrey','lan crown blonde'],['Робб','Robb','wf crown'],['Сандор Клиган','Sandor Clegane',''],['Бриенна','Brienne','woman knight blonde'],['Джорах','Jorah','knight'],
   ['Давос','Davos','knight'],['Мелисандра','Melisandre','woman red magic'],['Сэмвелл','Samwell','watch'],['Варис','Varys','bald'],['Мизинец','Littlefinger',''],['Станнис','Stannis','crown']]}
 ];
+window.OrionGuessQuestions.install(THEMES);
 const D={
 eyebrow:['Настольная игра на двоих','A tabletop game for two'],lede:['Загадайте героя и найдите героя соперника раньше, чем он найдёт вашего. Один вопрос за ход, ответ только «да» или «нет».','Pick a secret hero and find your opponent’s before they find yours. One question per turn, answered only yes or no.'],
 vs_bot:['Против компьютера','Play the computer'],vs_friend:['С другом онлайн','Play a friend online'],your_name:['Ваше имя','Your name'],create:['Создать комнату','Create room'],
@@ -389,7 +393,7 @@ function show(id){for(const s of SECTIONS)$('#'+s).hidden=s!==id;window.scrollTo
 let toastT=0;function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;t.style.opacity=1;clearTimeout(toastT);toastT=setTimeout(()=>{t.style.opacity=0;setTimeout(()=>t.hidden=true,300);},2600);}
 const hero=id=>G.theme.c[id];
 const hname=id=>id>=0&&hero(id)?hero(id)[L()]:'—';
-const has=(id,f)=>(' '+hero(id)[2]+' ').includes(' '+f+' ');
+const has=(id,f)=>G.theme.extraRules?.[f]?window.OrionGuessQuestions.matches(hero(id)[2],G.theme.extraRules[f]):(' '+hero(id)[2]+' ').includes(' '+f+' ');
 const qById=qid=>G.theme.q.find(q=>q[0]===qid);
 const qText=qid=>{const q=qById(qid);return q?q[1+L()]:'';};
 
@@ -410,7 +414,7 @@ function sigil(id){
 }
 function cardEl(id,opts={}){
   const b=document.createElement('button');b.type='button';b.className='card';b.dataset.id=id;
-  const chips=G.theme.q.filter(q=>has(id,q[0])).map(q=>`<i>${q[3+L()]}</i>`).join('');
+  const chips=G.theme.q.filter(q=>!q[0].startsWith('extra_')&&has(id,q[0])).map(q=>`<i>${q[3+L()]}</i>`).join('');
   b.innerHTML=`<div class="in"><div class="face">${sigil(id)}<b></b><div class="chips">${chips}</div></div><div class="backf"></div></div>`;
   b.querySelector('b').textContent=hname(id);
   b.setAttribute('aria-label',hname(id));
@@ -573,7 +577,8 @@ function renderNet(){
   updateNetNote();if(!(SHELL&&Shell.inLobby))return;
   const others=Shell.peers.filter(q=>q&&q.label!==Shell.me);
   const sig=others.map(q=>q.label+peerName(q)+q.w+(q.gp&&q.gp.busy)+q.ig).join('|')+[...N.invFrom.keys()].join()+N.inv+cfg.lang;if(sig===netSig)return;netSig=sig;
-  const ul=$('#plist');ul.innerHTML='';
+  $('#netCount').textContent=String(new Set(Shell.peers.map(q=>q.label).concat(Shell.me)).size);
+  const ul=$('#plist');ul.innerHTML='';const self=document.createElement('li');self.innerHTML='<span class="nm"></span>';self.querySelector('.nm').textContent=myName()+' · '+T('you');ul.appendChild(self);
   if(!others.length){const li=document.createElement('li');li.textContent=T('nobody');ul.appendChild(li);}
   for(const q of others){
     const li=document.createElement('li');const inv=N.invFrom.has(q.label);if(inv)li.className='inv';

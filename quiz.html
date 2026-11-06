@@ -237,8 +237,11 @@ input:focus{border-color:var(--gold);outline:none}
 .toast{position:fixed;left:50%;bottom:24px;translate:-50% 0;background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-weight:700;z-index:50;transition:opacity .3s}
 @media (max-width:900px){.hero,.grid2,.game{grid-template-columns:1fr}.board{position:static}}
 @media (prefers-reduced-motion:reduce){.stage .tile{animation:none}.wheelW .wheel{transition-duration:.01s}}
+
+#sTable>.grid2{align-items:start;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr)}#tableRosterPanel{position:sticky;top:82px;min-width:0}.tableRosterTitle{display:flex;justify-content:space-between;gap:12px;align-items:center}.tableRosterTitle>b{font:700 12px var(--body);color:var(--gold)}#tableRosterPanel .teams{grid-template-columns:1fr;gap:14px}#invitePanel{display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:16px}#invitePanel .plist{margin:0}#tblPlayers .plist{margin:0}.tableRosterTitle+.teams{margin:0}
 </style>
 <link rel="stylesheet" href="orion-layout.css">
+<script src="quiz-extra.js"></script>
 </head>
 <body data-orion-game="quiz">
 <img class="gameBackdrop" src="assets/quiz-menu.webp" alt="" decoding="async" fetchpriority="high" draggable="false"><div class="gameBackdropShade" aria-hidden="true"></div>
@@ -301,14 +304,14 @@ input:focus{border-color:var(--gold);outline:none}
           <div class="chips" id="evChips"></div>
           <div class="setrow"><div><span class="eyebrow" data-t="freq"></span><div class="seg" id="freqSeg" role="group"></div></div><div><span class="eyebrow" data-t="diff"></span><div class="seg" id="diffSeg" role="group"></div></div></div>
         </div>
-        <div id="tblPlayers"></div>
         <p class="note" id="tblNote"></p>
         <div class="row"><button class="btn" id="bStart" type="button"><i class="fa-solid fa-play"></i><span data-t="start"></span></button><button class="btn ghost" id="bLeave" type="button"><i class="fa-solid fa-right-from-bracket"></i><span data-t="leave"></span></button></div>
       </div>
-      <div class="panel" id="invitePanel">
-        <p class="eyebrow"><i class="fa-solid fa-paper-plane"></i><span data-t="invite_more"></span></p>
-        <ul class="plist sf" id="invList"></ul>
-      </div>
+      <aside class="panel" id="tableRosterPanel">
+        <div class="tableRosterTitle"><p class="eyebrow"><i class="fa-solid fa-users"></i><span data-t="table_players"></span></p><b id="tableCount"></b></div>
+        <div id="tblPlayers"></div>
+        <div id="invitePanel"><p class="eyebrow"><i class="fa-solid fa-paper-plane"></i><span data-t="invite_more"></span></p><ul class="plist sf" id="invList"></ul></div>
+      </aside>
     </div>
   </section>
 
@@ -361,6 +364,7 @@ const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=R(i+1);[a[i],a[j]]=[a[j]
 
 /* ================= i18n ================= */
 const D={
+table_players:['За столом','At this table'],no_more_players:['Все игроки лобби уже за столом.','Everyone in the lobby is already at this table.'],
 all_games:['Все игры','All games'],eyebrow:['Игра-шоу для компании','A party game show'],title1:['Викто','Quiz'],title2:['рина','Night'],
 lede:['Отвечайте на вопросы, рискуйте на колесе фортуны и не вылетайте на испытаниях между раундами. Вместе против Профессора или каждый сам за себя.','Answer questions, gamble on the wheel and survive the trials between rounds. Together against the Professor or every player for themselves.'],
 solo:['Один против Профессора','Solo vs the Professor'],solo_s:['без лобби','no lobby'],friends:['С друзьями','With friends'],friends_s:['до 8 игроков','up to 8 players'],
@@ -586,6 +590,7 @@ const BANK=[
 ['misc','Где изобрели бумагу?','Where was paper invented?',['Китай|China','Египет|Egypt','Индия|India','Греция|Greece']],
 ['misc','Как называется страх пауков?','What is the fear of spiders called?',['Арахнофобия|Arachnophobia','Клаустрофобия|Claustrophobia','Акрофобия|Acrophobia','Агорафобия|Agoraphobia']]
 ];
+BANK.push(...window.OrionQuizExtra);
 const ansText=(s)=>{const p=String(s).split('|');return p[Math.min(L(),p.length-1)];};
 const qText=id=>BANK[id][1+L()];
 
@@ -800,6 +805,7 @@ function renderTable(){
   chipsUI($('#evChips'),EVTYPES.map(e=>[e,T('ev_'+e),EVICON[e]]),s.evs||EVTYPES,v=>hostSet('ev',v),!host||!s.evOn);
   buildSeg($('#freqSeg'),FREQS.map(f=>[f,T('f_'+f)]),s.freq||'normal',v=>hostSet('freq',v),!host||!s.evOn);
   buildSeg($('#diffSeg'),DIFFS.map(f=>[f,T('d_'+f)]),s.diff||'grow',v=>hostSet('diff',v),!host||!s.evOn);
+  $('#tableCount').textContent=s.players.length+' / 8';
   const box=$('#tblPlayers');box.innerHTML='';
   const li=p=>`<li class="${host&&s.mode==='teams'?'move':''}" data-l="${esc(p.l)}">${avHTML(p.n,p.l)}<span class="nm">${esc(pname(p))}${p.l===s.host?' <i class="fa-solid fa-crown" style="color:var(--gold)"></i>':''}</span></li>`;
   if(s.mode==='teams'){box.innerHTML=`<div class="teams">${['A','B'].map(t=>`<div class="team" style="--tc:${TEAMS[t].c}"><h3><i class="fa-solid ${TEAMS[t].i}"></i>${esc(T('team_'+t))}</h3><ul class="plist">${s.players.filter(p=>p.team===t).map(li).join('')}</ul></div>`).join('')}</div>`;
@@ -817,7 +823,7 @@ function canStartS(s){if(s.mode!=='coop'&&s.players.length<2)return 'need2';if(s
 function renderInvites(){const ul=$('#invList');if(!ul||$('#invitePanel').hidden)return;
   const at=new Set((ST&&ST.players||[]).map(p=>p.l));const others=Shell.peers.filter(q=>q&&q.label!==ME()&&!at.has(q.label));
   const sig=others.map(q=>q.label+peerName(q)+q.w+q.ig).join('|')+cfg.lang;if(ul._sig===sig)return;ul._sig=sig;ul.innerHTML='';
-  if(!others.length){ul.innerHTML=`<li><span class="nm">${esc(T('nobody'))}</span></li>`;return;}
+  if(!others.length){ul.innerHTML=`<li><span class="nm">${esc(T('no_more_players'))}</span></li>`;return;}
   for(const q of others){const li=document.createElement('li');li.innerHTML=`${avHTML(peerName(q),q.label)}<span class="nm">${esc(peerName(q))}<small>${esc(q.ig?T('in_game'):q.w==='quiz'?T('here'):T('elsewhere'))}</small></span>`;
     const bt=document.createElement('button');bt.type='button';bt.className='btn bet';bt.textContent='BET';bt.disabled=!!q.ig;bt.onclick=()=>shellPost('bet',{target:q.label});li.appendChild(bt);
     if(!q.ig){const iv=document.createElement('button');iv.type='button';iv.className='btn sm';iv.innerHTML='<i class="fa-solid fa-paper-plane"></i>'+esc(T('invite'));iv.onclick=()=>{shellPost('invite',{to:q.label});iv.disabled=true;setTimeout(()=>iv.disabled=false,4000);};li.appendChild(iv);}
