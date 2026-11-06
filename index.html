@@ -615,6 +615,9 @@ const EVENTS=[
  {id:'chess.beat_ai',g:'chess',kind:'group',base:2.2,t:['Игрок обыграет шахматный ИИ','The player beats the chess AI']},
  {id:'battleship.win',g:'battleship',kind:'yes',base:2.0,t:['Флот {n} победит','{n}’s fleet wins']},
  {id:'battleship.beat_ai',g:'battleship',kind:'group',base:2.0,t:['Игрок обыграет морской ИИ','The player beats the naval AI']},
+ {id:'carcassonne.win',g:'carcassonne',kind:'yes',base:2.4,t:['{n} победит в Каркассоне','{n} wins Carcassonne']},
+ {id:'carcassonne.score100',g:'carcassonne',kind:'yes',base:3.0,t:['{n} наберёт 100 очков','{n} scores 100 points']},
+ {id:'carcassonne.cities5',g:'carcassonne',kind:'group',base:2.5,t:['Будет завершено 5 городов с миплами','Five occupied cities are completed']},
  {id:'runes.rich',g:'runes',kind:'group',base:2.6,t:['Добыча больше 300 золота','The haul tops 300 gold']}
 ];
 const EV=Object.fromEntries(EVENTS.map(e=>[e.id,e]));
@@ -626,10 +629,14 @@ const GAMES=[
  {id:'codewords',file:'codewords.html',name:['Шифр','Cipher'],d:'g_codewords_d',tags:['t_board','t_words','t_teams'],cover:'wordsc',r:'common',icon:'fa-user-secret'},
  {id:'chess',file:'chess.html',name:['Шахматы','Chess'],d:'g_chess_d',tags:['t_strategy','t_two','t_online'],cover:'chessc',r:'common',icon:'fa-chess-knight'},
  {id:'battleship',file:'battleship.html',name:['Морской бой','Battleship'],d:'g_battleship_d',tags:['t_tactics','t_two','t_online'],cover:'navalc',r:'common',icon:'fa-ship'},
+ {id:'carcassonne',file:'carcassonne.html',name:['Каркассон','Carcassonne'],d:'g_carcassonne_d',tags:['t_strategy','t_tiles','t_8'],cover:'landsc',r:'epic',icon:'fa-chess-rook'},
  {id:'runes',file:'runes.html',name:['Руны удачи','Reels & Runes'],d:'g_runes_d',tags:['t_slots','t_solo','t_rpg'],cover:'runesc',r:'legendary',icon:'fa-dice-d20'}
 ];
 const GM=Object.fromEntries(GAMES.map(g=>[g.id,g]));
 const ACH=[
+ {id:'carcassonne_first',g:'carcassonne',r:'common',i:'fa-chess-rook',t:['Первый тайл','First tile'],d:['Завершите партию в Каркассоне.','Finish a Carcassonne game.']},
+ {id:'carcassonne_win',g:'carcassonne',r:'epic',i:'fa-crown',t:['Властитель земель','Lord of the lands'],d:['Победите в Каркассоне.','Win Carcassonne.']},
+ {id:'carcassonne_hundred',g:'carcassonne',r:'rare',i:'fa-landmark',t:['Процветание','Prosperity'],d:['Наберите 100 очков за одну партию.','Score 100 points in one game.']},
  {id:'chess_first',g:'chess',r:'common',i:'fa-chess-knight',t:['Первый гамбит','First game'],d:['Завершите партию.','Finish a game.']},
  {id:'chess_win',g:'chess',r:'rare',i:'fa-trophy',t:['Король под защитой','Victory'],d:['Победите в партии.','Win a game.']},
  {id:'battleship_first',g:'battleship',r:'common',i:'fa-ship',t:['Первый залп','First game'],d:['Завершите партию.','Finish a game.']},
@@ -1108,7 +1115,7 @@ $('#logo').onclick=()=>{if(!curGame)show('vHome');};
 $('#navHome').onclick=()=>{if(curGame)closeGame(true);show('vHome');};$('#navEvents').onclick=()=>{if(curGame)closeGame(true);show('vEvents');};
 $('#bShelf').onclick=()=>show('vShelf');
 $('#bTamada').onclick=()=>startTamada();
-const GAME_ART={chess:'chess-menu',battleship:'battleship-menu',tetris:'tetris-menu',codewords:'codewords-menu',svo:'svo-cover',gw:'guess-hero-menu',quiz:'quiz-menu',runes:'runes-menu'};
+const GAME_ART={carcassonne:'carcassonne-menu',chess:'chess-menu',battleship:'battleship-menu',tetris:'tetris-menu',codewords:'codewords-menu',svo:'svo-cover',gw:'guess-hero-menu',quiz:'quiz-menu',runes:'runes-menu'};
 function coverHTML(g){return `<img class="gameCoverArt" src="assets/${GAME_ART[g]||'runes-menu'}.webp" alt="" decoding="async" draggable="false"><span class="coverShade"></span>`;}
 function renderShelf(){const grid=$('#shelfGrid');grid.innerHTML='';
   for(const g of GAMES){const b=document.createElement('button');b.type='button';b.className='box '+g.r;b.style.setProperty('--rc',rc(g.r));
@@ -1207,7 +1214,7 @@ function closeGame(keepView){curGame=null;GP=null;if(window.OrionLoader)OrionLoa
 function peersForGame(){return members().map(m=>({label:m.label,name:clean(m.p.n),chips:num(m.p.c),w:str(m.p.w),ig:inGame(m.label)?1:0,gp:m.me?null:(m.p.gk===str(m.p.w)?obj(m.p.gp):null)}));}
 function hello(){const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'hello',me:LB.label,name:prof.name,lang:cfg.lang,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');}
 setInterval(()=>{if(!curGame)return;const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'peers',me:LB.label,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');},100);
-function ownEvent(ev,x){if(['chess.fin','battleship.fin','carcassonne.fin'].includes(ev)){const game=ev.split('.')[0];unlock(game+'_first');if(x&&x.win)unlock(game+'_win');}const a=EV_ACH[ev];if(a)unlock(a);if(ev==='tetris.fin'){unlock('t_first');if(x&&x.lines>=20)unlock('t_twenty');}if(ev==='codewords.win')unlock('cw_win');
+function ownEvent(ev,x){if(ev==='carcassonne.score100')unlock('carcassonne_hundred');if(['chess.fin','battleship.fin','carcassonne.fin'].includes(ev)){const game=ev.split('.')[0];unlock(game+'_first');if(x&&x.win)unlock(game+'_win');}const a=EV_ACH[ev];if(a)unlock(a);if(ev==='tetris.fin'){unlock('t_first');if(x&&x.lines>=20)unlock('t_twenty');}if(ev==='codewords.win')unlock('cw_win');
   if(ev==='runes.castle'&&x){const k=str(x.adv,12);const id={knight:'r_knight',rogue:'r_rogue',mage:'r_mage'}[k];if(id){unlock(id);if(!Array.isArray(prof.runesDone))prof.runesDone=[];if(!prof.runesDone.includes(k))prof.runesDone.push(k);saveProf();if(prof.runesDone.length>=3)unlock('r_all');}}
   if(ev==='runes.fin'&&x&&num(x.gold)>=500)unlock('r_gold');
   if(ev==='quiz.fin'&&x){unlock('q_first');if(x.win){if(x.mode==='ffa')unlock('q_win');if(x.mode==='teams')unlock('q_team');if(x.mode==='coop')unlock(x.solo?'q_solo':'q_bot');}if(x.perfect)unlock('q_perfect');}
