@@ -1,7 +1,7 @@
 /* Handcrafted WebGL miniature; all pick targets come from legal engine actions. */
 (()=>{'use strict';
-window.createCatanScene=function(host,onPick,onHover){
-if(!window.THREE){host.innerHTML='<p class="sceneError">3D недоступно / 3D unavailable. Проверьте загрузку файлов игры.</p>';return{update(){},select(){},highlightIncome(){},home(){},rotate(){}};}
+window.createCatanScene=function(host,onPick,onHover,buttons){
+if(!window.THREE){host.innerHTML='<p class="sceneError">3D недоступно / 3D unavailable. Проверьте загрузку файлов игры.</p>';return{update(){},select(){},highlightIncome(){}};}
 const T=THREE,scene=new T.Scene(),background=0x8dbec0;scene.background=new T.Color(background);scene.fog=new T.Fog(background,20,45);let renderer;
 try{renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});}catch(_){renderer=new CatanSoftware3D();}
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.outputEncoding=T.sRGBEncoding;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.setClearColor(background);host.appendChild(renderer.domElement);
@@ -38,23 +38,63 @@ const water=mesh(new T.PlaneGeometry(70,70,renderer.isSoftware?24:80,renderer.is
 const sand=mesh(new T.CylinderGeometry(5.8,6.15,.28,72),mat(0xdac9a5),scene,0,-.48,0);sand.userData.softwareLayer=-2;sand.receiveShadow=true;const islandBase=mesh(new T.CylinderGeometry(5.55,5.8,.32,72),mat(0xb3b895),scene,0,-.27,0);islandBase.userData.softwareLayer=-1;
 const homeAngle=.72;
 let state=null,boardID='',pieceSignature='',selection={kind:'',ids:[]},targetAngle=homeAngle,angle=homeAngle,zoom=7.1,targetZoom=7.1,hover=-1,drag=null;
-const tileMeshes=[],incomeHighlights=new T.Group(),diceIsland=new T.Group(),dice=[];
+const tileMeshes=[],incomeHighlights=new T.Group(),dice=[];
 let incomeStart=0,rollKey=null,diceStart=0,diceDuration=0;
-scene.add(incomeHighlights,diceIsland);
-diceIsland.visible=false;
-diceIsland.rotation.y=homeAngle;
+let viewportWidth=1,viewportHeight=1,outpostLayout='';
+scene.add(incomeHighlights);
 
-const diceFoam=flat(0xd4efdf,{side:T.DoubleSide,transparent:true,opacity:.36,depthWrite:false});
-const coast=mesh(new T.RingGeometry(1.48,1.55,24),diceFoam,diceIsland,0,-.45,0);
-coast.rotation.x=-Math.PI/2;
-coast.castShadow=false;
-coast.userData.softwareLayer=-2.5;
-const beach=mesh(new T.CylinderGeometry(1.32,1.51,.32,20),sand.material,diceIsland,0,-.46,0);
-beach.userData.softwareLayer=-2;
-const bluff=mesh(new T.CylinderGeometry(1.12,1.32,.38,20),mats.soil,diceIsland,0,-.23,0);
-bluff.userData.softwareLayer=-1;
-const clearing=mesh(new T.CylinderGeometry(1.1,1.14,.12,20),mats.desert,diceIsland,0,0,0);
-clearing.userData.softwareLayer=-1;
+function outpost(action,button){
+ const group=new T.Group();
+ group.userData.action=action;
+ group.rotation.y=homeAngle;
+ group.visible=false;
+ scene.add(group);
+ const coast=mesh(new T.RingGeometry(1.48,1.55,24),flat(0xd4efdf,{side:T.DoubleSide,transparent:true,opacity:.36,depthWrite:false}),group,0,-.45,0);
+ coast.rotation.x=-Math.PI/2;
+ coast.castShadow=false;
+ coast.userData.softwareLayer=-2.5;
+ const beach=mesh(new T.CylinderGeometry(1.32,1.51,.32,20),sand.material,group,0,-.46,0);
+ beach.userData.softwareLayer=-2;
+ const bluff=mesh(new T.CylinderGeometry(1.12,1.32,.38,20),mats.soil,group,0,-.23,0);
+ bluff.userData.softwareLayer=-1;
+ const clearing=mesh(new T.CylinderGeometry(1.1,1.14,.12,20),mats.desert,group,0,0,0);
+ clearing.userData.softwareLayer=-1;
+ return {group,button,coast};
+}
+const diceOutpost=outpost('roll',buttons.roll);
+const tradeOutpost=outpost('trade',buttons.trade);
+const outposts=[diceOutpost,tradeOutpost],diceIsland=diceOutpost.group,tradeIsland=tradeOutpost.group;
+const canvasPoint=new T.Vector3();
+
+const sailCloth=mat(0xd38c71),marketWood=mat(0xb78a59);
+for(const x of [-.63,.63]){
+ for(const z of [-.3,.27])box(tradeIsland,x,.39,z,.065,.66,.065,mats.trunk);
+}
+for(let i=0;i<7;i++){
+ const awning=box(tradeIsland,(i-3)*.205,.73,-.03,.21,.045,.83,i%2?sailCloth:mats.wool);
+ awning.rotation.x=-.17;
+}
+box(tradeIsland,0,.3,.13,1.19,.075,.46,marketWood);
+box(tradeIsland,0,.16,.13,1.07,.22,.36,mats.trunk);
+for(const [x,z] of [[-.72,.44],[.72,.44],[-.51,.57]]){
+ box(tradeIsland,x,.155,z,.24,.19,.22,marketWood);
+ box(tradeIsland,x,.255,z,.19,.025,.18,mats.road);
+}
+for(let i=0;i<4;i++)box(tradeIsland,0,-.065,.72+i*.13,.42,.06,.12,mats.trunk);
+
+function layoutOutposts(){
+ for(const {group,button,coast} of outposts)coast.material.opacity=button.disabled?.28:.62;
+ const key=[angle,zoom,viewportWidth,viewportHeight,boardID].join('|');
+ if(key===outpostLayout)return;
+ outpostLayout=key;
+ for(const {group,button} of outposts){
+  canvasPoint.copy(group.position).project(camera);
+  const x=(canvasPoint.x+1)*50,y=(1-canvasPoint.y)*50+62/zoom;
+  button.hidden=!group.visible||x<6||x>94||y>97;
+  button.style.left=x+'%';
+  button.style.top=y+'%';
+ }
+}
 sphere(diceIsland,-.8,.06,-.47,.16,mats.stone,1,.5,.85);
 sphere(diceIsland,-.65,.065,-.57,.095,mats.stone,1,.6,.9);
 sphere(diceIsland,.83,.06,.48,.12,mats.stone,1.1,.58,.8);
@@ -105,12 +145,18 @@ function animateDice(now,reduce){
 function rng(seed){let a=seed|0;return()=>{a=(Math.imul(a,1664525)+1013904223)|0;return(a>>>0)/4294967296;};}
 function clearGroup(group){for(const child of [...group.children]){child.traverse(o=>{o.geometry?.dispose();const list=Array.isArray(o.material)?o.material:[o.material];for(const m of list)if(m&&!Object.values(mats).includes(m)){m.map?.dispose();m.dispose();}});group.remove(child);}}
 function portLabel(parent,text,x,z){const c=document.createElement('canvas');c.width=256;c.height=80;const ctx=c.getContext('2d');ctx.fillStyle='#faf0d6';ctx.beginPath();ctx.roundRect(2,2,252,76,20);ctx.fill();ctx.fillStyle='#58755f';ctx.font='600 34px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,128,42);const tex=new T.CanvasTexture(c);tex.encoding=T.sRGBEncoding;const label=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,depthTest:false}));label.position.set(x,.48,z);label.scale.set(.85,.27,1);parent.add(label);}
-function buildBoard(s){clearGroup(weatherGroup);foam.length=0;wind.length=0;islandRadius=Math.max(...s.board.nodes.map(n=>Math.hypot(n.x,n.z)))+.8;const scale=islandRadius/5.8;sand.scale.set(scale,1,scale);islandBase.scale.set(scale,1,scale);const diceDistance=islandRadius+1.86,foreground=1.15;
-diceIsland.position.set(Math.cos(homeAngle)*diceDistance+Math.sin(homeAngle)*foreground,0,-Math.sin(homeAngle)*diceDistance+Math.cos(homeAngle)*foreground);
-diceIsland.visible=true;
+function buildBoard(s){clearGroup(weatherGroup);foam.length=0;wind.length=0;islandRadius=Math.max(...s.board.nodes.map(n=>Math.hypot(n.x,n.z)))+.8;const scale=islandRadius/5.8;sand.scale.set(scale,1,scale);islandBase.scale.set(scale,1,scale);const distance=islandRadius+1.86;
+for(const [index,{group}] of outposts.entries()){
+ const side=index===0?1:-1,depth=index===0?1.15:-1.5;
+ group.position.set(Math.cos(homeAngle)*distance*side+Math.sin(homeAngle)*depth,0,-Math.sin(homeAngle)*distance*side+Math.cos(homeAngle)*depth);
+ group.visible=true;
+}
 const aspect=Math.max(1,host.clientWidth)/Math.max(1,host.clientHeight);
-homeZoom=Math.max(7.1*scale,(diceDistance+1.72)/aspect);
-zoom=targetZoom=homeZoom;resize();
+homeZoom=Math.max(7.1*scale,(distance+1.8)/aspect);
+angle=targetAngle=homeAngle;
+zoom=targetZoom=homeZoom;
+outpostLayout='';
+resize();
 const weatherRand=rng(9301);for(let i=0;i<70;i++){const a=weatherRand()*Math.PI*2,r=islandRadius+.6+weatherRand()*9,m=flat(i%3?0xd2efdf:0xf8f6dd,{transparent:true,opacity:.2,side:T.DoubleSide,depthWrite:false}),o=mesh(new T.RingGeometry(.3,.32,12,1,0,Math.PI*(.3+weatherRand()*.35)),m,weatherGroup,Math.cos(a)*r,-.52,Math.sin(a)*r);o.rotation.x=-Math.PI/2;o.rotation.z=a;const len=.7+weatherRand()*1.4;o.scale.set(len,.5,1);o.castShadow=false;o.userData.softwareLayer=-2.5;foam.push({o,x:o.position.x,z:o.position.z,phase:weatherRand()*7});}
 for(const edge of s.board.edges.filter(e=>e.tiles.length===1)){const a=s.board.nodes[edge.a],b=s.board.nodes[edge.b],mx=(a.x+b.x)/2,mz=(a.z+b.z)/2,len=Math.hypot(mx,mz),o=mesh(new T.RingGeometry(.27,.3,8,1,0,Math.PI),flat(0xfff5dd,{transparent:true,opacity:.38,side:T.DoubleSide,depthWrite:false}),weatherGroup,mx/len*(islandRadius+.12),-.48,mz/len*(islandRadius+.12));o.rotation.x=-Math.PI/2;o.rotation.z=-Math.atan2(mz,mx);o.scale.set(1.7,.55,1);o.castShadow=false;o.userData.softwareLayer=-2.5;foam.push({o,x:o.position.x,z:o.position.z,phase:weatherRand()*7});}
 for(let i=0;i<14;i++){const o=mesh(new T.SphereGeometry(.025,6,4),flat(0xfff7d8,{transparent:true,opacity:.25,depthWrite:false}),weatherGroup,0,0,0);o.scale.set(9,.3,.5);o.castShadow=false;wind.push({o,phase:weatherRand(),z:(weatherRand()-.5)*islandRadius*2,y:.5+weatherRand()*1.6});}
@@ -181,9 +227,62 @@ function update(s,roll,tossDuration){
   if(!diceDuration)animateDice(diceStart,true);
  }
 }
-function resize(){const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);renderer.setSize(w,h,false);camera.left=-zoom*w/h;camera.right=zoom*w/h;camera.top=zoom;camera.bottom=-zoom;camera.updateProjectionMatrix();}
-new ResizeObserver(resize).observe(host);function coords(e){const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(pointer,camera);}
-renderer.domElement.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,angle:targetAngle,moved:false};renderer.domElement.setPointerCapture(e.pointerId);});renderer.domElement.addEventListener('pointermove',e=>{if(drag){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>5)drag.moved=true;if(drag.moved)targetAngle=drag.angle-(e.clientX-drag.x)*.006;}else{coords(e);const hit=ray.intersectObjects(ghosts.children)[0];renderer.domElement.style.cursor=hit?'pointer':'grab';const tile=ray.intersectObjects(tileMeshes)[0];if(tile?.object.userData.tile!==hover){hover=tile?.object.userData.tile??-1;onHover?.(hover);}}});renderer.domElement.addEventListener('pointerup',e=>{if(drag&&!drag.moved){coords(e);const hit=ray.intersectObjects(ghosts.children)[0];if(hit)onPick(hit.object.userData.kind,hit.object.userData.pick);}drag=null;});renderer.domElement.addEventListener('pointercancel',()=>drag=null);renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();targetZoom=T.MathUtils.clamp(targetZoom+e.deltaY*.006,4.6,homeZoom*1.45);},{passive:false});renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
-function frame(now){requestAnimationFrame(frame);if(!host.getClientRects().length)return;angle+=(targetAngle-angle)*.07;const oldZoom=zoom;zoom+=(targetZoom-zoom)*.09;if(Math.abs(oldZoom-zoom)>.001)resize();camera.position.set(Math.sin(angle)*11,12,Math.cos(angle)*11);camera.lookAt(look);const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,time=now*.001;weatherTime.value=reduce?0:time;scene.userData.catanWeatherTime=weatherTime.value;for(const f of foam){const t=reduce?0:time*.65+f.phase;f.o.position.x=f.x+Math.sin(t)*.08;f.o.position.z=f.z+Math.cos(t)*.06;f.o.material.opacity=.12+(Math.sin(t)+1)*.12;}for(const f of wind){const t=(time*.035+f.phase)%1;f.o.visible=!reduce;f.o.position.set((t-.5)*(islandRadius*3),f.y+Math.sin(time+f.phase)*.08,f.z+Math.sin(t*Math.PI*2)*.3);f.o.material.opacity=Math.sin(t*Math.PI)*.18;}for(const f of flora)f.o.rotation.z=reduce?0:(Math.sin(time*1.4+f.phase)+Math.sin(time*.43)*.7)*f.amp;for(const [i,b]of boats.entries()){b.position.y=-.4+(reduce?0:Math.sin(time*1.2+i)*.05);b.rotation.z=reduce?0:Math.sin(time*.8+i)*.025;}for(const g of ghosts.children)g.material.opacity=.65+(reduce?0:Math.sin(time*3)*.18);for(let i=bounces.length-1;i>=0;i--){const b=bounces[i],t=Math.min(1,(now-b.t)/500),v=reduce?1:1+Math.sin(t*Math.PI)*.12;b.o.scale.set(1,v,1);if(t===1)bounces.splice(i,1);}animateIncome(now,reduce);if(diceDuration)animateDice(now,reduce);const pos=water.geometry.attributes.position;for(let i=0;i<pos.count;i++)pos.array[i*3+2]=reduce?0:Math.sin(waterBase[i*3]*.8+time*.95)*.09+Math.cos(waterBase[i*3+1]*.65+time*.8)*.055;pos.needsUpdate=true;if(!renderer.isSoftware)water.geometry.computeVertexNormals();renderer.render(scene,camera);}
-resize();requestAnimationFrame(frame);return{update,select,highlightIncome,home(){targetAngle=homeAngle;targetZoom=homeZoom;},rotate(dir){targetAngle+=dir*.35;}};
+function resize(){
+ viewportWidth=Math.max(1,host.clientWidth);
+ viewportHeight=Math.max(1,host.clientHeight);
+ renderer.setSize(viewportWidth,viewportHeight,false);
+ const halfWidth=zoom*viewportWidth/viewportHeight;
+ camera.left=-halfWidth;camera.right=halfWidth;camera.top=zoom;camera.bottom=-zoom;
+ camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(host);
+function pointerTarget(e){
+ const rect=renderer.domElement.getBoundingClientRect();
+ pointer.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);
+ ray.setFromCamera(pointer,camera);
+ const build=ray.intersectObjects(ghosts.children)[0];
+ const islands=outposts.filter(({group,button})=>group.visible&&!button.disabled).map(({group})=>group);
+ const hit=ray.intersectObjects(islands,true)[0];
+ if(hit&&(!build||hit.distance<build.distance)){
+  const land=ray.intersectObjects([sand,...tileMeshes])[0];
+  if(!land||hit.distance<land.distance){
+   let group=hit.object;
+   while(!group.userData.action)group=group.parent;
+   return {kind:group.userData.action};
+  }
+ }
+ return build?.object.userData;
+}
+renderer.domElement.addEventListener('pointerdown',e=>{
+ drag={x:e.clientX,y:e.clientY,angle:targetAngle,moved:false};
+ renderer.domElement.setPointerCapture(e.pointerId);
+});
+renderer.domElement.addEventListener('pointermove',e=>{
+ if(drag){
+  if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>5)drag.moved=true;
+  if(drag.moved)targetAngle=drag.angle-(e.clientX-drag.x)*.006;
+  return;
+ }
+ const target=pointerTarget(e);
+ renderer.domElement.style.cursor=target?'pointer':'grab';
+ const tile=target?.pick===undefined&&target?undefined:ray.intersectObjects(tileMeshes)[0];
+ const next=tile?.object.userData.tile??-1;
+ if(next!==hover){hover=next;onHover?.(hover);}
+});
+renderer.domElement.addEventListener('pointerup',e=>{
+ if(drag&&!drag.moved){
+  const target=pointerTarget(e);
+  if(target)onPick(target.kind,target.pick);
+ }
+ drag=null;
+});
+renderer.domElement.addEventListener('pointercancel',()=>drag=null);
+renderer.domElement.addEventListener('pointerleave',()=>{hover=-1;onHover?.(hover);});
+renderer.domElement.addEventListener('wheel',e=>{
+ e.preventDefault();
+ targetZoom=T.MathUtils.clamp(targetZoom+e.deltaY*.006,4.6,homeZoom*1.45);
+},{passive:false});
+renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
+function frame(now){requestAnimationFrame(frame);if(!host.getClientRects().length)return;angle+=(targetAngle-angle)*.07;const oldZoom=zoom;zoom+=(targetZoom-zoom)*.09;if(Math.abs(oldZoom-zoom)>.001)resize();camera.position.set(Math.sin(angle)*11,12,Math.cos(angle)*11);camera.lookAt(look);camera.updateMatrixWorld();layoutOutposts();const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,time=now*.001;weatherTime.value=reduce?0:time;scene.userData.catanWeatherTime=weatherTime.value;for(const f of foam){const t=reduce?0:time*.65+f.phase;f.o.position.x=f.x+Math.sin(t)*.08;f.o.position.z=f.z+Math.cos(t)*.06;f.o.material.opacity=.12+(Math.sin(t)+1)*.12;}for(const f of wind){const t=(time*.035+f.phase)%1;f.o.visible=!reduce;f.o.position.set((t-.5)*(islandRadius*3),f.y+Math.sin(time+f.phase)*.08,f.z+Math.sin(t*Math.PI*2)*.3);f.o.material.opacity=Math.sin(t*Math.PI)*.18;}for(const f of flora)f.o.rotation.z=reduce?0:(Math.sin(time*1.4+f.phase)+Math.sin(time*.43)*.7)*f.amp;for(const [i,b]of boats.entries()){b.position.y=-.4+(reduce?0:Math.sin(time*1.2+i)*.05);b.rotation.z=reduce?0:Math.sin(time*.8+i)*.025;}for(const g of ghosts.children)g.material.opacity=.65+(reduce?0:Math.sin(time*3)*.18);for(let i=bounces.length-1;i>=0;i--){const b=bounces[i],t=Math.min(1,(now-b.t)/500),v=reduce?1:1+Math.sin(t*Math.PI)*.12;b.o.scale.set(1,v,1);if(t===1)bounces.splice(i,1);}animateIncome(now,reduce);if(diceDuration)animateDice(now,reduce);const pos=water.geometry.attributes.position;for(let i=0;i<pos.count;i++)pos.array[i*3+2]=reduce?0:Math.sin(waterBase[i*3]*.8+time*.95)*.09+Math.cos(waterBase[i*3+1]*.65+time*.8)*.055;pos.needsUpdate=true;if(!renderer.isSoftware)water.geometry.computeVertexNormals();renderer.render(scene,camera);}
+resize();requestAnimationFrame(frame);return{update,select,highlightIncome};
 };})();

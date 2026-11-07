@@ -38,3 +38,17 @@ test('new action cards cannot be played immediately and private hands, deck and 
 test('autonomous games for two, three and four seats finish without resource creation or stalled phases',()=>{for(const count of [2,3,4]){const s=game(count);s.settings.target=8;for(const p of s.seats)p.bot=true;let n=0;while(s.phase==='play'&&n++<4000){assert.ok(C.step(s,n*1500),'bot stalled at '+s.stage);for(const r of C.RES){assert.ok(s.bank[r]>=0);assert.equal(s.bank[r]+s.seats.reduce((v,p)=>v+p.res[r],0),19);}}assert.equal(s.phase,'over');assert.ok(C.score(s,s.winner)>=8);}});
 test('expanded islands support six seats, all map settings and conserve the enlarged bank',()=>{for(const size of [19,30,37]){const s=C.create('h','Host','bot',true);s.host='h';for(const [key,value] of Object.entries({size,bots:5,deserts:2,ports:'many',terrain:'woodland'}))assert.ok(C.action(s,'h',{type:'setting',key,value},0));assert.ok(C.action(s,'h',{type:'start'},0));assert.equal(s.board.tiles.length,size);assert.equal(s.board.tiles.filter(t=>t.type==='desert').length,2);assert.equal(s.board.ports.length,12);assert.equal(s.seats.length,6);assert.equal(new Set(s.seats.map(p=>C.COLORS[p.color])).size,6);assert.ok(!s.board.edges.some(e=>e.tiles.length===2&&e.tiles.every(i=>[6,8].includes(s.board.tiles[i].number))));const stock=s.bank.wood;s.settings.target=8;s.seats.forEach(p=>p.bot=true);let steps=0;while(s.phase==='play'&&steps++<6000){assert.ok(C.step(s,steps*1500));for(const r of C.RES)assert.equal(s.bank[r]+s.seats.reduce((n,p)=>n+p.res[r],0),stock);}assert.equal(s.phase,'over');}});
 test('only the host changes valid settings, player trading and the robber can be disabled',()=>{const s=C.create('h','Host','bot',true);s.host='h';assert.equal(C.action(s,'guest',{type:'setting',key:'size',value:37},0),false);assert.equal(C.action(s,'h',{type:'setting',key:'size',value:38},0),false);assert.ok(C.action(s,'h',{type:'setting',key:'trade',value:false},0));assert.ok(C.action(s,'h',{type:'setting',key:'robber',value:false},0));C.start(s,0);setup(s);s.stage='build';const p=s.seats[s.turn];p.res.wood=3;assert.equal(C.action(s,p.l,{type:'offer',give:{wood:1},want:{ore:1}},0),false);p.dev.knight=1;assert.ok(C.action(s,p.l,{type:'dev',card:'knight'},0));assert.equal(s.stage,'build');assert.equal(p.knights,1);});
+
+test('the journal keeps the first event and every roll through a long match',()=>{
+ const s=setup(game(2));
+ s.settings.robber=false;
+ for(let i=0;i<30;i++){
+  const {l}=s.seats[s.turn];
+  assert.ok(C.action(s,l,{type:'roll'},i));
+  assert.ok(C.action(s,l,{type:'end'},i));
+ }
+ const journal=C.view(s,s.seats[1].l).log;
+ assert.equal(journal[0].key,'setup');
+ assert.equal(journal.filter(entry=>entry.key==='dice').length,30);
+ assert.deepEqual(journal.map(entry=>entry.serial),Array.from({length:journal.length},(_,i)=>i+1));
+});
