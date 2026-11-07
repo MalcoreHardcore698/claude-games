@@ -19,8 +19,5 @@
   const colors=['#ef947e','#65c7bc','#bda0ef','#edca72','#7cace8','#da8bc3','#a7c56d','#ed9e5e','#7cd4df'];
   const color=index=>colors[index]||`hsl(${Math.round(index*137.508)%360} 65% 68%)`;
   function visibleLabel(sector,label){const span=sector.end-sector.start;const room=2*137*Math.sin(Math.min(180,span)*Math.PI/360)-14;return span>=22&&String(label).length*6<=room;}
-  /* Band for a radial label: from radius 190 in to 112 (clear of the vote count at 86);
-     width is the chord at mid-band, which limits the text height. */
-  function labelRoom(sector){const span=Math.min(180,sector.end-sector.start);return{length:78,width:2*150*Math.sin(span*Math.PI/360)};}
-  return{point,path,interpolate,color,visibleLabel,labelRoom};
+  return{point,path,interpolate,color,visibleLabel};
 });

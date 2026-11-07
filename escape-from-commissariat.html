@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<script src="screen-guard.js?v=202611061221" defer></script>
+<script src="screen-guard.js" defer></script>
 <meta charset="utf-8">
 <style data-orion-critical>
 html.orion-pending body{visibility:hidden!important}
@@ -14,7 +14,7 @@ html.orion-pending:not(.orion-mounted)::after{content:"";position:fixed;left:50%
 document.documentElement.classList.add('orion-pending');
 setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.remove('orion-pending');},12000);
 </script>
-<script src="orion-loader.js?v=202611061221" defer></script>
+<script src="orion-loader.js" defer></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>body{margin:0}</style>
 <title>Escape from SVO</title>
@@ -251,10 +251,10 @@ kbd{font:600 11px var(--mono);color:var(--paper);border:1px solid rgba(232,226,2
 }
 @media (prefers-reduced-motion:reduce){#grain{animation:none}.toast{animation:none}}
 </style>
-<link rel="stylesheet" href="orion-layout.css?v=202611061221">
-<script src="orion-navigation.js?v=202611061221" defer></script>
-<link rel="stylesheet" href="orion-ui.css?v=202611061221">
-<script src="orion-ui.js?v=202611061221" defer></script><link rel="stylesheet" href="orion-info.css?v=202611061221"><script src="orion-info.js?v=202611061221" defer></script>
+<link rel="stylesheet" href="orion-layout.css">
+<script src="orion-navigation.js" defer></script>
+<link rel="stylesheet" href="orion-ui.css">
+<script src="orion-ui.js" defer></script>
 </head>
 <body data-orion-game="svo">
 <canvas id="c" aria-label="Game world"></canvas>
@@ -596,15 +596,6 @@ kiosks:[['ПРОДУКТЫ 24','ТАБАК · ПРЕССА','ШАУРМА','ЦВ
 const HELP_KB=[['W A S D','W A S D','идти','move'],['Мышь','Mouse','смотреть','look'],['Shift','Shift','бег','sprint'],['C','C','пригнуться','crouch'],['F','F','фонарь','flashlight'],
  ['E','E','обыскать (удерживать), войти, купить','search (hold), enter, buy'],['Колесо · 1–5','Wheel · 1–5','выбрать слот инвентаря','choose an inventory slot'],['ЛКМ · R','LMB · R','использовать предмет','use the item'],
  ['Q','Q','выкинуть предмет','drop the item'],['M','M','карта','map'],['G','G','дать другу $100','give a friend $100'],['Esc','Esc','пауза','pause']];
-/* Guide in the shared ORION dialog (orion-info.js); keys come from HELP_KB above. */
-window.OrionInfoSpec=()=>{const en=LI()===1,L=(ru,e)=>en?e:ru;return{kicker:L('Справка · побег из города','Guide · escape the city'),title:'Escape from SVO',lead:T('info_rules'),facts:[{v:'1–8',l:L('игроков','players')},{v:'🌙',l:L('день и ночь','day and night')}],tabs:[
- {id:'goal',icon:'🛂',label:L('Цель','Goal'),blocks:[{steps:[
-  {t:L('Найдите загранпаспорт','Find your passport'),d:L('Без него из города не уехать.','You cannot leave without it.')},
-  {t:L('Выберите способ уехать','Choose a way out'),d:L('На «Жигулях», если найдёте ключи, или на платной попутке.','In the Lada if you find the keys, or on a paid ride.')},
-  {t:L('Переждите день','Wait out the day'),d:L('Днём на улицах опасно — прячьтесь у друзей, в подвалах и ночлежках.','Daytime streets are dangerous — hide at friends’ flats, basements and shelters.')}]},
-  {note:L('Ищите закладки и лут, сдавайте их барыгам и откупайтесь от военкомов.','Find stashes and loot, sell them to dealers and bribe the officers.'),tone:'tip'}]},
- {id:'coop',icon:'🤝',label:L('Кооператив','Co-op'),blocks:[{cards:[{icon:'🫂',t:L('Помогайте','Help'),d:L('Делитесь деньгами и укрытием с друзьями.','Share money and shelter with friends.')},{icon:'📞',t:L('Или мешайте','Or betray'),d:L('Доносы на других игроков тоже часть игры.','Snitching on other players is part of the game.')}]},{keys:[{k:['G'],d:HELP_KB.find(r=>r[0]==='G')[2+LI()]}]}]},
- {id:'keys',icon:'⌨️',label:T('help_kb'),blocks:[{keys:HELP_KB.map(r=>({k:r[LI()].split(' · '),d:r[2+LI()]}))}]}]};};
 const cfg={vol:80,sens:100,lang:(navigator.language||'').toLowerCase().startsWith('ru')?'ru':'en'};
 try{Object.assign(cfg,JSON.parse(localStorage.getItem('svo-cfg')||'{}'));}catch(e){}
 const LI=()=>cfg.lang==='en'?1:0;
@@ -1192,13 +1183,13 @@ const S={mode:'menu',ui:null,nick:'',gid:null,lastGid:null,slot:0,st:'free',mone
   inv:[],sel:0,hasPP:false,hasKeys:false,earned:0,alive:0,detT:0,graceT:0,inside:null,act:null,drunkT:0,highT:0,exEvict:-1,paid:new Set(),friendGifts:new Set(),leakT:0,
   bribeT:0,bribeId:-1,hold:0,holdKey:'',ePulse:false,hb:0,lastSting:-99,wasDay:false,warned:false,result:null,spec:0,msgI:0,curInter:null,dogWarn:-99,screenFrom:null,stopped:false};
 const SHELL=(()=>{try{return window.parent!==window&&!!window.parent.__gameShell;}catch(e){return false;}})();
-const Shell={me:null,name:'',inLobby:false,hub:null,peers:[],wantCoop:false};
+const Shell={me:null,name:'',inLobby:false,hub:null,peers:[],live:new Map(),wantCoop:false};
 function shellPost(type,o){if(SHELL){try{parent.postMessage(Object.assign({svo:1,type},o||{}),'*');}catch(e){}}}
 function gev(ev,sub){if(SHELL&&S.gid)shellPost('event',{gid:S.gid,ev,sub:sub||Net.myPeer});}
 addEventListener('message',e=>{if(!SHELL||e.source!==parent)return;const m=e.data;if(!m||m.svo!==1)return;
   if(m.type==='hello'||m.type==='peers'){if(typeof m.me==='string')Shell.me=m.me.slice(0,40);Shell.inLobby=!!m.inLobby;Shell.hub=typeof m.hub==='string'?m.hub:null;Shell.peers=Array.isArray(m.peers)?m.peers.slice(0,16):[];
     if(m.type==='hello'&&typeof m.name==='string')Shell.name=cleanName(m.name);}
-  else if(m.type==='accept')Shell.wantCoop=true;});
+  else if(m.type==='ev'&&m.k==='g'&&m.d?.game==='svo'&&m.d.m?.t==='sp'){const d=m.d.m,old=Shell.live.get(m.from);if(Number.isFinite(d.seq)&&(!old||d.seq>old.seq))Shell.live.set(m.from,{seq:d.seq,p:d.p});}else if(m.type==='accept')Shell.wantCoop=true;});
 const Net={room:null,rm:null,code:'',solo:true,myPeer:'local',t0:0,sendT:0,host:null};
 let myPres={};let HS=null,H=null,lastH=null,amHost=false;
 const hostSim={enemies:[],nextId:1,cd:{},keysLost:0};
@@ -1295,17 +1286,17 @@ function updateHostRole(list){
 }
 function flushPresence(force){if(Net.solo||!Net.rm)return;const now=performance.now();if(!force&&now-Net.sendT<100)return;Net.sendT=now;try{Net.rm.presence(myPres).catch(()=>{});}catch(e){}}
 let actSeq=Math.floor(Math.random()*1000);
-function act(type,...args){actSeq++;const a=(Array.isArray(myPres.a)?myPres.a:[]).slice(-5);a.push([actSeq,type,...args]);myPres.a=a;flushPresence(true);}
+function act(type,...args){actSeq++;const a=(Array.isArray(myPres.a)?myPres.a:[]).slice(-32);a.push([actSeq,type,...args]);myPres.a=a;flushPresence(true);}
 
 /* Co-op inside the site shell: the site lobby carries presence; this adapter gives the game the same surface as a room. */
 function makeShellRoom(){
   return {join(){return new Promise((resolve,reject)=>{
     if(!Shell.inLobby||!Shell.me){reject('nolobby');return;}
-    let mine={};let open=true;
+    let mine={},seq=0;let open=true;
     resolve({
-      presence:async p=>{if(!open)return;for(const k in p){if(p[k]===null)delete mine[k];else mine[k]=p[k];}shellPost('gp',{d:mine});},
+      presence:async p=>{if(!open)return;for(const k in p){if(p[k]===null)delete mine[k];else mine[k]=p[k];}shellPost('emit',{d:{t:'sp',seq:++seq,p:mine}});const meta={};for(const k of ['v','t0','n','st','rd','g','cr'])if(k in mine)meta[k]=mine[k];shellPost('gp',{d:meta});},
       peers:()=>{const out=[{peer:Shell.me,isMe:true,sameTab:true,kind:'viewer',presence:mine}];
-        for(const q of Shell.peers){if(!q||q.label===Shell.me||q.w!=='svo')continue;out.push({peer:String(q.label),isMe:false,sameTab:false,kind:'viewer',presence:(q.gp&&typeof q.gp==='object')?q.gp:{}});}return out;},
+        for(const q of Shell.peers){if(!q||q.label===Shell.me||q.w!=='svo')continue;out.push({peer:String(q.label),isMe:false,sameTab:false,kind:'viewer',presence:Shell.live.get(q.label)?.p||((q.gp&&typeof q.gp==='object')?q.gp:{})});}return out;},
       connected:()=>Shell.inLobby,
       leave:async()=>{open=false;shellPost('gp',{d:{st:'left'}});}
     });});}};
@@ -1315,7 +1306,7 @@ async function initRoom(){
   try{if(window.claude&&typeof window.claude.use==='function')Net.room=await window.claude.use('room');}catch(e){Net.room=null;}
   Net.kind=Net.room?'claude':null;updateCoopNote();}
 function shellAlias(){let a='';try{a=cleanName(localStorage.getItem('gs-alias-svo')||'');}catch(e){}return a||Shell.name||cleanName($('#nick').value)||(cfg.lang==='en'?'Player':'Игрок');}
-async function enterShellCoop(){if(enterShellCoop.busy)return;enterShellCoop.busy=true;try{$('#nick').value=shellAlias();await joinRoom('site',false);$('#lobAlias').value=S.nick;}finally{enterShellCoop.busy=false;}}
+async function enterShellCoop(){if(enterShellCoop.busy)return;if(Shell.peers.filter(q=>q.label!==Shell.me&&q.w==='svo'&&q.gp?.st&&q.gp.st!=='left').length>=8){$('#coopShellNote').textContent=cfg.lang==='en'?'Room full · 8/8':'Комната заполнена · 8/8';return;}enterShellCoop.busy=true;try{$('#nick').value=shellAlias();await joinRoom('site',false);$('#lobAlias').value=S.nick;}finally{enterShellCoop.busy=false;}}
 setInterval(()=>{if(!SHELL)return;
   if(Shell.wantCoop&&S.mode==='menu'&&Shell.inLobby&&Shell.me){Shell.wantCoop=false;showScreen('coopScr');updateCoopNote();enterShellCoop();}
   else if(curScreen()==='coopScr'&&Shell.inLobby&&Shell.me&&S.mode==='menu')enterShellCoop();
@@ -1351,18 +1342,18 @@ function lobbyFrame(){
       if(!q.ig){const iv=document.createElement('button');iv.type='button';iv.className='bet inv';iv.textContent=T('invite');iv.addEventListener('click',()=>{shellPost('invite',{to:String(q.label)});iv.disabled=true;setTimeout(()=>{iv.disabled=false;},4000);});li.appendChild(iv);}ul.appendChild(li);}}
   const iAmHost=Net.host===Net.myPeer;const notReady=lobbyP.filter(p=>p.presence.rd!==1);
   $('#lobReady').textContent=myPres.rd===1?T('unready'):T('ready');$('#lobReady').hidden=!!(inGame&&H.gid===S.lastGid);
-  $('#lobStart').hidden=!iAmHost||inGame;$('#lobStart').disabled=!lobbyP.length||notReady.length>0;
+  $('#lobStart').hidden=!iAmHost||inGame;$('#lobStart').disabled=!lobbyP.length||lobbyP.length>8||notReady.length>0;
   $('#lobNote').textContent=inGame?(H.gid===S.lastGid?T('lob_over'):T('lob_joining')):
     notReady.length?T('lob_wait_ready',{n:notReady.map(nameOf).join(', ')}):(iAmHost?T('lob_all_ready'):T('lob_wait_host'));
   let conn=true;try{if(typeof Net.rm.connected==='function')conn=Net.rm.connected();}catch(e){}
-  $('#lobConn').textContent=conn?T('conn_ok',{n:players.length}):T('conn_bad');
+  $('#lobConn').textContent=(conn?T('conn_ok',{n:players.length}):T('conn_bad'))+' · '+players.length+'/8';
   if(inGame&&H.gid!==S.lastGid&&slotOf(Net.myPeer)>=0)startRun(H);
   myPres.st='lobby';myPres.h=amHost?HS:null;flushPresence();
 }
 function betBtn(label){const b=document.createElement('button');b.type='button';b.className='bet';b.textContent='BET';const q=Shell.peers.find(x=>x&&x.label===label);b.disabled=!!(q&&q.ig);b.addEventListener('click',()=>shellPost('bet',{target:label}));return b;}
 function hostStartCoop(){
   const list=getPeers();const players=list.filter(p=>p.presence.v===VER&&p.presence.st==='lobby'&&p.presence.rd===1).sort((a,b)=>num(a.presence.t0)-num(b.presence.t0));
-  HS={ph:'play',gid:rid(),seed:(Math.random()*2147483647)|0,tm:0,slots:players.map((p,i)=>[p.peer,i]),en:[],tk:[],cg:0};
+  if(players.length<1||players.length>8)return;HS={ph:'play',gid:rid(),seed:(Math.random()*2147483647)|0,tm:0,slots:players.map((p,i)=>[p.peer,i]),en:[],tk:[],cg:0};
   H=HS;myPres.h=HS;flushPresence(true);shellPost('start',{gid:HS.gid,players:HS.slots.map(x=>x[0])});startRun(HS);
 }
 

@@ -23,11 +23,45 @@ function award(s,key,values,min){const max=Math.max(...values.map(x=>x.n));if(ma
 function titles(s){for(const p of s.seats)p.longest=roadLength(s,p.l);award(s,'longest',s.seats.map(p=>({id:p.l,n:p.longest})),5);award(s,'army',s.seats.map(p=>({id:p.l,n:p.knights})),3);}
 function score(s,id,publicOnly=false){const p=who(s,id);if(!p)return 0;return s.board.nodes.filter(n=>n.owner===id).reduce((v,n)=>v+(n.city?2:1),0)+(s.longest===id?2:0)+(s.army===id?2:0)+(publicOnly?0:(p.dev.vp||0)+(p.newDev.vp||0));}
 function checkWin(s){const p=active(s);if(score(s,p.l)>=s.settings.target){s.phase='over';s.winner=p.l;s.offer=null;log(s,'win',{by:p.l});for(const x of s.players)x.score=score(s,x.l);return true;}return false;}
-function start(s,now){const count=s.players.length+s.settings.bots;if(count<2||count>6)return false;s.seed=Date.now()>>>0;s.board=board(s);s.bank=Object.fromEntries(RES.map(r=>[r,s.settings.size===19&&count<=4?19:s.settings.size===37?32:24]));s.deck=shuffle(s,[...(count>4?['knight','knight','knight','knight','knight','knight','vp','vp','roads','plenty','monopoly']:[]),...Array(14).fill('knight'),...Array(5).fill('vp'),'roads','roads','plenty','plenty','monopoly','monopoly']);s.seats=s.players.map((p,i)=>({...p,color:i,res:empty(),dev:{},newDev:{},knights:0,longest:0,stats:{trades:0,cities:0,settlements:0,roads:0}}));for(let i=0;i<s.settings.bots;i++)s.seats.push({l:'@bot'+i,n:'Bot '+(i+1),bot:true,color:s.seats.length,res:empty(),dev:{},newDev:{},knights:0,longest:0,stats:{trades:0,cities:0,settlements:0,roads:0}});s.phase='play';s.stage='setupSettlement';s.setupOrder=[...s.seats.keys(),...s.seats.keys()].map((_,i)=>i<count?i:2*count-1-i);s.setupIndex=0;s.turn=0;s.round=1;s.robber=s.board.tiles.find(t=>t.type==='desert').id;s.dice=null;s.longest=null;s.army=null;s.offer=null;s.log=[];s.version=0;s.winner=null;s.freeRoads=0;s.usedDev=false;s.nextAt=now+s.settings.pace;log(s,'setup');return true;}
-function setup(s,id,a,now){if(a.type==='build'&&a.kind==='settlement'&&s.stage==='setupSettlement'&&legal(s,id,'settlement').includes(a.index)){s.board.nodes[a.index].owner=id;who(s,id).stats.settlements++;s.setupNode=a.index;if(s.setupIndex>=s.seats.length){const gained=empty();for(const ti of s.board.nodes[a.index].tiles){const r=s.board.tiles[ti].type;if(RES.includes(r))gained[r]++;}grant(s,who(s,id),gained);}s.stage='setupRoad';log(s,'settlement',{by:id,index:a.index});s.nextAt=now+s.settings.pace;return true;}
+function start(s,now){const count=s.players.length+s.settings.bots;if(count<2||count>6)return false;s.seed=Date.now()>>>0;s.board=board(s);s.bank=Object.fromEntries(RES.map(r=>[r,s.settings.size===19&&count<=4?19:s.settings.size===37?32:24]));s.deck=shuffle(s,[...(count>4?['knight','knight','knight','knight','knight','knight','vp','vp','roads','plenty','monopoly']:[]),...Array(14).fill('knight'),...Array(5).fill('vp'),'roads','roads','plenty','plenty','monopoly','monopoly']);s.seats=s.players.map((p,i)=>({...p,color:i,res:empty(),dev:{},newDev:{},knights:0,longest:0,stats:{trades:0,cities:0,settlements:0,roads:0}}));for(let i=0;i<s.settings.bots;i++)s.seats.push({l:'@bot'+i,n:'Bot '+(i+1),bot:true,color:s.seats.length,res:empty(),dev:{},newDev:{},knights:0,longest:0,stats:{trades:0,cities:0,settlements:0,roads:0}});s.phase='play';s.stage='setupSettlement';s.setupOrder=[...s.seats.keys(),...s.seats.keys()].map((_,i)=>i<count?i:2*count-1-i);s.setupIndex=0;s.turn=0;s.round=1;s.lastRoll=null;s.production=null;s.robber=s.board.tiles.find(t=>t.type==='desert').id;s.dice=null;s.longest=null;s.army=null;s.offer=null;s.log=[];s.version=0;s.winner=null;s.freeRoads=0;s.usedDev=false;s.nextAt=now+s.settings.pace;log(s,'setup');return true;}
+function setup(s,id,a,now){if(a.type==='build'&&a.kind==='settlement'&&s.stage==='setupSettlement'&&legal(s,id,'settlement').includes(a.index)){s.board.nodes[a.index].owner=id;who(s,id).stats.settlements++;s.setupNode=a.index;if(s.setupIndex>=s.seats.length){const gained=empty(),tiles=[];
+ for(const tileId of s.board.nodes[a.index].tiles){
+  const resource=s.board.tiles[tileId].type;
+  if(RES.includes(resource)&&gained[resource]<s.bank[resource]){
+   gained[resource]++;
+   tiles.push(tileId);
+  }
+ }
+ grant(s,who(s,id),gained);
+ s.production={serial:s.version+1,give:{[id]:gained},tilesByPlayer:{[id]:tiles}};}s.stage='setupRoad';log(s,'settlement',{by:id,index:a.index});s.nextAt=now+s.settings.pace;return true;}
  if(a.type==='build'&&a.kind==='road'&&s.stage==='setupRoad'&&legal(s,id,'road').includes(a.index)){s.board.edges[a.index].owner=id;who(s,id).stats.roads++;log(s,'road',{by:id,index:a.index});s.setupIndex++;if(s.setupIndex>=s.setupOrder.length){s.turn=0;s.stage='roll';log(s,'turn',{by:active(s).l,round:s.round});}else{s.turn=s.setupOrder[s.setupIndex];s.stage='setupSettlement';}s.nextAt=now+s.settings.pace;return true;}return false;}
-function produce(s,n){const give=Object.fromEntries(s.seats.map(p=>[p.l,empty()]));for(const t of s.board.tiles)if(t.number===n&&t.id!==s.robber&&RES.includes(t.type))for(const i of t.nodes){const node=s.board.nodes[i];if(node.owner)give[node.owner][t.type]+=node.city?2:1;}for(const r of RES){const need=s.seats.reduce((n,p)=>n+give[p.l][r],0);if(need>s.bank[r])for(const p of s.seats)give[p.l][r]=0;}for(const p of s.seats)grant(s,p,give[p.l]);s.production={serial:s.version+1,give};}
-function roll(s,now){s.dice=[1+Math.floor(random(s)*6),1+Math.floor(random(s)*6)];const n=s.dice[0]+s.dice[1];log(s,'dice',{by:active(s).l,dice:s.dice.slice()});if(n===7&&s.settings.robber!==false){s.discard={};for(const p of s.seats)if(sum(p.res)>7)s.discard[p.l]=Math.floor(sum(p.res)/2);s.stage=Object.keys(s.discard).length?'discard':'robber';}else{produce(s,n);s.stage='build';}s.nextAt=now+s.settings.pace;}
+function produce(s,number){
+ const give=Object.fromEntries(s.seats.map(player=>[player.l,empty()]));
+ const sources=Object.fromEntries(s.seats.map(player=>[player.l,new Set()]));
+ for(const tile of s.board.tiles){
+  if(tile.number!==number||tile.id===s.robber||!RES.includes(tile.type))continue;
+  for(const nodeId of tile.nodes){
+   const node=s.board.nodes[nodeId];
+   if(!node.owner)continue;
+   give[node.owner][tile.type]+=node.city?2:1;
+   sources[node.owner].add(tile.id);
+  }
+ }
+ for(const resource of RES){
+  const needed=s.seats.reduce((total,player)=>total+give[player.l][resource],0);
+  if(needed>s.bank[resource]){
+   for(const player of s.seats)give[player.l][resource]=0;
+  }
+ }
+ const tilesByPlayer={};
+ for(const player of s.seats){
+  const resources=give[player.l];
+  tilesByPlayer[player.l]=[...sources[player.l]].filter(tileId=>resources[s.board.tiles[tileId].type]>0);
+  grant(s,player,resources);
+ }
+ s.production={serial:s.version+1,give,tilesByPlayer};
+}
+function roll(s,now){s.dice=[1+Math.floor(random(s)*6),1+Math.floor(random(s)*6)];const n=s.dice[0]+s.dice[1];log(s,'dice',{by:active(s).l,dice:s.dice.slice()});s.lastRoll={serial:s.version,dice:s.dice.slice()};s.production=null;if(n===7&&s.settings.robber!==false){s.discard={};for(const p of s.seats)if(sum(p.res)>7)s.discard[p.l]=Math.floor(sum(p.res)/2);s.stage=Object.keys(s.discard).length?'discard':'robber';}else{produce(s,n);s.stage='build';}s.nextAt=now+s.settings.pace;}
 function steal(s,victim){const p=active(s),v=who(s,victim),cards=[];if(v)for(const r of RES)for(let i=0;i<v.res[r];i++)cards.push(r);if(cards.length){const r=cards[Math.floor(random(s)*cards.length)];v.res[r]--;p.res[r]++;log(s,'steal',{by:p.l,victim});}s.stage='build';s.victims=[];}
 function ratio(s,id,res){const nodes=s.board.nodes;let n=4;for(const port of s.board.ports){const e=s.board.edges[port.edge];if([e.a,e.b].some(v=>nodes[v].owner===id)){if(port.resource===res)n=2;else if(port.resource===null)n=Math.min(n,3);}}return n;}
 function bag(raw){return raw&&typeof raw==='object'&&!Array.isArray(raw)&&Object.keys(raw).every(r=>RES.includes(r)&&Number.isInteger(raw[r])&&raw[r]>=0&&raw[r]<=99)&&sum(raw)>0;}

@@ -1,0 +1,1 @@
+{"name":"orion-lobby-relay","private":true,"version":"1.0.0","engines":{"node":">=22"},"scripts":{"start":"node relay.cjs","test":"node --test relay.test.cjs"},"dependencies":{"ws":"^8.18.3"}}

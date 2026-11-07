@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<script src="screen-guard.js?v=202611061221" defer></script>
+<script src="screen-guard.js" defer></script>
 <meta charset="utf-8">
 <style data-orion-critical>
 html.orion-pending body{visibility:hidden!important}
@@ -14,7 +14,7 @@ html.orion-pending:not(.orion-mounted)::after{content:"";position:fixed;left:50%
 document.documentElement.classList.add('orion-pending');
 setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.remove('orion-pending');},12000);
 </script>
-<script src="orion-loader.js?v=202611061221" defer></script>
+<script src="orion-loader.js" defer></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Викторина</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,6 +49,10 @@ setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.
 }
 [hidden]{display:none!important}
 *{box-sizing:border-box}
+*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background-color:rgba(255,210,63,.6)}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}
 body{font:400 16px/1.45 var(--body);min-height:100vh;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   background:radial-gradient(ellipse 60% 50% at 50% -5%,rgba(255,210,63,.16),transparent 70%),radial-gradient(ellipse 40% 60% at 0% 100%,rgba(255,79,139,.14),transparent 70%),radial-gradient(ellipse 40% 60% at 100% 100%,rgba(62,224,197,.12),transparent 70%),var(--bg);background-attachment:fixed}
@@ -236,11 +240,11 @@ input:focus{border-color:var(--gold);outline:none}
 
 #sTable>.grid2{align-items:start;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr)}#tableRosterPanel{position:sticky;top:82px;min-width:0}.tableRosterTitle{display:flex;justify-content:space-between;gap:12px;align-items:center}.tableRosterTitle>b{font:700 12px var(--body);color:var(--gold)}#tableRosterPanel .teams{grid-template-columns:1fr;gap:14px}#invitePanel{display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:16px}#invitePanel .plist{margin:0}#tblPlayers .plist{margin:0}.tableRosterTitle+.teams{margin:0}
 </style>
-<link rel="stylesheet" href="orion-layout.css?v=202611061221">
-<script src="quiz-fandoms.js?v=202611061221"></script><script src="quiz-extra.js?v=202611061221"></script>
-<script src="orion-navigation.js?v=202611061221" defer></script>
-<link rel="stylesheet" href="orion-ui.css?v=202611061221">
-<script src="orion-ui.js?v=202611061221" defer></script><link rel="stylesheet" href="orion-info.css?v=202611061221"><script src="orion-info.js?v=202611061221" defer></script><script src="quiz-info.js?v=202611061221" defer></script>
+<link rel="stylesheet" href="orion-layout.css">
+<script src="orion-room-limits.js"></script><script src="quiz-extra.js"></script>
+<script src="orion-navigation.js" defer></script>
+<link rel="stylesheet" href="orion-ui.css">
+<script src="orion-ui.js" defer></script>
 </head>
 <body data-orion-game="quiz">
 <img class="gameBackdrop" src="assets/quiz-menu.webp" alt="" decoding="async" fetchpriority="high" draggable="false"><div class="gameBackdropShade" aria-hidden="true"></div>
@@ -414,10 +418,9 @@ evd_odd:['{n} ищет лишнюю картинку — три раза под�
 rh_how:['Жмите пробел или кнопку, когда шарик в жёлтом кольце','Press Space or the button when the ball is in the yellow ring'],tap:['Бей!','Hit!'],
 rh_hits:['Попаданий: {h} из {n}','Hits: {h} of {n}'],odd_round:['Раунд {i} из 3','Round {i} of 3'],
 cat_geo:['География','Geography'],cat_hist:['История','History'],cat_sci:['Наука','Science'],cat_screen:['Кино и сериалы','Film & TV'],cat_games:['Игры','Games'],
-cat_nature:['Природа','Nature'],cat_food:['Еда','Food'],cat_sport:['Спорт','Sport'],cat_misc:['Всякое','Mixed bag'],
-cat_twilight:['Сумерки','Twilight'],cat_potter:['Гарри Поттер','Harry Potter'],cat_genshin:['Genshin Impact','Genshin Impact'],cat_winx:['Винкс','Winx Club'],cat_rick:['Рик и Морти','Rick and Morty'],cat_overwatch:['Overwatch','Overwatch']
+cat_nature:['Природа','Nature'],cat_food:['Еда','Food'],cat_sport:['Спорт','Sport'],cat_misc:['Всякое','Mixed bag']
 };
-const CATI={geo:'fa-earth-europe',hist:'fa-landmark',sci:'fa-flask',screen:'fa-film',games:'fa-gamepad',nature:'fa-paw',food:'fa-burger',sport:'fa-futbol',misc:'fa-shuffle',twilight:'fa-moon',potter:'fa-hat-wizard',genshin:'fa-wind',winx:'fa-wand-magic-sparkles',rick:'fa-flask-vial',overwatch:'fa-crosshairs'};
+const CATI={geo:'fa-earth-europe',hist:'fa-landmark',sci:'fa-flask',screen:'fa-film',games:'fa-gamepad',nature:'fa-paw',food:'fa-burger',sport:'fa-futbol',misc:'fa-shuffle'};
 let cfg={lang:(navigator.language||'').toLowerCase().startsWith('ru')?'ru':'en'};try{Object.assign(cfg,JSON.parse(localStorage.getItem('svo-cfg')||'{}'));}catch(e){}
 const L=()=>cfg.lang==='en'?1:0;
 const T=(k,v)=>{let s=D[k]?D[k][L()]:k;if(v)for(const n in v)s=s.split('{'+n+'}').join(String(v[n]));return s;};
@@ -590,7 +593,7 @@ const BANK=[
 ['misc','Где изобрели бумагу?','Where was paper invented?',['Китай|China','Египет|Egypt','Индия|India','Греция|Greece']],
 ['misc','Как называется страх пауков?','What is the fear of spiders called?',['Арахнофобия|Arachnophobia','Клаустрофобия|Claustrophobia','Акрофобия|Acrophobia','Агорафобия|Agoraphobia']]
 ];
-BANK.push(...window.OrionQuizExtra,...(window.OrionQuizFandoms||[]));
+BANK.push(...window.OrionQuizExtra);
 const ansText=(s)=>{const p=String(s).split('|');return p[Math.min(L(),p.length-1)];};
 const qText=id=>BANK[id][1+L()];
 
@@ -621,7 +624,7 @@ const QDUR=15000,REVEAL=4800,READY=3000,EV_INTRO=2800,EV_RES=3400;
 const WHEEL=[{k:'plus',c:'#2fd17a',i:'fa-plus'},{k:'x2',c:'#ff4f8b',i:'fa-angles-up'},{k:'shield',c:'#3ee0c5',i:'fa-shield-halved'},{k:'skip',c:'#ff5a5f',i:'fa-ban'},
   {k:'minus',c:'#8a5cff',i:'fa-minus'},{k:'steal',c:'#ffb627',i:'fa-hand-holding-dollar'},{k:'none',c:'#5b5486',i:'fa-face-meh'},{k:'jackpot',c:'#ffd23f',i:'fa-crown'}];
 const SYMS=[{i:'fa-star',c:'#ffb627'},{i:'fa-heart',c:'#ff4f8b'},{i:'fa-moon',c:'#3ee0c5'},{i:'fa-bolt',c:'#3d8bff'},{i:'fa-leaf',c:'#2fd17a'},{i:'fa-gem',c:'#a66bff'}];
-const CATS=['geo','hist','sci','screen','games','nature','food','sport','misc','twilight','potter','genshin','winx','rick','overwatch'];
+const CATS=['geo','hist','sci','screen','games','nature','food','sport','misc'];
 const EVTYPES=['wheel','memory','math','sprint','reflex','rhythm','odd'];
 const EVICON={wheel:'fa-dharmachakra',memory:'fa-brain',math:'fa-calculator',sprint:'fa-stopwatch',reflex:'fa-gauge-high',rhythm:'fa-drum',odd:'fa-eye'};
 const FREQS=['rare','normal','often','always'],DIFFS=['easy','normal','hard','grow'];
@@ -669,7 +672,7 @@ function hostSet(k,v){if(!isHost()||H.ph!=='lobby')return;
   if(k==='diff'&&DIFFS.includes(v))H.diff=v;
   saveSet();
   hostBroadcast();}
-function canStart(){const act=H.players.filter(p=>!p.left);if(H.mode!=='coop'&&act.length<2)return 'need2';
+function canStart(){const act=H.players.filter(p=>!p.left);if(act.length>8||new Set(act.map(p=>p.l)).size!==act.length)return 'full';if(H.mode!=='coop'&&act.length<2)return 'need2';
   if(H.mode==='teams'&&(!act.some(p=>p.team==='A')||!act.some(p=>p.team==='B')))return 'need_teams';return '';}
 function hostStart(){
   if(!isHost()||(H.ph!=='lobby'&&H.ph!=='over'))return;
@@ -747,7 +750,7 @@ function hostOver(){
 setInterval(()=>{
   if(!isHost())return;const now=performance.now();
   // players who closed the quiz
-  if(SHELL&&!H.solo)for(const p of H.players){if(p.l===ME()||p.left)continue;const q=peer(p.l);if(q&&q.w==='quiz'&&Shell.inLobby){p.goneT=0;continue;}if(!p.goneT)p.goneT=now;else if(now-p.goneT>4000){if(H.ph==='lobby'||H.ph==='over')H.players=H.players.filter(x=>x!==p);else p.left=true;hostBroadcast();}}
+  if(SHELL&&!H.solo)for(const p of H.players){if(p.l===ME()||p.left)continue;const q=peer(p.l);if(q&&q.w==='quiz'&&Shell.inLobby){p.goneT=0;continue;}if(!p.goneT)p.goneT=now;else if(now-p.goneT>45000){if(H.ph==='lobby'||H.ph==='over')H.players=H.players.filter(x=>x!==p);else p.left=true;hostBroadcast();}}
   const due=now>=H.phEnd;
   if(H.ph==='ready'&&due)hostNextQ();
   else if(H.ph==='q'){const act=H.players.filter(p=>!p.out&&!p.left);if(due||act.every(p=>p.ans))hostReveal();}
@@ -810,7 +813,7 @@ function renderTable(){
   const li=p=>`<li class="${host&&s.mode==='teams'?'move':''}" data-l="${esc(p.l)}">${avHTML(p.n,p.l)}<span class="nm">${esc(pname(p))}${p.l===s.host?' <i class="fa-solid fa-crown" style="color:var(--gold)"></i>':''}</span></li>`;
   if(s.mode==='teams'){box.innerHTML=`<div class="teams">${['A','B'].map(t=>`<div class="team" style="--tc:${TEAMS[t].c}"><h3><i class="fa-solid ${TEAMS[t].i}"></i>${esc(T('team_'+t))}</h3><ul class="plist">${s.players.filter(p=>p.team===t).map(li).join('')}</ul></div>`).join('')}</div>`;
     if(host)box.querySelectorAll('li.move').forEach(el=>el.onclick=()=>hostMove(el.dataset.l));}
-  else box.innerHTML=`<ul class="plist">${s.players.map(li).join('')}</ul>`;
+  else box.innerHTML=`<ul class="plist">${s.players.map(li).join('')}</ul>`;if(s.ph==='lobby'){box.insertAdjacentHTML('beforeend',`<p class="hint">${s.players.length} / 8</p><div class="quizEmptySlots">`+Array.from({length:Math.max(0,8-s.players.length)},(_,i)=>`<div class="roomRow">${s.players.length+i+1} · ${cfg.lang==='en'?'Empty slot':'Свободное место'}</div>`).join('')+'</div>');}
   const why=host?canStartS(s):'';$('#bStart').hidden=!host;$('#bStart').disabled=!!why;
   $('#tblNote').textContent=host?(why?T(why):''):T('wait_host',{n:hostP?hostP.n:'?'});
   $('#invitePanel').hidden=s.solo||!SHELL;renderInvites();
@@ -1048,7 +1051,7 @@ function acceptFrom(l){if(HOST)return;const q=peer(l);show('sLobby');lobSig='';r
 setInterval(()=>{ // host gone?
   if(!SHELL||!HOST||isHost()){hostGoneT=0;return;}const q=peer(HOST);
   if(q&&q.w==='quiz'&&Shell.inLobby){hostGoneT=0;return;}if(!hostGoneT){hostGoneT=performance.now();return;}
-  if(performance.now()-hostGoneT>3500){hostGoneT=0;HOST=null;ST=null;hideEv();toast(T('host_left'));show('sLobby');lobSig='';renderLobby();pushGp();}
+  if(performance.now()-hostGoneT>45000){hostGoneT=0;HOST=null;ST=null;hideEv();toast(T('host_left'));show('sLobby');lobSig='';renderLobby();pushGp();}
 },700);
 setInterval(()=>{if(SHELL)pushGp();},1500);
 

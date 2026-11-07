@@ -3,7 +3,34 @@ function game(count=4){const s=C.create('h','Host','bot',true);s.host='h';s.sett
 function setup(s){let steps=0;while(s.stage.startsWith('setup')&&steps++<30){const p=s.seats[s.turn],a=C.botAction(s,p);assert.ok(C.action(s,p.l,a,steps*1000));}return s;}
 test('the island is a connected 19-hex board with 54 corners, 72 roads and nine coastal ports',()=>{const s=game(),b=s.board;assert.equal(b.tiles.length,19);assert.equal(b.nodes.length,54);assert.equal(b.edges.length,72);assert.equal(b.ports.length,9);assert.equal(new Set(b.ports.map(p=>p.edge)).size,9);assert.ok(b.ports.every(p=>b.edges[p.edge].tiles.length===1));assert.ok(b.edges.every(e=>e.tiles.length===1||e.tiles.length===2));assert.ok(!b.edges.some(e=>e.tiles.length===2&&e.tiles.every(id=>[6,8].includes(b.tiles[id].number))));});
 test('initial placement uses snake order, respects distance and grants resources only for second homes',()=>{const s=game(),order=[];while(s.stage.startsWith('setup')){const p=s.seats[s.turn];if(s.stage==='setupSettlement')order.push(s.turn);assert.equal(C.action(s,'outsider',C.botAction(s,p),0),false);assert.ok(C.action(s,p.l,C.botAction(s,p),0));}assert.deepEqual(order,[0,1,2,3,3,2,1,0]);assert.equal(s.stage,'roll');for(const p of s.seats){assert.equal(s.board.nodes.filter(n=>n.owner===p.l).length,2);assert.equal(s.board.edges.filter(e=>e.owner===p.l).length,2);assert.ok(C.sum(p.res)>0);}for(const e of s.board.edges)assert.ok(!(s.board.nodes[e.a].owner&&s.board.nodes[e.b].owner));for(const r of C.RES)assert.equal(s.bank[r]+s.seats.reduce((n,p)=>n+p.res[r],0),19);});
-test('cities produce two resources and a bank shortage withholds that resource from all recipients',()=>{const s=game(2),p=s.seats[0],tile=s.board.tiles.find(t=>t.number&&t.id!==s.robber);for(const n of s.board.nodes){n.owner=null;n.city=false;}s.board.nodes[tile.nodes[0]].owner=p.l;s.board.nodes[tile.nodes[0]].city=true;p.res=C.empty();C.produce(s,tile.number);assert.ok(p.res[tile.type]>=2);p.res=C.empty();s.bank[tile.type]=1;C.produce(s,tile.number);assert.equal(p.res[tile.type],0);assert.equal(s.bank[tile.type],1);});
+test('production records exact contributing tiles and omits resources withheld by the bank',()=>{
+ const s=game(2),[cityPlayer,settlementPlayer]=s.seats;
+ const robberTile=s.board.tiles[s.robber];
+ const available=s.board.tiles.filter(tile=>tile.id!==s.robber);
+ const first=available[0],others=available.filter(tile=>tile.nodes.every(id=>!first.nodes.includes(id)));
+ const [second,unused]=others;
+ for(const tile of s.board.tiles)tile.number=0;
+ for(const tile of [first,second,unused,robberTile]){
+  tile.number=6;
+  tile.type='wood';
+ }
+ Object.assign(s.board.nodes[first.nodes.find(id=>!robberTile.nodes.includes(id))],{owner:cityPlayer.l,city:true});
+ Object.assign(s.board.nodes[second.nodes.find(id=>!unused.nodes.includes(id)&&!robberTile.nodes.includes(id))],{owner:settlementPlayer.l});
+ const robberNode=s.board.nodes[robberTile.nodes.find(id=>!first.nodes.includes(id)&&!second.nodes.includes(id)&&!unused.nodes.includes(id))];
+ if(robberNode)robberNode.owner=cityPlayer.l;
+
+ C.produce(s,6);
+ assert.equal(cityPlayer.res.wood,2);
+ assert.equal(settlementPlayer.res.wood,1);
+ assert.deepEqual(s.production.tilesByPlayer,{[cityPlayer.l]:[first.id],[settlementPlayer.l]:[second.id]});
+
+ s.bank.wood=1;
+ C.produce(s,6);
+ assert.equal(cityPlayer.res.wood,2);
+ assert.equal(settlementPlayer.res.wood,1);
+ assert.equal(s.bank.wood,1);
+ assert.deepEqual(s.production.tilesByPlayer,{[cityPlayer.l]:[],[settlementPlayer.l]:[]});
+});
 test('bank and player exchanges are atomic and harbors reduce the correct exchange rate',()=>{const s=setup(game(2)),p=s.seats[0],q=s.seats[1];s.stage='build';s.turn=0;p.res={wood:8,brick:0,sheep:0,wheat:0,ore:0};q.res={wood:0,brick:0,sheep:0,wheat:0,ore:2};assert.ok(C.action(s,p.l,{type:'offer',give:{wood:1},want:{ore:1}},0));assert.equal(C.action(s,q.l,{type:'accept'},0),true);assert.equal(p.res.ore,1);assert.equal(q.res.wood,1);assert.equal(s.offer,null);assert.equal(C.action(s,q.l,{type:'accept'},0),false);const port=s.board.ports.find(p=>p.resource==='wood'),edge=s.board.edges[port.edge];s.board.nodes[edge.a].owner=p.l;assert.equal(C.ratio(s,p.l,'wood'),2);assert.ok(C.action(s,p.l,{type:'bank',give:'wood',want:'brick'},0));assert.equal(p.res.wood,5);assert.equal(p.res.brick,1);});
 test('a seven requires exact discards and robber theft conserves the two hands',()=>{const s=setup(game(2)),p=s.seats[0],q=s.seats[1];s.turn=0;s.stage='discard';p.res={wood:8,brick:4,sheep:0,wheat:0,ore:0};s.discard={[p.l]:6};assert.equal(C.action(s,p.l,{type:'discard',resources:{wood:5}},0),false);assert.ok(C.action(s,p.l,{type:'discard',resources:{wood:6}},0));assert.equal(C.sum(p.res),6);assert.equal(s.stage,'robber');q.res={wood:0,brick:1,sheep:0,wheat:0,ore:0};const node=s.board.nodes.find(n=>n.owner===q.l),tile=node.tiles.find(i=>i!==s.robber);const before=C.sum(p.res)+C.sum(q.res);assert.ok(C.action(s,p.l,{type:'robber',tile},0));assert.equal(s.stage,'build');assert.equal(C.sum(q.res),0);assert.equal(C.sum(p.res)+C.sum(q.res),before);});
 test('opponent settlements interrupt the longest road and ties retain an existing title holder',()=>{const s=game(2),p=s.seats[0];const path=[];function find(v,visited){if(path.length===6)return true;for(const i of s.board.nodes[v].edges){const e=s.board.edges[i],n=e.a===v?e.b:e.a;if(visited.has(n))continue;path.push(i);visited.add(n);if(find(n,visited))return true;visited.delete(n);path.pop();}return false;}assert.ok(find(0,new Set([0])));for(const i of path)s.board.edges[i].owner=p.l;assert.equal(C.roadLength(s,p.l),6);C.titles(s);assert.equal(s.longest,p.l);const a=s.board.edges[path[2]],b=s.board.edges[path[3]],mid=[a.a,a.b].find(n=>n===b.a||n===b.b);s.board.nodes[mid].owner=s.seats[1].l;assert.equal(C.roadLength(s,p.l),3);C.titles(s);assert.equal(s.longest,null);});

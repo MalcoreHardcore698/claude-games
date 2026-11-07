@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<script src="screen-guard.js?v=202611061221" defer></script>
+<script src="screen-guard.js" defer></script>
 <meta charset="utf-8">
 <style data-orion-critical>
 html.orion-pending body{visibility:hidden!important}
@@ -30,7 +30,7 @@ html.orion-pending:not(.orion-mounted)::after{content:"";position:fixed;left:50%
 document.documentElement.classList.add('orion-pending');
 setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.remove('orion-pending');},12000);
 </script>
-<script src="orion-loader.js?v=202611061221" defer></script>
+<script src="orion-loader.js" defer></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Угадай героя</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -168,11 +168,11 @@ input[type=text]{font:500 17px var(--body);color:var(--paper);background:var(--w
 
 .netLayout{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.95fr);gap:22px;align-items:start}#netList{position:sticky;top:82px}#netCount{font:600 12px var(--mono);color:var(--acc)}
 </style>
-<link rel="stylesheet" href="orion-layout.css?v=202611061221">
-<script src="guess-questions.js?v=202611061221"></script>
-<script src="orion-navigation.js?v=202611061221" defer></script>
-<link rel="stylesheet" href="orion-ui.css?v=202611061221">
-<script src="orion-ui.js?v=202611061221" defer></script><link rel="stylesheet" href="orion-info.css?v=202611061221"><script src="orion-info.js?v=202611061221" defer></script><script src="guess-info.js?v=202611061221" defer></script>
+<link rel="stylesheet" href="orion-layout.css">
+<script src="orion-room-limits.js"></script><script src="guess-questions.js"></script>
+<script src="orion-navigation.js" defer></script>
+<link rel="stylesheet" href="orion-ui.css">
+<script src="orion-ui.js" defer></script>
 </head>
 <body data-orion-game="guess">
 <img class="gameBackdrop" src="assets/guess-hero-menu.webp" alt="" decoding="async" fetchpriority="high" draggable="false"><div class="gameBackdropShade" aria-hidden="true"></div>
@@ -339,74 +339,7 @@ const THEMES=[
  c:[['Джон Сноу','Jon Snow','wf targ crown watch'],['Дейенерис','Daenerys','woman targ crown blonde'],['Тирион','Tyrion','lan blonde'],['Серсея','Cersei','woman lan crown blonde'],
   ['Джейме','Jaime','lan knight blonde'],['Арья','Arya','woman wf'],['Санса','Sansa','woman wf crown red'],['Эддард Старк','Eddard Stark','wf'],['Бран','Bran','wf crown magic'],
   ['Джоффри','Joffrey','lan crown blonde'],['Робб','Robb','wf crown'],['Сандор Клиган','Sandor Clegane',''],['Бриенна','Brienne','woman knight blonde'],['Джорах','Jorah','knight'],
-  ['Давос','Davos','knight'],['Мелисандра','Melisandre','woman red magic'],['Сэмвелл','Samwell','watch'],['Варис','Varys','bald'],['Мизинец','Littlefinger',''],['Станнис','Stannis','crown']]},
-{id:'twilight',name:['Сумерки','Twilight'],sub:['Форкс, вампиры и оборотни','Forks, vampires and werewolves'],acc:'#9b2d3a',acc2:'#a9b7c4',
- q:[['woman','Это женщина?','Is it a woman?','женщина','woman'],['vampire','Это вампир?','Is it a vampire?','вампир','vampire'],['wolf','Это оборотень?','Is it a werewolf?','оборотень','werewolf'],
-  ['human','Это обычный человек?','Is it an ordinary human?','человек','human'],['cullen','Из семьи Калленов?','Part of the Cullen family?','Каллены','Cullens'],['volturi','Из клана Вольтури?','From the Volturi?','Вольтури','Volturi'],
-  ['quileute','Из племени квилетов?','From the Quileute tribe?','квилеты','Quileute'],['gift','Есть особый дар?','Has a special gift?','особый дар','special gift'],['blonde','Светлые волосы?','Fair hair?','светлые волосы','fair hair'],
-  ['dark','Тёмные волосы?','Dark hair?','тёмные волосы','dark hair'],['red','Рыжие волосы?','Red hair?','рыжие волосы','red hair']],
- c:[['Белла Свон','Bella Swan','woman human dark'],['Эдвард Каллен','Edward Cullen','vampire cullen gift'],['Джейкоб Блэк','Jacob Black','wolf quileute dark'],['Элис Каллен','Alice Cullen','woman vampire cullen gift dark'],
-  ['Розали Хейл','Rosalie Hale','woman vampire cullen blonde'],['Эммет Каллен','Emmett Cullen','vampire cullen dark'],['Джаспер Хейл','Jasper Hale','vampire cullen gift blonde'],['Карлайл Каллен','Carlisle Cullen','vampire cullen blonde'],
-  ['Эсми Каллен','Esme Cullen','woman vampire cullen'],['Ренесми','Renesmee','woman cullen'],['Чарли Свон','Charlie Swan','human dark'],['Аро','Aro','vampire volturi gift dark'],
-  ['Джейн','Jane','woman vampire volturi gift blonde'],['Алек','Alec','vampire volturi gift dark'],['Виктория','Victoria','woman vampire red'],['Джеймс','James','vampire gift blonde'],
-  ['Лоран','Laurent','vampire dark'],['Сэм Улей','Sam Uley','wolf quileute dark'],['Лея Клируотер','Leah Clearwater','woman wolf quileute dark'],['Сет Клируотер','Seth Clearwater','wolf quileute dark'],
-  ['Билли Блэк','Billy Black','human quileute dark']]},
-{id:'potter',name:['Гарри Поттер','Harry Potter'],sub:['Хогвартс и волшебный мир','Hogwarts and the wizarding world'],acc:'#a8792a',acc2:'#7a1f2b',
- q:[['woman','Это женщина?','Is it a woman?','женщина','woman'],['student','Учится в Хогвартсе?','A Hogwarts student?','ученик','student'],['teacher','Преподаёт в Хогвартсе?','Teaches at Hogwarts?','преподаватель','teacher'],
-  ['gryffindor','Гриффиндор?','Gryffindor?','Гриффиндор','Gryffindor'],['slytherin','Слизерин?','Slytherin?','Слизерин','Slytherin'],['ravenclaw','Когтевран?','Ravenclaw?','Когтевран','Ravenclaw'],
-  ['hufflepuff','Пуффендуй?','Hufflepuff?','Пуффендуй','Hufflepuff'],['weasley','Из семьи Уизли?','A Weasley?','Уизли','Weasley'],['red','Рыжие волосы?','Red hair?','рыжие волосы','red hair'],
-  ['blonde','Светлые волосы?','Fair hair?','светлые волосы','fair hair'],['glasses','Носит очки?','Wears glasses?','очки','glasses'],['order','Состоит в Ордене Феникса?','In the Order of the Phoenix?','Орден Феникса','Order'],
-  ['deatheater','Пожиратель смерти?','A Death Eater?','Пожиратель смерти','Death Eater']],
- c:[['Гарри Поттер','Harry Potter','gryffindor student glasses order'],['Гермиона Грейнджер','Hermione Granger','woman gryffindor student order'],['Рон Уизли','Ron Weasley','gryffindor student weasley red order'],
-  ['Джинни Уизли','Ginny Weasley','woman gryffindor student weasley red order'],['Фред Уизли','Fred Weasley','gryffindor student weasley red order'],['Невилл Долгопупс','Neville Longbottom','gryffindor student'],
-  ['Драко Малфой','Draco Malfoy','slytherin student deatheater blonde'],['Луна Лавгуд','Luna Lovegood','woman ravenclaw student blonde'],['Седрик Диггори','Cedric Diggory','hufflepuff student'],
-  ['Чжоу Чанг','Cho Chang','woman ravenclaw student'],['Альбус Дамблдор','Albus Dumbledore','gryffindor teacher order glasses'],['Северус Снейп','Severus Snape','slytherin teacher deatheater order'],
-  ['Минерва Макгонагалл','Minerva McGonagall','woman gryffindor teacher order glasses'],['Рубеус Хагрид','Rubeus Hagrid','gryffindor teacher order'],['Волан-де-Морт','Voldemort','slytherin deatheater'],
-  ['Беллатриса Лестрейндж','Bellatrix Lestrange','woman slytherin deatheater'],['Люциус Малфой','Lucius Malfoy','slytherin deatheater blonde'],['Сириус Блэк','Sirius Black','gryffindor order'],
-  ['Римус Люпин','Remus Lupin','gryffindor teacher order'],['Долорес Амбридж','Dolores Umbridge','woman slytherin teacher'],['Помона Стебль','Pomona Sprout','woman hufflepuff teacher']]},
-{id:'genshin',name:['Genshin Impact','Genshin Impact'],sub:['Путешествие по Тейвату','A journey across Teyvat'],acc:'#d9b45b',acc2:'#4f8fc0',
- q:[['woman','Это женщина?','Is it a woman?','женщина','woman'],['archon','Это Архонт?','Is it an Archon?','Архонт','Archon'],['anemo','Стихия — Анемо?','Element: Anemo?','Анемо','Anemo'],
-  ['pyro','Стихия — Пиро?','Element: Pyro?','Пиро','Pyro'],['hydro','Стихия — Гидро?','Element: Hydro?','Гидро','Hydro'],['electro','Стихия — Электро?','Element: Electro?','Электро','Electro'],
-  ['cryo','Стихия — Крио?','Element: Cryo?','Крио','Cryo'],['geo','Стихия — Гео?','Element: Geo?','Гео','Geo'],['dendro','Стихия — Дендро?','Element: Dendro?','Дендро','Dendro'],
-  ['mond','Из Мондштадта?','From Mondstadt?','Мондштадт','Mondstadt'],['liyue','Из Ли Юэ?','From Liyue?','Ли Юэ','Liyue'],['inazuma','Из Инадзумы?','From Inazuma?','Инадзума','Inazuma'],
-  ['sumeru','Из Сумеру?','From Sumeru?','Сумеру','Sumeru'],['fontaine','Из Фонтейна?','From Fontaine?','Фонтейн','Fontaine'],['sword','Оружие — одноручный меч?','Wields a sword?','меч','sword'],
-  ['bow','Оружие — лук?','Wields a bow?','лук','bow'],['polearm','Оружие — копьё?','Wields a polearm?','копьё','polearm'],['catalyst','Оружие — катализатор?','Wields a catalyst?','катализатор','catalyst'],
-  ['claymore','Оружие — двуручный меч?','Wields a claymore?','двуручный меч','claymore']],
- c:[['Венти','Venti','anemo archon mond bow'],['Чжун Ли','Zhongli','geo archon liyue polearm'],['Райдэн','Raiden Shogun','woman electro archon inazuma polearm'],['Нахида','Nahida','woman dendro archon sumeru catalyst'],
-  ['Фурина','Furina','woman hydro archon fontaine sword'],['Дилюк','Diluc','pyro mond claymore'],['Джинн','Jean','woman anemo mond sword'],['Кли','Klee','woman pyro mond catalyst'],
-  ['Кэйа','Kaeya','cryo mond sword'],['Ноэлль','Noelle','woman geo mond claymore'],['Беннет','Bennett','pyro mond sword'],['Сяо','Xiao','anemo liyue polearm'],
-  ['Ху Тао','Hu Tao','woman pyro liyue polearm'],['Гань Юй','Ganyu','woman cryo liyue bow'],['Кэ Цин','Keqing','woman electro liyue sword'],['Аяка','Ayaka','woman cryo inazuma sword'],
-  ['Яэ Мико','Yae Miko','woman electro inazuma catalyst'],['Итто','Itto','geo inazuma claymore'],['Тарталья','Tartaglia','hydro bow'],['Альхайтам','Alhaitham','dendro sumeru sword'],
-  ['Сайно','Cyno','electro sumeru polearm'],['Тигнари','Tighnari','dendro sumeru bow'],['Нёвиллет','Neuvillette','hydro fontaine catalyst']]},
-{id:'winx',name:['Клуб Винкс','Winx Club'],sub:['Феи Алфеи и их враги','The fairies of Alfea and their foes'],acc:'#e05aa8',acc2:'#6fb7e8',
- q:[['woman','Это девушка?','Is it a girl?','девушка','girl'],['fairy','Это фея?','Is it a fairy?','фея','fairy'],['witch','Это ведьма?','Is it a witch?','ведьма','witch'],
-  ['winx','Состоит в Клубе Винкс?','A member of the Winx Club?','Винкс','Winx'],['specialist','Специалист из Красного фонтана?','A Red Fountain Specialist?','Специалист','Specialist'],
-  ['villain','Это злодей?','Is it a villain?','злодей','villain'],['royal','Принц или принцесса?','A prince or princess?','королевская кровь','royal'],['teacher','Учитель или директор?','A teacher or headmistress?','учитель','teacher'],
-  ['red','Рыжие волосы?','Red hair?','рыжие волосы','red hair'],['blonde','Светлые волосы?','Fair hair?','светлые волосы','fair hair'],['dark','Тёмные волосы?','Dark hair?','тёмные волосы','dark hair'],
-  ['glasses','Носит очки?','Wears glasses?','очки','glasses']],
- c:[['Блум','Bloom','woman fairy winx red royal'],['Стелла','Stella','woman fairy winx blonde royal'],['Флора','Flora','woman fairy winx'],['Муза','Musa','woman fairy winx dark'],
-  ['Текна','Tecna','woman fairy winx'],['Лейла','Layla','woman fairy winx dark royal'],['Роксана','Roxy','woman fairy'],['Дафна','Daphne','woman fairy royal blonde'],
-  ['Айси','Icy','woman witch villain'],['Дарси','Darcy','woman witch villain'],['Сторми','Stormy','woman witch villain'],['Валтор','Valtor','villain'],
-  ['Скай','Sky','specialist royal blonde'],['Брэндон','Brandon','specialist dark'],['Ривен','Riven','specialist'],['Гелия','Helia','specialist dark'],
-  ['Тимми','Timmy','specialist red glasses'],['Фарагонда','Faragonda','woman fairy teacher'],['Гриффин','Griffin','woman witch teacher dark'],['Кодаторта','Codatorta','teacher']]},
-{id:'rick',name:['Рик и Морти','Rick and Morty'],sub:['Безумная мультивселенная','A mad multiverse'],acc:'#97ce4c',acc2:'#44b2e8',
- q:[['woman','Это женщина?','Is it a woman?','женщина','woman'],['smith','Из семьи Смитов?','Part of the Smith family?','Смиты','Smiths'],['rick','Это какой-то Рик?','Is it a version of Rick?','Рик','a Rick'],
-  ['morty','Это какой-то Морти?','Is it a version of Morty?','Морти','a Morty'],['alien','Это инопланетянин?','Is it an alien?','пришелец','alien'],['robot','Это робот?','Is it a robot?','робот','robot'],
-  ['villain','Это злодей?','Is it a villain?','злодей','villain']],
- c:[['Рик Санчез','Rick Sanchez','rick smith'],['Морти Смит','Morty Smith','morty smith'],['Саммер Смит','Summer Smith','woman smith'],['Бет Смит','Beth Smith','woman smith'],
-  ['Джерри Смит','Jerry Smith','smith'],['Птичья Личность','Birdperson','alien'],['Сквончи','Squanchy','alien'],['Мистер Мисикс','Mr. Meeseeks','alien'],
-  ['Злой Морти','Evil Morty','morty villain'],['Огурчик Рик','Pickle Rick','rick'],['Рик Прайм','Rick Prime','rick villain'],['Мистер Пупибатхол','Mr. Poopybutthole','alien'],
-  ['Юникити','Unity','woman alien'],['Тэмми','Tammy','woman villain'],['Масляный робот','Butter Robot','robot'],['Джессика','Jessica','woman'],
-  ['Абрадольф Линклер','Abradolf Lincler','villain'],['Кромулон','Cromulon','alien'],['Мистер Голдинфолд','Mr. Goldenfold',''],['Диана Санчес','Diane Sanchez','woman']]},
-{id:'overwatch',name:['Overwatch','Overwatch'],sub:['Герои будущего','Heroes of the future'],acc:'#f99e1a',acc2:'#4a90c8',
- q:[['woman','Это героиня?','Is it a heroine?','героиня','heroine'],['tank','Роль — танк?','Role: tank?','танк','tank'],['damage','Роль — урон?','Role: damage?','урон','damage'],
-  ['support','Роль — поддержка?','Role: support?','поддержка','support'],['robot','Робот или омник?','A robot or omnic?','омник','omnic'],['animal','Это животное?','Is it an animal?','животное','animal'],
-  ['talon','Работает на «Коготь»?','Works for Talon?','«Коготь»','Talon'],['overwatch','Был агентом Overwatch?','A former Overwatch agent?','агент Overwatch','Overwatch agent'],['sniper','Стреляет из снайперской винтовки?','Uses a sniper rifle?','снайпер','sniper']],
- c:[['Трейсер','Tracer','woman damage overwatch'],['Уинстон','Winston','tank animal overwatch'],['Ангел','Mercy','woman support overwatch'],['Гэндзи','Genji','damage overwatch'],
-  ['Хандзо','Hanzo','damage'],['Райнхардт','Reinhardt','tank overwatch'],['D.Va','D.Va','woman tank'],['Жнец','Reaper','damage talon'],
-  ['Роковая вдова','Widowmaker','woman damage talon sniper'],['Ана','Ana','woman support sniper overwatch'],['Солдат-76','Soldier: 76','damage overwatch'],['Дзенъятта','Zenyatta','support robot'],
-  ['Бастион','Bastion','damage robot'],['Таран','Wrecking Ball','tank animal'],['Мойра','Moira','woman support talon'],['Кирико','Kiriko','woman support'],
-  ['Лусио','Lúcio','support'],['Кэссиди','Cassidy','damage'],['Мэй','Mei','woman damage'],['Сигма','Sigma','tank talon'],['Эхо','Echo','woman damage robot'],['Торбьорн','Torbjörn','damage overwatch']]}
+  ['Давос','Davos','knight'],['Мелисандра','Melisandre','woman red magic'],['Сэмвелл','Samwell','watch'],['Варис','Varys','bald'],['Мизинец','Littlefinger',''],['Станнис','Stannis','crown']]}
 ];
 window.OrionGuessQuestions.install(THEMES);
 const D={
@@ -629,7 +562,7 @@ function send(m){if(N.opp)shellPost('emit',{to:N.opp,d:m});}
 function sendTo(l,m){shellPost('emit',{to:l,d:m});}
 function leaveNet(){if(N.opp)send({t:'bye'});N.opp=null;N.role=null;N.inv=null;G.gid=null;pushGp();}
 function myName(){return clean($('#nick').value)||Shell.name||T('player');}
-function pushGp(){shellPost('gp',{d:{n:myName(),busy:N.opp?1:0,gid:G.gid||null}});}
+function pushGp(){for(const id of ['sWait','sSetup']){const box=document.getElementById(id);if(box){let slots=box.querySelector('.guessPairSlots');if(!slots){slots=document.createElement('p');slots.className='guessPairSlots';box.prepend(slots);}slots.textContent=(cfg.lang==='en'?'Room slots':'Слоты комнаты')+' · '+(N.opp?'2':'1')+'/2 · '+myName()+' / '+(N.opp?G.oppName:'—');}}shellPost('gp',{d:{n:myName(),busy:N.opp?1:0,host:N.role==='host'?1:0,cnt:N.opp?2:1,max:2,gid:G.gid||null}});}
 function peerName(q){return clean(q.gp&&q.gp.n)||clean(q.name)||T('player');}
 function oppGone(){
   if(!N.opp)return;N.opp=null;
@@ -646,8 +579,8 @@ let netSig='';
 function renderNet(){
   updateNetNote();if(!(SHELL&&Shell.inLobby))return;
   const others=Shell.peers.filter(q=>q&&q.label!==Shell.me);
-  const sig=others.map(q=>q.label+peerName(q)+q.w+(q.gp&&q.gp.busy)+q.ig).join('|')+[...N.invFrom.keys()].join()+N.inv+cfg.lang;if(sig===netSig)return;netSig=sig;
-  $('#netCount').textContent=String(new Set(Shell.peers.map(q=>q.label).concat(Shell.me)).size);
+  const sig=(N.opp||'')+'|'+others.map(q=>q.label+peerName(q)+q.w+(q.gp&&q.gp.busy)+q.ig).join('|')+[...N.invFrom.keys()].join()+N.inv+cfg.lang;if(sig===netSig)return;netSig=sig;
+  $('#netCount').textContent=(N.opp?'2':'1')+' / 2';let slots=document.getElementById('guessSlots');if(!slots){slots=document.createElement('div');slots.id='guessSlots';$('#plist').before(slots);}slots.className='guessSlots';slots.textContent='① '+myName()+' · ② '+(N.opp?G.oppName:(cfg.lang==='en'?'Empty slot':'Свободное место'));
   const ul=$('#plist');ul.innerHTML='';const self=document.createElement('li');self.innerHTML='<span class="nm"></span>';self.querySelector('.nm').textContent=myName()+' · '+T('you');ul.appendChild(self);
   if(!others.length){const li=document.createElement('li');li.textContent=T('nobody');ul.appendChild(li);}
   for(const q of others){
@@ -662,7 +595,7 @@ function renderNet(){
     ul.appendChild(li);}
 }
 function acceptInv(from){
-  if(N.opp)return;const pq=Shell.peers.find(x=>x&&x.label===from);const name=N.invFrom.get(from)||(pq?peerName(pq):'');N.invFrom.clear();N.inv=null;N.opp=from;N.role='guest';G.mode='net';G.oppName=name||T('player');
+  if(N.opp){sendTo(from,{t:'dec'});return;}const pq=Shell.peers.find(x=>x&&x.label===from);const name=N.invFrom.get(from)||(pq?peerName(pq):'');N.invFrom.clear();N.inv=null;N.opp=from;N.role='guest';G.mode='net';G.oppName=name||T('player');
   send({t:'acc',name:myName()});$('#roomCode').textContent=G.oppName;$('#waitNote').textContent=T('host_setup',{n:G.oppName});show('sWait');pushGp();
 }
 function onShellG(from,m){
@@ -682,7 +615,7 @@ addEventListener('message',e=>{if(!SHELL||e.source!==parent)return;const m=e.dat
   else if(m.type==='accept'&&typeof m.from==='string')acceptInv(m.from);});
 setInterval(()=>{if(!SHELL)return;
   for(const k of [...N.invFrom.keys()]){const q=Shell.peers.find(x=>x.label===k);if(!q||q.w!=='gw'){N.invFrom.delete(k);netSig='';}}
-  if(N.opp){const q=Shell.peers.find(x=>x.label===N.opp);if(Shell.inLobby&&q&&q.w==='gw'){N.goneT=0;}else if(!N.goneT)N.goneT=performance.now();else if(performance.now()-N.goneT>3000){N.goneT=0;oppGone();}}
+  if(N.opp){const q=Shell.peers.find(x=>x.label===N.opp);if(Shell.inLobby&&q&&q.w==='gw'){N.goneT=0;}else if(!N.goneT)N.goneT=performance.now();else if(performance.now()-N.goneT>45000){N.goneT=0;oppGone();}}
   pushGp();},1000);
 $('#bNeed').onclick=()=>{if(SHELL)shellPost('lobby');else location.href='index.html';};
 function maybeStartNet(){if(N.role==='host'&&G.meReady&&G.oppReady){const first=Math.random()<.5?'host':'guest';G.turn=first==='host'?'me':'opp';send({t:'start',first});shellPost('start',{gid:G.gid,players:[Shell.me,N.opp]});startPlay();}}

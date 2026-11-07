@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<script src="screen-guard.js?v=202611061221" defer></script>
+<script src="screen-guard.js" defer></script>
 <meta charset="utf-8">
 <style data-orion-critical>
 html.orion-pending body{visibility:hidden!important}
@@ -14,7 +14,7 @@ html.orion-pending:not(.orion-mounted)::after{content:"";position:fixed;left:50%
 document.documentElement.classList.add('orion-pending');
 setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.remove('orion-pending');},12000);
 </script>
-<script src="orion-loader.js?v=202611061221" defer></script>
+<script src="orion-loader.js" defer></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ORION</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -50,6 +50,11 @@ setTimeout(function(){if(!window.OrionLoader)document.documentElement.classList.
 }
 [hidden]{display:none!important}
 *{box-sizing:border-box}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(236,230,216,.16);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background-color:rgba(242,163,58,.55)}
+::-webkit-scrollbar-corner{background:transparent}
 @supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:rgba(236,230,216,.2) transparent}}
 .sf{--fd:34px}
 .sf.ft{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--fd));mask-image:linear-gradient(to bottom,transparent 0,#000 var(--fd))}
@@ -273,7 +278,6 @@ a{color:inherit}
 #pop{position:fixed;z-index:70;width:min(420px,calc(100vw - 32px));max-height:calc(100vh - 100px);overflow:auto;background:var(--shelf);border:1px solid rgba(236,230,216,.2);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 80px rgba(0,0,0,.65)}
 #pop.atChip{top:66px;right:max(16px,calc((100vw - 1180px)/2))}
 #pop.atFab{left:52px;top:50%;transform:translateY(-50%)}
-#pop.atGame{transform-origin:top right;max-height:calc(100vh - 110px)}
 .code{font:800 40px/1 var(--display);color:var(--amber);letter-spacing:.06em}
 .members{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .members li{display:flex;align-items:center;gap:10px;padding:9px;border-radius:10px;background:var(--shelf2);min-width:0}
@@ -368,14 +372,14 @@ select option:disabled{color:#555}
 .door>span{max-height:0;opacity:0;transform:translateY(10px);overflow:hidden;transition:max-height .28s ease,opacity .25s,transform .28s}.door:hover>span,.door:focus-visible>span{max-height:70px;opacity:1;transform:translateY(0)}
 
 </style>
-<link rel="stylesheet" href="tamada.css?v=202611061221">
-<script src="tamada-session.js?v=202611061221"></script>
-<script src="tamada-core.js?v=202611061221"></script>
-<script src="orion-wheel.js?v=202611061221"></script>
-<script src="tamada.js?v=202611061221"></script>
-<link rel="stylesheet" href="orion-layout.css?v=202611061221">
-<link rel="stylesheet" href="orion-ui.css?v=202611061221">
-<script src="orion-ui.js?v=202611061221" defer></script><script src="orion-navigation.js?v=202611061221" defer></script>
+<link rel="stylesheet" href="tamada.css">
+<script src="tamada-session.js"></script>
+<script src="tamada-core.js"></script>
+<script src="orion-wheel.js"></script>
+<script src="tamada.js"></script>
+<link rel="stylesheet" href="orion-layout.css">
+<link rel="stylesheet" href="orion-ui.css">
+<script src="orion-ui.js" defer></script><script src="orion-navigation.js" defer></script>
 </head>
 <body data-orion-page="portal">
 <div class="siteHeaderGlass" aria-hidden="true"></div>
@@ -504,9 +508,9 @@ select option:disabled{color:#555}
 
 <div id="notifs" aria-live="polite"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="orion-network-config.js"></script><script src="orion-network.js"></script><script src="orion-relay.js"></script><script src="vendor/peerjs-1.5.4.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-<script src="ration-content.js?v=202611061221"></script><script src="catan-content.js?v=202611061221"></script><script src="casino-core.js?v=202611061221"></script><script src="casino-wallet.js?v=202611061221"></script><script src="casino-content.js?v=202611061221"></script><script src="orion-game-tags.js?v=202611061221"></script><script src="orion-milestones.js?v=202611061221"></script>
+<script src="ration-content.js"></script><script src="catan-content.js"></script><script src="casino-core.js"></script><script src="casino-wallet.js"></script><script src="casino-content.js"></script><script src="orion-game-tags.js"></script><script src="orion-milestones.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -825,10 +829,10 @@ function openAch(id){const a=AM[id];const u=prof.ach[id];
 $('#aClose').onclick=()=>{hideM($('#mAch'));};
 
 /* ================= lobby (PeerJS star with relay + takeover) ================= */
-const PFX='gsl1-';const popts=()=>Object.assign({debug:0},window.SVO_PEER||{});
+const PFX='gsl1-';const popts=()=>Object.assign({debug:0,pingInterval:10000},window.SVO_PEER||{});
 let myLabel='';try{myLabel=sessionStorage.getItem('gs-label')||'';}catch(e){}
 if(!/^u[a-z0-9]{6,12}$/.test(myLabel)){myLabel='u'+Math.random().toString(36).slice(2,10);try{sessionStorage.setItem('gs-label',myLabel);}catch(e){}}
-const LB={label:myLabel,code:'',hub:null,client:null,conn:null,hubConns:new Set(),hubLabel:null,connected:false,closed:true,others:new Map(),lastAll:0,migrating:false,pend:null,t0:Date.now()};
+const LB={label:myLabel,code:'',hub:null,client:null,conn:null,hubConns:new Set(),hubLabel:null,connected:false,closed:true,others:new Map(),lastAll:0,relay:null,lastPresence:0,lastRoster:0,migrating:false,pend:null,t0:Date.now()};
 let where='home',curGame=null,GP=null;
 let viewTrail=[],navReturning=false,gameReturn='vHome';
 const viewFor=w=>({home:'vHome',shelf:'vShelf',events:'vEvents',tamada:'vTamada'}[w]||'vHome');
@@ -840,27 +844,28 @@ function members(){const out=[{label:LB.label,me:true,p:myPres()}];for(const [k,
 function inLobby(){return !!LB.code;}
 function deliver(m){try{onEvent(m);}catch(e){console.warn(e);}}
 function route(m){const msg={t:'e',l:m.l,to:m.to||null,k:String(m.k||''),d:m.d};if(!msg.to||msg.to===LB.label)deliver(msg);
-  for(const c of LB.hubConns){if(!c.open)continue;if(!msg.to||c.label===msg.to){try{c.send(msg);}catch(_){}}}}
-function emit(k,d,to){const m={t:'e',l:LB.label,to:to||null,k,d};
+  for(const c of LB.hubConns){if(!c.open)continue;if(!msg.to||c.label===msg.to){try{OrionNetwork.send(c,msg);}catch(_){}}}}
+function emit(k,d,to){const m={t:'e',l:LB.label,to:to||null,k,d};if(LB.relay){LB.relay.emit(k,d,to);return;}
   if(!inLobby()){if(!to||to===LB.label)deliver(m);return;}
-  if(LB.hub)route(m);else if(LB.conn&&LB.conn.open){try{LB.conn.send(m);}catch(_){}}}
+  if(LB.hub)route(m);else if(LB.conn&&LB.conn.open){try{OrionNetwork.send(LB.conn,m);}catch(_){}}}
 function startHub(cb){
   let ok=false;const hp=new Peer(PFX+LB.code,popts());
-  hp.on('open',()=>{ok=true;LB.hub=hp;LB.hubLabel=LB.label;LB.connected=true;cb(true);});
-  hp.on('error',e=>{if(!ok){try{hp.destroy();}catch(_){}cb(false,e&&e.type==='unavailable-id'?'taken':'net');}});
+  let finished=false;const timer=setTimeout(()=>{if(!finished){finished=true;try{hp.destroy();}catch(_){}OrionNetwork.error('signaling-timeout');cb(false,'net');}},25000);hp.on('open',()=>{if(finished)return;finished=true;clearTimeout(timer);ok=true;LB.hub=hp;LB.hubLabel=LB.label;LB.connected=true;cb(true);});
+  hp.on('error',e=>{OrionNetwork.error('signaling-'+(e?.type||'error'));if(!ok&&!finished){finished=true;clearTimeout(timer);try{hp.destroy();}catch(_){}cb(false,e&&e.type==='unavailable-id'?'taken':'net');}});
   hp.on('connection',c=>{LB.hubConns.add(c);
     c.on('data',m=>{if(!m||typeof m!=='object')return;
       if(m.t==='p'&&typeof m.l==='string'&&m.l.length<40){c.label=m.l;LB.others.set(m.l,{pres:obj(m.d)||{},t:performance.now()});}
+      else if(m.t==='ping')OrionNetwork.send(c,{t:'pong',at:m.at});
       else if(m.t==='e'&&typeof m.l==='string'&&m.l===c.label)route(m);});
-    const drop=()=>{LB.hubConns.delete(c);if(c.label)LB.others.delete(c.label);};c.on('close',drop);c.on('error',drop);});
+    const drop=()=>{LB.hubConns.delete(c);if(c.label&&![...LB.hubConns].some(q=>q.open&&q.label===c.label))LB.others.delete(c.label);};c.on('close',drop);c.on('error',drop);});
   hp.on('disconnected',()=>{if(!LB.closed&&LB.hub===hp)setTimeout(()=>{try{hp.reconnect();}catch(_){}},1000);});
 }
 function ensureClient(cb){
   if(LB.client&&LB.client.open&&!LB.client.destroyed){cb(true);return;}
   if(LB.client){try{LB.client.destroy();}catch(_){}}
   const cp=new Peer(popts());LB.client=cp;let opened=false;
-  cp.on('open',()=>{opened=true;cb(true);});
-  cp.on('error',e=>{if(!opened){cb(false,'net');return;}if(e&&e.type==='peer-unavailable'&&LB.pend)LB.pend(false,'nf');});
+  let finished=false;const timer=setTimeout(()=>{if(!finished){finished=true;try{cp.destroy();}catch(_){}OrionNetwork.error('client-signaling-timeout');cb(false,'net');}},25000);cp.on('open',()=>{if(finished)return;finished=true;clearTimeout(timer);opened=true;cb(true);});
+  cp.on('error',e=>{OrionNetwork.error('peer-'+(e?.type||'error'));if(!opened){if(!finished){finished=true;clearTimeout(timer);cb(false,'net');}return;}if(e&&e.type==='peer-unavailable'&&LB.pend)LB.pend(false,'nf');});
   cp.on('disconnected',()=>{if(!LB.closed&&LB.client===cp)setTimeout(()=>{try{cp.reconnect();}catch(_){}},1000);});
 }
 function connectClient(cb){
@@ -868,12 +873,13 @@ function connectClient(cb){
     if(!ok){cb(false,err);return;}
     const c=LB.client.connect(PFX+LB.code,{reliable:true,serialization:'json'});let called=false,to=0;
     const fin=(a,b)=>{if(called)return;called=true;clearTimeout(to);if(LB.pend===fin)LB.pend=null;if(!a){try{c.close();}catch(_){}}cb(a,b);};
-    LB.pend=fin;to=setTimeout(()=>fin(false,'timeout'),9000);
+    LB.pend=fin;to=setTimeout(()=>fin(false,'timeout'),25000);
     c.on('open',()=>{LB.conn=c;LB.connected=true;LB.lastAll=performance.now();fin(true);});
     c.on('data',m=>{if(!m||typeof m!=='object')return;
       if(m.t==='all'&&obj(m.ps)){LB.lastAll=performance.now();LB.hubLabel=str(m.h);const seen=new Set();
         for(const k in m.ps){if(k===LB.label||k.length>40)continue;LB.others.set(k,{pres:obj(m.ps[k])||{},t:performance.now()});seen.add(k);}
         for(const k of [...LB.others.keys()])if(!seen.has(k))LB.others.delete(k);}
+      else if(m.t==='pong')OrionNetwork.stats.rtt=Math.round(performance.now()-m.at);
       else if(m.t==='e')deliver(m);});
     c.on('close',()=>{if(LB.conn===c){LB.conn=null;LB.connected=false;if(!LB.closed)migrate();}});
     c.on('error',()=>{});
@@ -891,23 +897,24 @@ function migrate(){
 }
 setInterval(()=>{
   if(!inLobby())return;
-  if(LB.hub){const now=performance.now();for(const [k,v] of LB.others)if(now-v.t>8000)LB.others.delete(k);
+  if(LB.relay){if(performance.now()-LB.lastPresence>1000){LB.lastPresence=performance.now();LB.relay.presence(myPres());}return;}
+  if(LB.hub){const now=performance.now();if(now-LB.lastRoster<1000)return;LB.lastRoster=now;for(const [k,v] of LB.others)if(now-v.t>45000)LB.others.delete(k);
     const ps={};ps[LB.label]=myPres();for(const [k,v] of LB.others)ps[k]=v.pres;const msg={t:'all',h:LB.label,ps};
-    for(const c of LB.hubConns)if(c.open){try{c.send(msg);}catch(_){}}}
+    for(const c of LB.hubConns)if(c.open){try{OrionNetwork.send(c,msg);}catch(_){}}}
   else if(LB.conn){
-    if(performance.now()-LB.lastAll>4000){const c=LB.conn;LB.conn=null;LB.connected=false;try{c.close();}catch(_){}migrate();}
-    else if(LB.conn.open){try{LB.conn.send({t:'p',l:LB.label,d:myPres()});}catch(_){}}}
+    if(performance.now()-LB.lastAll>45000){const c=LB.conn;LB.conn=null;LB.connected=false;try{c.close();}catch(_){}migrate();}
+    else if(LB.conn.open&&performance.now()-LB.lastPresence>1000){LB.lastPresence=performance.now();try{OrionNetwork.send(LB.conn,{t:'ping',at:performance.now()});OrionNetwork.send(LB.conn,{t:'p',l:LB.label,d:myPres()});}catch(_){}}}
 },100);
 function joinLobby(code,create){
   return new Promise(resolve=>{
-    if(typeof window.Peer!=='function'){resolve('lib');return;}
+    if(!window.ORION_NETWORK?.relayUrl&&typeof window.Peer!=='function'){resolve('lib');return;}
     leaveLobby(true);resumeLobby=code;LB.code=code;LB.closed=false;LB.t0=Date.now();
     const done=(ok,err)=>{if(ok){try{sessionStorage.setItem('gs-lobby',code);}catch(e){}resolve('ok');}else{leaveLobby(true);resumeLobby='';resolve(err||'net');}};
-    if(create)startHub(done);else connectClient(done);
+    if(window.ORION_NETWORK?.relayUrl){LB.relay=new OrionRelay({url:ORION_NETWORK.relayUrl,code,create,label:LB.label,presence:myPres(),event:deliver,roster:m=>{LB.hubLabel=m.host;LB.others.clear();for(const p of m.members)if(p.label!==LB.label)LB.others.set(p.label,{pres:p.presence,t:performance.now()});},status:status=>{LB.connected=status==='online';OrionNetwork.stats.status=status;}});LB.relay.connect().then(()=>done(true),e=>done(false,e.message));}else if(create)startHub(done);else connectClient(done);
   });
 }
 function leaveLobby(silent){
-  LB.closed=true;for(const c of LB.hubConns){try{c.close();}catch(_){}}LB.hubConns.clear();
+  LB.closed=true;if(LB.relay){LB.relay.close();LB.relay=null;}for(const c of LB.hubConns){try{c.close();}catch(_){}}LB.hubConns.clear();
   try{LB.conn&&LB.conn.close();}catch(_){}try{LB.client&&LB.client.destroy();}catch(_){}try{LB.hub&&LB.hub.destroy();}catch(_){}
   LB.conn=null;LB.client=null;LB.hub=null;LB.hubLabel=null;LB.connected=false;LB.others.clear();LB.code='';LB.migrating=false;
   if(!silent){resumeLobby='';tamadaSession?.clear();try{sessionStorage.removeItem('gs-lobby');}catch(e){}}
@@ -1163,8 +1170,7 @@ $('#vClose').onclick=()=>{hideM($('#mView'));};
 
 /* ================= lobby popover ================= */
 let popSig='';
-let gamePopAt=null,gameHeader=false;
-function openPop(){const p=$('#pop');const atGame=!!curGame&&gameHeader&&!!gamePopAt;p.classList.toggle('atGame',atGame);p.classList.toggle('atFab',!!curGame&&!atGame);p.classList.toggle('atChip',!curGame);if(atGame){p.style.top=Math.round(gamePopAt.top+10)+'px';p.style.right=Math.max(16,Math.round(innerWidth-gamePopAt.right))+'px';}else{p.style.top='';p.style.right='';}showM(p);popSig='';renderPop();
+function openPop(){const p=$('#pop');p.classList.toggle('atFab',!!curGame);p.classList.toggle('atChip',!curGame);showM(p);popSig='';renderPop();
   $('#lNote').textContent=typeof window.Peer==='function'?'':T('net_lib');$('#lNote').classList.toggle('err',typeof window.Peer!=='function');}
 function closePop(){hideM($('#pop'));}
 function togglePop(){const p=$('#pop');if(p.hidden||p.classList.contains('closing'))openPop();else closePop();}
@@ -1209,11 +1215,11 @@ $('#bEdit').onclick=()=>openProfile(false);
 
 /* ================= games in a frame ================= */
 const frame=$('#frame');const frameWin=()=>frame.contentWindow;
-function openGame(id){if(!GM[id]||tamadaSession?.locked())return;if(tamadaSession?.isHost()&&tamadaSession.control?.phase==='session')tamadaSession.end();closePop();if(!curGame)gameReturn=viewFor(where);curGame=id;GP=null;where=id;$('#frameWrap').hidden=false;gameHeader=false;gamePopAt=null;$('#fab').hidden=false;if(window.OrionLoader)OrionLoader.loadFrame(frame,{url:GM[id].file,title:gname(id)});else frame.src=GM[id].file;document.body.style.overflow='hidden';renderChip();setTimeout(()=>{try{frame.focus();}catch(e){}},300);}
+function openGame(id){if(!GM[id]||tamadaSession?.locked())return;if(tamadaSession?.isHost()&&tamadaSession.control?.phase==='session')tamadaSession.end();closePop();if(!curGame)gameReturn=viewFor(where);curGame=id;GP=null;where=id;$('#frameWrap').hidden=false;$('#fab').hidden=false;if(window.OrionLoader)OrionLoader.loadFrame(frame,{url:GM[id].file,title:gname(id)});else frame.src=GM[id].file;document.body.style.overflow='hidden';renderChip();setTimeout(()=>{try{frame.focus();}catch(e){}},300);}
 function closeGame(keepView){curGame=null;GP=null;if(window.OrionLoader)OrionLoader.cancelFrame();frame.src='about:blank';$('#frameWrap').hidden=true;$('#fab').hidden=true;closePop();document.body.style.overflow='';if(!keepView){navReturning=true;show(gameReturn,true);navReturning=false;if(gameReturn==='vTamada')renderTam();}}
 function peersForGame(){return members().map(m=>({label:m.label,name:clean(m.p.n),chips:num(m.p.c),w:str(m.p.w),ig:inGame(m.label)?1:0,gp:m.me?null:(m.p.gk===str(m.p.w)?obj(m.p.gp):null)}));}
-function hello(){const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'hello',me:LB.label,name:prof.name,lang:cfg.lang,chips:prof.chips,casinoHistory:curGame==='casino'?(prof.casinoLedger||[]).slice(0,6).map(e=>e.round):[],inLobby:inLobby()&&LB.connected,code:LB.code,hub:LB.hubLabel,peers:peersForGame()},'*');}
-setInterval(()=>{if(!curGame)return;const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'peers',me:LB.label,inLobby:inLobby()&&LB.connected,code:LB.code,hub:LB.hubLabel,peers:peersForGame()},'*');},100);
+function hello(){const w=frameWin();if(!w)return;w.postMessage({svo:1,type:'hello',me:LB.label,name:prof.name,lang:cfg.lang,chips:prof.chips,casinoHistory:curGame==='casino'?(prof.casinoLedger||[]).slice(0,6).map(e=>e.round):[],inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},'*');}
+let lastFrameRoster='';setInterval(()=>{if(!curGame)return;const w=frameWin();if(!w)return;const m={svo:1,type:'peers',me:LB.label,inLobby:inLobby()&&LB.connected,hub:LB.hubLabel,peers:peersForGame()},sig=curGame+JSON.stringify(m);if(sig!==lastFrameRoster){lastFrameRoster=sig;w.postMessage(m,'*');}},500);
 function ownEvent(ev,x){if(ev==='carcassonne.score100')unlock('carcassonne_hundred');if(['chess.fin','battleship.fin','carcassonne.fin','catan.fin'].includes(ev)){const game=ev.split('.')[0];unlock(game+'_first');if(x&&x.win)unlock(game+'_win');}const a=EV_ACH[ev]||OrionMilestones.achievementEvents[ev]||OrionCasinoContent.achievementEvents[ev]||OrionCatanContent.achievementEvents[ev]||OrionRationContent.achievementEvents[ev];if(a)unlock(a);if(ev==='tetris.fin'){unlock('t_first');if(x&&x.lines>=20)unlock('t_twenty');}if(ev==='codewords.win')unlock('cw_win');
   if(ev==='runes.castle'&&x){const k=str(x.adv,12);const id={knight:'r_knight',rogue:'r_rogue',mage:'r_mage'}[k];if(id){unlock(id);if(!Array.isArray(prof.runesDone))prof.runesDone=[];if(!prof.runesDone.includes(k))prof.runesDone.push(k);saveProf();if(prof.runesDone.length>=3)unlock('r_all');}}
   if(ev==='runes.fin'&&x&&num(x.gold)>=500)unlock('r_gold');
@@ -1249,9 +1255,7 @@ addEventListener('message',e=>{
       const w=frameWin();if(w)w.postMessage({svo:1,type:'stake',id:str(m.id),ok},'*');break;}
     case 'payout':{const amt=Math.max(0,Math.min(1e6,Math.floor(num(m.amt))));const st=Math.max(0,Math.floor(num(m.stake)));if(!amt)break;const from=prof.chips;prof.chips+=amt;saveProf();
       notify({icon:amt>st?'fa-sack-dollar':'fa-coins',color:amt>st?'var(--win)':'var(--amber)',title:T('payout_t'),text:gname(curGame),chips:{from,to:prof.chips},ttl:6000});if(amt>st)boom(amt>=1000);if(amt>=1000)unlock('r_rich');checkWealth();renderHome();break;}
-    case 'lobby':{const r=obj(m.rect);gamePopAt=r?{top:num(r.bottom),right:num(r.right)}:null;togglePop();break;}
-    case 'lobbyDismiss':if(!$('#pop').hidden)closePop();break;
-    case 'header':gameHeader=!!m.visible;$('#fab').hidden=!curGame||gameHeader;break;
+    case 'lobby':openPop();break;
     case 'exit':closeGame();break;
     case 'lang':if(m.lang==='ru'||m.lang==='en'){cfg.lang=m.lang;applyLang();}break;
   }
@@ -1269,7 +1273,7 @@ function applyLang(){
 }
 $('#lRu').onclick=()=>setLang('ru');$('#lEn').onclick=()=>setLang('en');
 setTimeout(segAll,60);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(segAll);
-setInterval(()=>{renderChip();renderPop();syncTamadaSession();tamadaUI.tick();},500);
+setInterval(()=>{OrionNetwork.stats.status=LB.connected?'online':inLobby()?'reconnecting':'offline';OrionNetwork.stats.host=!!LB.hub;OrionNetwork.stats.background=document.hidden;renderChip();renderPop();syncTamadaSession();tamadaUI.tick();},500);
 
 applyLang();show('vHome');if(prof)setTab(pTab);
 if(tamadaSession.control?.phase==='session'){tamadaSessionChanged(tamadaSession.control,null);if(tamadaSession.snapshot)tamadaUI.hydrate(tamadaSession.snapshot);}

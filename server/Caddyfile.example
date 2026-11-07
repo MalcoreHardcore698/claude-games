@@ -1,0 +1,13 @@
+# Replace this domain and serve ORION from /srv/orion.
+your-domain.example {
+ handle /relay {
+  reverse_proxy 127.0.0.1:8080
+ }
+ handle /health {
+  reverse_proxy 127.0.0.1:8080
+ }
+ handle {
+  root * /srv/orion
+  file_server
+ }
+}
