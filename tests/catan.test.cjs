@@ -44,11 +44,13 @@ test('the journal keeps the first event and every roll through a long match',()=
  s.settings.robber=false;
  for(let i=0;i<30;i++){
   const {l}=s.seats[s.turn];
-  assert.ok(C.action(s,l,{type:'roll'},i));
-  assert.ok(C.action(s,l,{type:'end'},i));
+  const rollAt=100_000+i*1_000;
+  assert.ok(C.action(s,l,{type:'roll'},rollAt));
+  assert.ok(C.action(s,l,{type:'end'},rollAt+100));
  }
  const journal=C.view(s,s.seats[1].l).log;
  assert.equal(journal[0].key,'setup');
- assert.equal(journal.filter(entry=>entry.key==='dice').length,30);
+ const rolls=journal.filter(entry=>entry.key==='dice');
+ assert.deepEqual(rolls.map(entry=>entry.at),Array.from({length:30},(_,i)=>100_000+i*1_000));
  assert.deepEqual(journal.map(entry=>entry.serial),Array.from({length:journal.length},(_,i)=>i+1));
 });

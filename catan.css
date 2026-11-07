@@ -30,19 +30,20 @@ body[data-orion-game="catan"]{--bg:#e5e8db;--panel:#f5f0e4f0;--paper:#384e45;--m
 .outpostAction{position:absolute;z-index:1;transform:translate(-50%,-50%);padding:4px 9px;border-radius:20px;border:1px solid #c6ceb4;background:#f8f3e4eb;color:#50644e;font:800 10px var(--game-body);white-space:nowrap;box-shadow:0 2px 6px #375d6030}
 .outpostAction:hover:not(:disabled),.outpostAction[data-offer]{background:#fff7d8;border-color:#d8b674;color:#62502d}
 .outpostAction:disabled{display:none}
-.leftDock{position:absolute;left:14px;bottom:14px;z-index:2;width:344px;display:grid;gap:8px}
+.leftDock{position:absolute;left:14px;bottom:14px;z-index:2;width:364px;display:grid;gap:8px}
 .islandJournal{position:relative;min-width:0}
-.journalViewport{max-height:78px;overflow:hidden;scrollbar-width:none;overscroll-behavior:contain;transition:max-height .22s ease}
+.journalViewport{max-height:78px;padding-right:14px;overflow:hidden;scrollbar-width:none;overscroll-behavior:contain;transition:max-height .22s ease}
 .journalViewport::-webkit-scrollbar{display:none}
-.islandJournal[data-expanded] .journalViewport{max-height:min(32dvh,256px);overflow:auto;padding-right:14px}
+.islandJournal[data-expanded] .journalViewport{max-height:min(25dvh,216px);overflow:auto}
 .islandJournal .journalToggle,.islandJournal .journalToggle:is(:hover,:active){display:block;width:100%;padding:4px 5px;border:0;border-radius:0;background:none;box-shadow:none;translate:none;text-align:left;color:#fffdf2}
 .journalToggle:focus-visible .logEntry:last-child{text-decoration:underline;text-underline-offset:3px}
 #logs{display:block}
-#logs .logEntry{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:800 11px/1.55 var(--game-body);paint-order:stroke fill;-webkit-text-stroke:.8px #304b47;text-shadow:0 1px 2px #24443f}
+#logs .logEntry{display:grid;grid-template-columns:52px minmax(0,1fr);gap:7px;align-items:baseline;font:800 11px/1.55 var(--game-body);paint-order:stroke fill;-webkit-text-stroke:.8px #304b47;text-shadow:0 1px 2px #24443f}
+.logTime{font:600 10px var(--ui-mono);font-variant-numeric:tabular-nums;color:#ecf5e8;white-space:nowrap}
+.logMessage{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .islandJournal:not([data-expanded]) .logEntry:nth-last-child(4){opacity:.36}
 .islandJournal:not([data-expanded]) .logEntry:nth-last-child(3){opacity:.56}
 .islandJournal:not([data-expanded]) .logEntry:nth-last-child(2){opacity:.76}
-.islandJournal[data-expanded] .logEntry{white-space:normal;overflow-wrap:anywhere;padding:2px 0}
 .journalScroll{position:absolute;top:3px;right:1px;width:10px;height:calc(100% - 6px);margin:0;writing-mode:vertical-lr;direction:ltr;appearance:none;background:none;cursor:pointer}
 .journalScroll::-webkit-slider-runnable-track{width:4px;height:100%;border-radius:6px;background:#294a4870}
 .journalScroll::-moz-range-track{width:4px;height:100%;border-radius:6px;background:#294a4870}
@@ -51,20 +52,19 @@ body[data-orion-game="catan"]{--bg:#e5e8db;--panel:#f5f0e4f0;--paper:#384e45;--m
 .journalScroll:focus-visible::-webkit-slider-thumb{background:#fff9dd}
 .journalScroll:focus-visible::-moz-range-thumb{background:#fff9dd}
 .buildDock{padding:9px}
-.dockHeading{margin:0 3px 6px}
-.dockHeading button{padding:2px 6px;background:#eaf0e1;border:1px solid #bfcbb1;color:#536b51;border-radius:7px;font-size:9px}
-.buildBar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
-.buildBar button{min-width:0;padding:5px 6px;display:flex;align-items:center;gap:7px;border-radius:9px;background:#fffaef;border-color:#b7c5a8;color:#46634d;text-align:left;font:800 10px/1.15 var(--game-body)}
+.buildBar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.buildBar button{min-width:0;min-height:46px;padding:7px 8px;display:flex;align-items:center;gap:7px;border-radius:9px;background:#fffaef;border-color:#b7c5a8;color:#46634d;text-align:left;font:800 11.5px/1.2 var(--game-body)}
 .buildBar button.selected{background:#dfead6;border-color:#7e9e76;box-shadow:inset 0 2px 4px #5879511a}
 .buildBar button:disabled{opacity:.48}
-.buildBar button svg{width:23px;height:23px;padding:3px;flex:none;border-radius:6px;background:#e6ecda;color:#507254}
+.buildBar button svg{width:26px;height:26px;padding:4px;flex:none;border-radius:6px;background:#e6ecda;color:#507254}
 .buildCost{display:block;margin-top:2px;font-size:10px;white-space:nowrap}
+.buildBar button[data-build="dev"] .buildCost{font-weight:600;color:#677d61}
 .turnDock{width:220px;padding:12px 14px 14px;text-align:center;background:linear-gradient(155deg,#fff8e8,#ecf1df);border-color:#bbcbb1}
 .turnRound{font:600 10px var(--ui-mono);letter-spacing:.12em;text-transform:uppercase;color:#6a7d62}
 .turnDock strong{display:block;margin:5px 0 10px;font:700 16px var(--game-display);text-transform:uppercase;color:#40634c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .turnDock button{width:100%;min-height:44px;font:800 13px var(--game-body)}
 .turnDock button:disabled{opacity:.55}
-.drawerSlot{min-height:0;min-width:0;width:100%;display:flex;align-items:center;justify-content:flex-end}
+.drawerSlot{min-height:0;min-width:0;width:100%;display:flex;align-items:flex-start;justify-content:flex-end}
 .catanDrawer{width:100%;max-height:100%;min-height:0;display:flex;flex-direction:column;visibility:hidden;transform:translateX(calc(100% + 18px));transition:transform .24s ease,visibility 0s .24s;background:#f9f5e9}
 .catanDrawer[data-open]{visibility:visible;transform:translateX(0);transition:transform .24s cubic-bezier(.22,.74,.23,1);pointer-events:auto}
 .drawerHeader{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 11px 8px 13px;border-bottom:1px solid #e3e5d5}
@@ -93,6 +93,10 @@ body[data-orion-game="catan"]{--bg:#e5e8db;--panel:#f5f0e4f0;--paper:#384e45;--m
 .drawerBody .devItem>span{font-size:16px}
 .drawerBody .devItem b{font-size:11px}
 .drawerBody .devItem p{font-size:10px;margin:2px 0}
+.devPurchase{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:8px;border-bottom:1px solid #dce2d1}
+.devPurchase .buildCost{margin:0}
+#devHand>p{margin:8px 0}
+.devItem .newDev{display:block;font-size:10px;color:#687e62}
 .catanDialog{width:min(730px,calc(100vw - 50px));max-height:calc(100dvh - 65px);overflow:auto;background:#f8f2e4}.catanDialog h2{font:700 24px var(--game-display);color:#4f715a;margin:0 0 20px}.catanDialog h3{font-size:15px;margin:23px 0 8px}.catanDialog p,.catanDialog li{font-size:13px;color:#7c8b71;line-height:1.9}.catanDialog .dialogActions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}.catanDialog .fieldRow{display:grid;grid-template-columns:1fr 75px 20px 1fr 75px;gap:9px;align-items:center;margin:15px 0}.catanDialog input[type=number]{width:100%;border:1px solid #bcc8ad;border-radius:9px;background:#fffbf3;padding:9px;color:#557052;font:700 15px var(--game-body)}.resourcePicker{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.pickResource{padding:12px;border:1px solid #b6c4a5;border-radius:12px;text-align:center;background:#fffaf0}.pickResource>span{font-size:24px;display:block}.pickResource small{display:block;margin:5px;font-size:10px}.devItem{border:1px solid #c0caaf;border-radius:14px;padding:14px;margin-bottom:10px;background:#fffaf0;display:flex;align-items:center;gap:13px}.devItem>span{font-size:26px}.devItem>div{flex:1}.devItem b{font-size:13px}.devItem p{font-size:11px;line-height:1.5;margin:5px 0}.devItem button{font-size:11px;padding:8px 11px}.sceneError{position:absolute;inset:40%;width:70%;left:15%;font-size:14px;text-align:center;color:#45685d}.resultPanel{margin:auto;max-width:650px}.resultPanel h1{font-size:40px;color:#668a65}.boardResultList>div{border-color:#bcc8b144;background:#f1f0e2;color:#697e5e}.notice{background:#f9f3e2;color:#4f6d55;border:1px solid #b5c6a5}body[data-orion-game="catan"] .gamePageHead::before{background:linear-gradient(#eceddca6,transparent)}body[data-orion-game="catan"] .pageHeaderActions :is(.seg,.lang)>button[aria-pressed=true]{background:#607e64!important;color:#fff9e9!important;border-color:#607e64!important}
 @keyframes catanGain{from{opacity:0;transform:translate(-50%,-5px)}22%,84%{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,3px)}}@media(max-height:790px){
  .islandStage{height:calc(100dvh - 92px)}
@@ -100,7 +104,7 @@ body[data-orion-game="catan"]{--bg:#e5e8db;--panel:#f5f0e4f0;--paper:#384e45;--m
  .catanSeat{min-height:25px;padding-block:2px}
  .leftDock{gap:5px}
  .buildDock{padding-block:6px}
- .buildBar button{padding-block:3px}
+ .buildBar button{padding-block:5px}
  .turnDock{padding:9px 11px 12px}
 }
 @media(max-width:1110px){
