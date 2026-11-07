@@ -6,8 +6,24 @@ const T=THREE,scene=new T.Scene(),background=0x8dbec0;scene.background=new T.Col
 try{renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});}catch(_){renderer=new CatanSoftware3D();}
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.outputEncoding=T.sRGBEncoding;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.setClearColor(background);host.appendChild(renderer.domElement);
 const camera=new T.OrthographicCamera(-8,8,6,-6,.1,100),look=new T.Vector3(0,0,0),ray=new T.Raycaster(),pointer=new T.Vector2(),boardGroup=new T.Group(),pieces=new T.Group(),ghosts=new T.Group(),flora=[],bounces=[],boats=[];scene.add(boardGroup,pieces,ghosts);pieces.userData.softwareLayer=1;ghosts.userData.softwareLayer=2;
-scene.add(new T.HemisphereLight(0xfff3db,0x8ca7ad,.9));const sun=new T.DirectionalLight(0xffefcf,1.35);sun.position.set(-7,13,8);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-10,right:10,top:10,bottom:-10,near:.5,far:35});sun.shadow.normalBias=.035;sun.shadow.bias=-.0002;sun.shadow.radius=4;scene.add(sun);const fill=new T.DirectionalLight(0xc9e6eb,.35);fill.position.set(8,5,-5);scene.add(fill);
-const mat=(color,roughness=.85)=>new T.MeshStandardMaterial({color,roughness,flatShading:true}),mats={wood:mat(0x8bb48a),brick:mat(0xc9947b),sheep:mat(0xb8ca8c),wheat:mat(0xdec78b),ore:mat(0xa6a7b3),desert:mat(0xe5d1ad),soil:mat(0xae9477),pine:mat(0x588d76),pine2:mat(0x74a18a),trunk:mat(0x8c7157),wool:mat(0xfff5df),sheepFace:mat(0x78766e),roof:mat(0xad7360),cream:mat(0xffe7b3),road:mat(0x836a52),stone:mat(0xa4a0b2),gold:mat(0xe5bc6c),clay:mat(0xba7a61),water:mat(0x7dbbbd,.4)};
+// The palette is authored in sRGB. Three r128 lights in linear space, while
+// the Canvas fallback uses the palette directly.
+function palette(color){
+ const value=new T.Color(color);
+ return renderer.isSoftware?value:value.convertSRGBToLinear();
+}
+const sky=new T.HemisphereLight(palette(0xfbfdff),palette(0xbacbcd),.58);
+const sun=new T.DirectionalLight(palette(0xfff5e5),.48);
+sun.position.set(-7,13,8);
+sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);
+Object.assign(sun.shadow.camera,{left:-10,right:10,top:10,bottom:-10,near:.5,far:35});
+sun.shadow.normalBias=.035;sun.shadow.bias=-.0002;sun.shadow.radius=4;
+const fill=new T.DirectionalLight(palette(0xd8ecf4),.14);
+fill.position.set(8,5,-5);
+scene.add(sky,sun,fill);
+const flat=(color,options)=>new T.MeshBasicMaterial({color:palette(color),...options});
+const mat=(color,roughness=.85)=>new T.MeshStandardMaterial({color:palette(color),roughness,flatShading:true}),mats={wood:mat(0x8bb48a),brick:mat(0xc9947b),sheep:mat(0xb8ca8c),wheat:mat(0xdec78b),ore:mat(0xa6a7b3),desert:mat(0xe5d1ad),soil:mat(0xae9477),pine:mat(0x588d76),pine2:mat(0x74a18a),trunk:mat(0x8c7157),wool:mat(0xfff5df),sheepFace:mat(0x78766e),roof:mat(0xad7360),cream:mat(0xffe7b3),road:mat(0x836a52),stone:mat(0xa4a0b2),gold:mat(0xe5bc6c),clay:mat(0xba7a61),water:mat(0x7dbbbd,.4)};
 function mesh(g,m,parent=boardGroup,x=0,y=0,z=0){const o=new T.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;}
 function box(parent,x,y,z,w,h,d,m){return mesh(new T.BoxGeometry(w,h,d),m,parent,x,y,z);}
 function cone(parent,x,y,z,r,h,m,n=7){return mesh(new T.ConeGeometry(r,h,n),m,parent,x,y,z);}
@@ -18,7 +34,7 @@ function sheep(parent,x,z,angle){const g=new T.Group();g.position.set(x,.25,z);g
 function house(parent,color,city=false){const g=new T.Group(),body=mat(color),roof=mat(new T.Color(color).multiplyScalar(.63));box(g,0,.19,0,.3,.28,.26,body);const r=cone(g,0,.4,0,.27,.23,roof,4);r.rotation.y=Math.PI/4;box(g,0,.17,.133,.065,.13,.012,mats.trunk);box(g,-.09,.25,.134,.05,.055,.012,mats.cream);box(g,.09,.25,.134,.05,.055,.012,mats.cream);box(g,.08,.41,-.05,.045,.18,.045,roof);if(city){const tower=box(g,.2,.29,-.08,.2,.5,.2,body);cone(g,.2,.62,-.08,.17,.2,roof,4).rotation.y=Math.PI/4;}parent.add(g);return g;}
 const weatherTime={value:0};for(const material of Object.values(mats)){if(material===mats.water)continue;material.onBeforeCompile=shader=>{shader.uniforms.catanTime=weatherTime;shader.vertexShader='varying vec3 vCatanWorld;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvCatanWorld=(modelMatrix*vec4(position,1.0)).xyz;');shader.fragmentShader='uniform float catanTime; varying vec3 vCatanWorld;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <dithering_fragment>','float cloud=sin(vCatanWorld.x*.43+catanTime*.055)*cos(vCatanWorld.z*.37+catanTime*.033)+.35*sin(vCatanWorld.x*.71+vCatanWorld.z*.29-catanTime*.04); gl_FragColor.rgb*=1.0-.22*smoothstep(.12,.8,cloud);\n#include <dithering_fragment>');};}
 const weatherGroup=new T.Group(),foam=[],wind=[];scene.add(weatherGroup);let islandRadius=5.8,homeZoom=7.1;
-const water=mesh(new T.PlaneGeometry(70,70,renderer.isSoftware?24:80,renderer.isSoftware?24:80),renderer.isSoftware?new T.MeshBasicMaterial({color:0x7dbbbd}):mats.water,scene,0,-.65,0);water.userData.softwareLayer=-3;water.rotation.x=-Math.PI/2;water.castShadow=false;const waterBase=water.geometry.attributes.position.array.slice();
+const water=mesh(new T.PlaneGeometry(70,70,renderer.isSoftware?24:80,renderer.isSoftware?24:80),renderer.isSoftware?flat(0x7dbbbd):mats.water,scene,0,-.65,0);water.userData.softwareLayer=-3;water.rotation.x=-Math.PI/2;water.castShadow=false;const waterBase=water.geometry.attributes.position.array.slice();
 const sand=mesh(new T.CylinderGeometry(5.8,6.15,.28,72),mat(0xdac9a5),scene,0,-.48,0);sand.userData.softwareLayer=-2;sand.receiveShadow=true;const islandBase=mesh(new T.CylinderGeometry(5.55,5.8,.32,72),mat(0xb3b895),scene,0,-.27,0);islandBase.userData.softwareLayer=-1;
 const homeAngle=.72;
 let state=null,boardID='',pieceSignature='',selection={kind:'',ids:[]},targetAngle=homeAngle,angle=homeAngle,zoom=7.1,targetZoom=7.1,hover=-1,drag=null;
@@ -28,7 +44,7 @@ scene.add(incomeHighlights,diceIsland);
 diceIsland.visible=false;
 diceIsland.rotation.y=homeAngle;
 
-const diceFoam=new T.MeshBasicMaterial({color:0xd4efdf,side:T.DoubleSide,transparent:true,opacity:.36,depthWrite:false});
+const diceFoam=flat(0xd4efdf,{side:T.DoubleSide,transparent:true,opacity:.36,depthWrite:false});
 const coast=mesh(new T.RingGeometry(1.48,1.55,24),diceFoam,diceIsland,0,-.45,0);
 coast.rotation.x=-Math.PI/2;
 coast.castShadow=false;
@@ -95,9 +111,9 @@ diceIsland.visible=true;
 const aspect=Math.max(1,host.clientWidth)/Math.max(1,host.clientHeight);
 homeZoom=Math.max(7.1*scale,(diceDistance+1.72)/aspect);
 zoom=targetZoom=homeZoom;resize();
-const weatherRand=rng(9301);for(let i=0;i<70;i++){const a=weatherRand()*Math.PI*2,r=islandRadius+.6+weatherRand()*9,m=new T.MeshBasicMaterial({color:i%3?0xd2efdf:0xf8f6dd,transparent:true,opacity:.2,side:T.DoubleSide,depthWrite:false}),o=mesh(new T.RingGeometry(.3,.32,12,1,0,Math.PI*(.3+weatherRand()*.35)),m,weatherGroup,Math.cos(a)*r,-.52,Math.sin(a)*r);o.rotation.x=-Math.PI/2;o.rotation.z=a;const len=.7+weatherRand()*1.4;o.scale.set(len,.5,1);o.castShadow=false;o.userData.softwareLayer=-2.5;foam.push({o,x:o.position.x,z:o.position.z,phase:weatherRand()*7});}
-for(const edge of s.board.edges.filter(e=>e.tiles.length===1)){const a=s.board.nodes[edge.a],b=s.board.nodes[edge.b],mx=(a.x+b.x)/2,mz=(a.z+b.z)/2,len=Math.hypot(mx,mz),o=mesh(new T.RingGeometry(.27,.3,8,1,0,Math.PI),new T.MeshBasicMaterial({color:0xfff5dd,transparent:true,opacity:.38,side:T.DoubleSide,depthWrite:false}),weatherGroup,mx/len*(islandRadius+.12),-.48,mz/len*(islandRadius+.12));o.rotation.x=-Math.PI/2;o.rotation.z=-Math.atan2(mz,mx);o.scale.set(1.7,.55,1);o.castShadow=false;o.userData.softwareLayer=-2.5;foam.push({o,x:o.position.x,z:o.position.z,phase:weatherRand()*7});}
-for(let i=0;i<14;i++){const o=mesh(new T.SphereGeometry(.025,6,4),new T.MeshBasicMaterial({color:0xfff7d8,transparent:true,opacity:.25,depthWrite:false}),weatherGroup,0,0,0);o.scale.set(9,.3,.5);o.castShadow=false;wind.push({o,phase:weatherRand(),z:(weatherRand()-.5)*islandRadius*2,y:.5+weatherRand()*1.6});}
+const weatherRand=rng(9301);for(let i=0;i<70;i++){const a=weatherRand()*Math.PI*2,r=islandRadius+.6+weatherRand()*9,m=flat(i%3?0xd2efdf:0xf8f6dd,{transparent:true,opacity:.2,side:T.DoubleSide,depthWrite:false}),o=mesh(new T.RingGeometry(.3,.32,12,1,0,Math.PI*(.3+weatherRand()*.35)),m,weatherGroup,Math.cos(a)*r,-.52,Math.sin(a)*r);o.rotation.x=-Math.PI/2;o.rotation.z=a;const len=.7+weatherRand()*1.4;o.scale.set(len,.5,1);o.castShadow=false;o.userData.softwareLayer=-2.5;foam.push({o,x:o.position.x,z:o.position.z,phase:weatherRand()*7});}
+for(const edge of s.board.edges.filter(e=>e.tiles.length===1)){const a=s.board.nodes[edge.a],b=s.board.nodes[edge.b],mx=(a.x+b.x)/2,mz=(a.z+b.z)/2,len=Math.hypot(mx,mz),o=mesh(new T.RingGeometry(.27,.3,8,1,0,Math.PI),flat(0xfff5dd,{transparent:true,opacity:.38,side:T.DoubleSide,depthWrite:false}),weatherGroup,mx/len*(islandRadius+.12),-.48,mz/len*(islandRadius+.12));o.rotation.x=-Math.PI/2;o.rotation.z=-Math.atan2(mz,mx);o.scale.set(1.7,.55,1);o.castShadow=false;o.userData.softwareLayer=-2.5;foam.push({o,x:o.position.x,z:o.position.z,phase:weatherRand()*7});}
+for(let i=0;i<14;i++){const o=mesh(new T.SphereGeometry(.025,6,4),flat(0xfff7d8,{transparent:true,opacity:.25,depthWrite:false}),weatherGroup,0,0,0);o.scale.set(9,.3,.5);o.castShadow=false;wind.push({o,phase:weatherRand(),z:(weatherRand()-.5)*islandRadius*2,y:.5+weatherRand()*1.6});}
 clearGroup(boardGroup);for(const b of boats){scene.remove(b);b.traverse(o=>o.geometry?.dispose());}flora.length=0;boats.length=0;tileMeshes.length=0;const rnd=rng(8371);for(const t of s.board.tiles){const parent=new T.Group();parent.position.set(t.x,0,t.z);boardGroup.add(parent);const tile=mesh(new T.CylinderGeometry(.965,1,.25,6),mats[t.type],parent,0,0,0);tile.userData.tile=t.id;tileMeshes.push(tile);mesh(new T.CylinderGeometry(.97,.97,.035,6),mats.soil,parent,0,-.145,0);
  const spots=Array.from({length:9},(_,i)=>{const a=i*.8+1.3,r=.4+rnd()*.24;return{x:Math.cos(a)*r,z:Math.sin(a)*r};});
  if(t.type==='wood')spots.slice(0,renderer.isSoftware?5:7).forEach(p=>tree(parent,p.x,p.z,rnd()));
@@ -114,14 +130,14 @@ function updatePieces(s){clearGroup(pieces);bounces.length=0;for(const e of s.bo
  for(const n of s.board.nodes)if(n.owner){const p=s.seats.find(p=>p.l===n.owner),h=house(pieces,OrionCatan.COLORS[p.color],n.city);h.position.set(n.x,.14,n.z);h.rotation.y=(n.id%3)*Math.PI/3;bounces.push({o:h,t:performance.now()});}
  const rt=s.board.tiles[s.robber],robber=new T.Group();robber.position.set(rt.x+.28,.26,rt.z+.05);pieces.add(robber);robber.visible=s.settings.robber!==false;cone(robber,0,.15,0,.12,.3,mat(0x62647c));sphere(robber,0,.35,0,.09,mat(0x62647c));sphere(robber,-.1,.12,.05,.07,mats.trunk);
 }
-function select(next){selection=next||{kind:'',ids:[]};clearGroup(ghosts);if(!state?.board)return;for(const id of selection.ids){let o;if(selection.kind==='road'){const e=state.board.edges[id],a=state.board.nodes[e.a],b=state.board.nodes[e.b];o=mesh(new T.BoxGeometry(.18,.1,.8),new T.MeshBasicMaterial({color:0xfbf0b6,transparent:true,opacity:.8}),ghosts,(a.x+b.x)/2,.26,(a.z+b.z)/2);o.rotation.y=Math.atan2(b.x-a.x,b.z-a.z);}else{const n=selection.kind==='robber'?state.board.tiles[id]:state.board.nodes[id];o=mesh(new T.CylinderGeometry(selection.kind==='robber'?.36:.18,selection.kind==='robber'?.36:.18,.045,24),new T.MeshBasicMaterial({color:0xfbf0b6,transparent:true,opacity:.85}),ghosts,n.x,.3,n.z);}o.userData.pick=id;o.userData.kind=selection.kind;o.castShadow=false;}}
+function select(next){selection=next||{kind:'',ids:[]};clearGroup(ghosts);if(!state?.board)return;for(const id of selection.ids){let o;if(selection.kind==='road'){const e=state.board.edges[id],a=state.board.nodes[e.a],b=state.board.nodes[e.b];o=mesh(new T.BoxGeometry(.18,.1,.8),flat(0xfbf0b6,{transparent:true,opacity:.8}),ghosts,(a.x+b.x)/2,.26,(a.z+b.z)/2);o.rotation.y=Math.atan2(b.x-a.x,b.z-a.z);}else{const n=selection.kind==='robber'?state.board.tiles[id]:state.board.nodes[id];o=mesh(new T.CylinderGeometry(selection.kind==='robber'?.36:.18,selection.kind==='robber'?.36:.18,.045,24),flat(0xfbf0b6,{transparent:true,opacity:.85}),ghosts,n.x,.3,n.z);}o.userData.pick=id;o.userData.kind=selection.kind;o.castShadow=false;}}
 function highlightIncome(ids){
  clearGroup(incomeHighlights);
  incomeStart=performance.now();
  for(const id of ids){
   const tile=state.board.tiles[id];
-  const glaze=mesh(new T.CylinderGeometry(.96,.96,.012,6),new T.MeshBasicMaterial({color:0xffe9a0,transparent:true,opacity:.46,depthWrite:false}),incomeHighlights,tile.x,.14,tile.z);
-  const rim=mesh(new T.RingGeometry(.89,.96,6,1,Math.PI/6),new T.MeshBasicMaterial({color:0xffed9a,side:T.DoubleSide,transparent:true,opacity:.95,depthWrite:false}),incomeHighlights,tile.x,.152,tile.z);
+  const glaze=mesh(new T.CylinderGeometry(.96,.96,.012,6),flat(0xffe9a0,{transparent:true,opacity:.46,depthWrite:false}),incomeHighlights,tile.x,.14,tile.z);
+  const rim=mesh(new T.RingGeometry(.89,.96,6,1,Math.PI/6),flat(0xffed9a,{side:T.DoubleSide,transparent:true,opacity:.95,depthWrite:false}),incomeHighlights,tile.x,.152,tile.z);
   rim.rotation.x=-Math.PI/2;
   for(const [o,opacity] of [[glaze,.46],[rim,.95]]){
    o.castShadow=false;
